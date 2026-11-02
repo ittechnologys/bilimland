@@ -26,6 +26,9 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
+        @keyframes pulseLive { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+        .live-badge-pulse { animation: pulseLive 1.5s infinite; }
+
         #gov-boot {
             position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #0f172a; transition: opacity 0.5s ease;
         }
@@ -297,7 +300,8 @@
         let ktpList = [];
         let supportTickets = [];
         let currentAnnouncement = '';
-        let newsList = []; // NEW: News storage
+        let newsList = []; 
+        let activeLives = {}; // NEW: LIVE streams storage { classOrId: { title, teacher, url, active } }
         let selectedTeacherSubject = subjectsList[0];
         let activeScheduleDay = 'Дүйсенбі';
 
@@ -384,6 +388,7 @@
                 adminUsers: "👥 Логин/парольдер & Ата-ана",
                 adminAnn: "📢 Хабарландыру",
                 adminNews: "📰 Жаңалықтар",
+                adminLive: "🔴 LIVE Эфирлер",
                 adminSupport: "🛟 Қолдау кірістері",
                 adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Басқару",
@@ -393,6 +398,7 @@
                 teachClass: "➕ Сынып ашу (DCA)",
                 teachSched: "📅 Сабақ кестесі",
                 teachNews: "📰 Жаңалықтар",
+                teachLive: "🔴 LIVE Сабақ ашу",
                 teachKtp: "📑 КТЖ (Күнтізбелік жоспар)",
                 teachSup: "🛟 Қолдау қызметі",
                 teachAI: "🤖 TeachGPT",
@@ -403,6 +409,7 @@
                 studSched: "📅 Менің кестем",
                 studHw: "📚 Үй тапсырмасы",
                 studNews: "📰 Жаңалықтар",
+                studLive: "🔴 LIVE Сабақтар",
                 studContact: "💬 Мұғаліммен байланыс",
                 studJoin: "🔑 DCA кодпен қосылу",
                 studSup: "🛟 Қолдау",
@@ -412,6 +419,7 @@
                 parentGrades: "👨‍👩‍👧 Баланың бағалары",
                 parentSched: "📅 Баланың кестесі",
                 parentNews: "📰 Жаңалықтар",
+                parentLive: "🔴 LIVE Сабақтар",
                 parentSupport: "🛟 Қолдау қызметі",
                 parentID: "🪪 Баланың BilimID-і",
                 parentSub: "📜 BilimSubscription (Табель қол қою)",
@@ -433,6 +441,7 @@
                 adminUsers: "👥 Пользователи и Родители",
                 adminAnn: "📢 Объявления",
                 adminNews: "📰 Новости",
+                adminLive: "🔴 LIVE Эфиры",
                 adminSupport: "🛟 Входящие тикеты",
                 adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 Управление BilimID",
@@ -442,6 +451,7 @@
                 teachClass: "➕ Создать класс (DCA)",
                 teachSched: "📅 Расписание",
                 teachNews: "📰 Новости",
+                teachLive: "🔴 LIVE Урок",
                 teachKtp: "📑 КТП",
                 teachSup: "🛟 Поддержка",
                 teachAI: "🤖 TeachGPT",
@@ -452,6 +462,7 @@
                 studSched: "📅 Мое расписание",
                 studHw: "📚 Домашка",
                 studNews: "📰 Новости",
+                studLive: "🔴 LIVE Уроки",
                 studContact: "💬 Связь с учителем",
                 studJoin: "🔑 Вступить по DCA коду",
                 studSup: "🛟 Поддержка",
@@ -461,6 +472,7 @@
                 parentGrades: "👨‍👩‍👧 Оценки ребенка",
                 parentSched: "📅 Расписание ребенка",
                 parentNews: "📰 Новости",
+                parentLive: "🔴 LIVE Уроки",
                 parentSupport: "🛟 Поддержка",
                 parentID: "🪪 BilimID ребенка",
                 parentSub: "📜 BilimSubscription (Подпись)",
@@ -482,6 +494,7 @@
                 adminUsers: "👥 Users & Parents",
                 adminAnn: "📢 Announcements",
                 adminNews: "📰 News",
+                adminLive: "🔴 LIVE Streams",
                 adminSupport: "🛟 Support Tickets",
                 adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Manage",
@@ -491,6 +504,7 @@
                 teachClass: "➕ Create Class (DCA)",
                 teachSched: "📅 Schedule",
                 teachNews: "📰 News",
+                teachLive: "🔴 LIVE Lesson",
                 teachKtp: "📑 KTP",
                 teachSup: "🛟 Support",
                 teachAI: "🤖 TeachGPT",
@@ -501,6 +515,7 @@
                 studSched: "📅 My Schedule",
                 studHw: "📚 Homework",
                 studNews: "📰 News",
+                studLive: "🔴 LIVE Lessons",
                 studContact: "💬 Contact",
                 studJoin: "🔑 Join via DCA Code",
                 studSup: "🛟 Support",
@@ -510,6 +525,7 @@
                 parentGrades: "👨‍👩‍👧 Child Grades",
                 parentSched: "📅 Child Schedule",
                 parentNews: "📰 News",
+                parentLive: "🔴 LIVE Lessons",
                 parentSupport: "🛟 Support",
                 parentID: "🪪 Child BilimID",
                 parentSub: "📜 BilimSubscription",
@@ -556,7 +572,8 @@
                         ktpList = data.ktpList || [];
                         supportTickets = data.supportTickets || [];
                         currentAnnouncement = data.announcement || '';
-                        newsList = data.newsList || []; // Load news
+                        newsList = data.newsList || [];
+                        activeLives = data.activeLives || {}; // Load active lives
                         activeSessionsStore = data.activeSessionsStore || {};
                         
                         bilimTests = data.bilimTests || [];
@@ -573,7 +590,7 @@
             if(useFirebase) {
                 try {
                     await db.collection("bilimal").doc("enterprise_v14_ai").set({
-                        users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeSessionsStore,
+                        users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeLives, activeSessionsStore,
                         bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings
                     });
                 } catch(e) { console.error(e); }
@@ -914,7 +931,8 @@
                     { id: 'admin_bilimid', label: t.adminBilimID },
                     { id: 'admin_sub', label: t.adminSub },
                     { id: 'admin_announcement', label: t.adminAnn },
-                    { id: 'admin_news', label: t.adminNews }, // NEW
+                    { id: 'admin_news', label: t.adminNews },
+                    { id: 'admin_live', label: t.adminLive }, // NEW: Admin LIVE monitoring
                     { id: 'admin_support', label: t.adminSupport },
                     { id: 'sessions_management', label: t.sessionsTab },
                     { id: 'admin_ai', label: t.adminAI }
@@ -928,7 +946,8 @@
                     { id: 'teacher_checkid', label: t.teachCheckID },
                     { id: 'teacher_id', label: t.teachID },
                     { id: 'teacher_schedule', label: t.teachSched },
-                    { id: 'teacher_news', label: t.teachNews }, // NEW
+                    { id: 'teacher_news', label: t.teachNews },
+                    { id: 'teacher_live', label: t.teachLive }, // NEW: Teacher LIVE stream host
                     { id: 'teacher_ktp', label: t.teachKtp },
                     { id: 'teacher_support', label: t.teachSup },
                     { id: 'sessions_management', label: t.sessionsTab },
@@ -938,7 +957,8 @@
                 links = [
                     { id: 'parent_grades', label: t.parentGrades },
                     { id: 'parent_schedule', label: t.parentSched },
-                    { id: 'parent_news', label: t.parentNews }, // NEW
+                    { id: 'parent_news', label: t.parentNews },
+                    { id: 'parent_live', label: t.parentLive }, // NEW: Parent LIVE view
                     { id: 'parent_id', label: t.parentID },
                     { id: 'parent_sub', label: t.parentSub },
                     { id: 'sessions_management', label: t.sessionsTab },
@@ -950,7 +970,8 @@
                     { id: 'student_test', label: t.studTest },
                     { id: 'student_id', label: t.studID },
                     { id: 'student_schedule', label: t.studSched },
-                    { id: 'student_news', label: t.studNews }, // NEW
+                    { id: 'student_news', label: t.studNews },
+                    { id: 'student_live', label: t.studLive }, // NEW: Student LIVE view
                     { id: 'student_homework', label: t.studHw },
                     { id: 'student_contact', label: t.studContact },
                     { id: 'student_join', label: t.studJoin },
@@ -1020,7 +1041,97 @@
                 return;
             }
 
-            // NEW: Render News section for Admin
+            // NEW: Teacher LIVE Stream Control Panel
+            if (activeTab === 'teacher_live') {
+                let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
+                let myLive = activeLives[currentUser.username];
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🔴 LIVE Сабақ басталды / Басқару</h3>
+                    <div class="p-4 bg-slate-50 border rounded-xl max-w-xl space-y-3">
+                        <div class="text-xs font-bold text-slate-700">Жетекшілік ететін сынып: <span class="text-blue-700">${myClass ? myClass.name : 'Сынып жоқ'}</span></div>
+                        
+                        ${myLive ? `
+                            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg space-y-2">
+                                <div class="flex items-center gap-2 text-xs font-extrabold text-emerald-800">
+                                    <span class="w-3 h-3 rounded-full bg-red-600 live-badge-pulse inline-block"></span>
+                                    Эфир жүріп жатыр: "${myLive.title}" (${myLive.className})
+                                </div>
+                                <p class="text-[11px] text-slate-600">Оқушылар сіздің онлайн сабағыңызды көріп жатыр.</p>
+                                <button onclick="stopTeacherLive()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow">⏹ Эфирді тоқтату</button>
+                            </div>
+                        ` : `
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Сабақ / Эфир тақырыбы:</label>
+                                    <input type="text" id="live-title" placeholder="Мысалы: Физикадан онлайн консультация" class="w-full border rounded p-2 text-xs bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Сыныпты таңдаңыз:</label>
+                                    <select id="live-class" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">
+                                        ${myClass ? `<option value="${myClass.name}">${myClass.name}</option>` : '<option value="">Сынып табылмады</option>'}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Видео сілтеме (Zoom / Jitsi / YouTube / немесе интеграция):</label>
+                                    <input type="text" id="live-url" placeholder="https://meet.jit.si/BilimAL-Live-Class" class="w-full border rounded p-2 text-xs bg-white">
+                                </div>
+                                <button onclick="startTeacherLive()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow">🔴 LIVE Эфирді бастау</button>
+                            </div>
+                        `}
+                    </div>
+                `;
+                return;
+            }
+
+            // NEW: Student, Parent & Admin LIVE View Panel
+            if (activeTab === 'student_live' || activeTab === 'parent_live' || activeTab === 'admin_live') {
+                let targetClassName = '';
+                if (currentUser.role === 'student') {
+                    let stClass = classesList.find(c => (c.students || []).includes(currentUser.username));
+                    targetClassName = stClass ? stClass.name : '';
+                } else if (currentUser.role === 'parent') {
+                    let childUn = currentUser.parentOf;
+                    let pClass = classesList.find(c => (c.students || []).includes(childUn));
+                    targetClassName = pClass ? pClass.name : '';
+                }
+
+                let liveCards = Object.keys(activeLives).length > 0 ? Object.keys(activeLives).map(teacherKey => {
+                    let l = activeLives[teacherKey];
+                    if (currentUser.role !== 'admin' && l.className !== targetClassName) return '';
+
+                    return `
+                        <div class="p-4 bg-white border border-red-200 rounded-xl shadow-md space-y-3">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-3 h-3 rounded-full bg-red-600 live-badge-pulse inline-block"></span>
+                                    <span class="text-xs font-extrabold text-red-700 uppercase tracking-wider">LIVE Сабақ жүріп жатыр</span>
+                                </div>
+                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">Сынып: ${l.className}</span>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-extrabold text-slate-900">${l.title}</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">Мұғалім: <b class="text-blue-900">${l.teacherName}</b></p>
+                            </div>
+                            <div class="pt-2 flex gap-2">
+                                <a href="${l.url}" target="_blank" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow flex items-center gap-1.5">
+                                    <span>▶</span> Эфирге қосылу (Қосылу)
+                                </a>
+                                ${currentUser.role === 'admin' ? `<button onclick="adminStopLive('${teacherKey}')" class="px-3 py-2 bg-slate-200 hover:bg-red-600 hover:text-white rounded font-bold text-xs transition-all">🛑 Эфирді өшіру (Админ)</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('') : '';
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🔴 LIVE Сабақтар тізбегі</h3>
+                    <div class="space-y-3 max-w-2xl mx-auto">
+                        ${liveCards || '<div class="p-8 text-center text-slate-400 bg-slate-50 border rounded-xl"><div class="text-2xl mb-1">📺</div><div class="text-xs font-bold">Қазіргі уақытта белсенді тікелей эфирлер жоқ.</div></div>'}
+                    </div>
+                `;
+                return;
+            }
+
             if (activeTab === 'admin_news') {
                 let autoDateTime = getCurrentDateDDMMYYYY();
                 let newsCards = newsList.length > 0 ? newsList.map((n, idx) => `
@@ -1062,7 +1173,6 @@
                 return;
             }
 
-            // NEW: Render News section for Teacher, Student, Parent
             if (activeTab === 'teacher_news' || activeTab === 'student_news' || activeTab === 'parent_news') {
                 let newsCards = newsList.length > 0 ? newsList.map(n => `
                     <div class="p-4 bg-white border rounded-xl shadow-xs space-y-2">
@@ -1762,7 +1872,52 @@
             }
         }
 
-        // NEW: Publish News function
+        // NEW: Teacher Live Control Functions
+        async function startTeacherLive() {
+            let title = document.getElementById('live-title').value.trim();
+            let className = document.getElementById('live-class').value;
+            let url = document.getElementById('live-url').value.trim();
+
+            if(!title || !url) {
+                showIosToast(false, "Сәтсіз!", "Тақырып пен видео сілтемені толтырыңыз!");
+                return;
+            }
+
+            showSpinner("LIVE сабақ іске қосылуда...");
+            activeLives[currentUser.username] = {
+                title: title,
+                className: className,
+                teacherName: currentUser.name,
+                url: url,
+                active: true
+            };
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "🔴 LIVE сабақ сәтті басталды!");
+            renderTabContent();
+        }
+
+        async function stopTeacherLive() {
+            showSpinner("Эфир тоқтатылуда...");
+            delete activeLives[currentUser.username];
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "LIVE сабақ аяқталды.");
+            renderTabContent();
+        }
+
+        async function adminStopLive(teacherKey) {
+            if(confirm("Бұл мұғалімнің тікелей эфирін тоқтатқыңыз келе ме?")) {
+                showSpinner("Эфир өшірілуде...");
+                delete activeLives[teacherKey];
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Эфир әкімші тарапынан өшірілді.");
+                renderTabContent();
+            }
+        }
+
         async function publishNews() {
             let datetime = document.getElementById('news-datetime').value.trim();
             let title = document.getElementById('news-title').value.trim();
@@ -1774,11 +1929,7 @@
             }
 
             showSpinner("Жаңалық жариялануда...");
-            newsList.unshift({
-                datetime: datetime,
-                title: title,
-                text: text
-            });
+            newsList.unshift({ datetime, title, text });
 
             await saveDataToCloud();
             hideSpinner();
@@ -1786,7 +1937,6 @@
             renderTabContent();
         }
 
-        // NEW: Delete News function
         async function deleteNewsItem(index) {
             if(confirm("Бұл жаңалықты өшіргіңіз келе ме?")) {
                 showSpinner("Өшірілуде...");
@@ -2702,7 +2852,7 @@
             let content = `BILIMAL ENTERPRISE CLOUD - OFFICIAL REPORT\nOqushy: ${currentUser.name}\nDate: ${new Date().toLocaleDateString()}\n-------------------------------------\n`;
             let myGrades = grades[currentUser.username] || {};
             for(let sub in myGrades) {
-                content += `Pan: ${sub} | Format: ${myGrades[sub]?.form || ''} | BZHB: ${myGrgrades[sub]?.bzhb || ''} | TZHB: ${myGrgrades[sub]?.tzhb || ''} | Payiz: ${myGrades[sub]?.percent || 0}% | Qorytyndy: ${myGrgrades[sub]?.final || ''}\n`;
+                content += `Pan: ${sub} | Format: ${myGrades[sub]?.form || ''} | BZHB: ${myGrgrades[sub]?.bzhb || ''} | TZHB: ${myGrgrades[sub]?.tzhb || ''} | Payiz: ${myGrgrades[sub]?.percent || 0}% | Qorytyndy: ${myGrgrades[sub]?.final || ''}\n`;
             }
             let blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             let link = document.createElement('a');
