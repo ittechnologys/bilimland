@@ -44,7 +44,6 @@
 
         .id-card-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); }
 
-        /* iPhone Style Notification Container */
         #ios-toast-container {
             position: fixed;
             top: 20px;
@@ -66,7 +65,6 @@
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
 
-    <!-- iPhone Style Push Notification Element -->
     <div id="ios-toast-container">
         <div id="ios-toast-box" class="flex items-center gap-3 p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border text-white text-xs font-semibold">
             <div id="ios-toast-icon" class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm shrink-0"></div>
@@ -121,7 +119,6 @@
     </header>
 
     <div class="flex-1 max-w-[1400px] w-full mx-auto p-3 md:p-4 flex flex-col">
-        <!-- Login Section & Informative Blocks -->
         <div id="login-section" class="w-full max-w-4xl mx-auto my-auto space-y-6 animate-fade">
             <div class="bg-white p-8 rounded-xl shadow-xl border border-slate-200 max-w-md mx-auto">
                 <div class="text-center mb-6">
@@ -154,7 +151,6 @@
                 </form>
             </div>
 
-            <!-- Informative Blocks Below Login -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
                     <div class="w-8 h-8 rounded bg-blue-50 text-blue-700 flex items-center justify-center font-black text-xs">01</div>
@@ -206,7 +202,6 @@
         </div>
     </div>
 
-    <!-- BilimWeb QR Modal -->
     <div id="bilimweb-qr-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center relative border border-slate-200">
             <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-3">📱</div>
@@ -222,7 +217,6 @@
         </div>
     </div>
 
-    <!-- BilimWeb Mobile Modal -->
     <div id="bilimweb-mobile-modal" class="fixed inset-0 bg-slate-900 hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 space-y-4">
             <div class="text-center">
@@ -249,7 +243,6 @@
         </div>
     </div>
 
-    <!-- Passkey / Biometric Registration Modal / Prompt -->
     <div id="passkey-prompt-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center relative border border-slate-200 space-y-4">
             <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black">🔒</div>
@@ -304,6 +297,7 @@
         let ktpList = [];
         let supportTickets = [];
         let currentAnnouncement = '';
+        let newsList = []; // NEW: News storage
         let selectedTeacherSubject = subjectsList[0];
         let activeScheduleDay = 'Дүйсенбі';
 
@@ -363,6 +357,16 @@
             return `${y}/${m}/${d}-${h}:${min}`;
         }
 
+        function getCurrentDateDDMMYYYY() {
+            let now = new Date();
+            let d = String(now.getDate()).padStart(2, '0');
+            let m = String(now.getMonth() + 1).padStart(2, '0');
+            let y = now.getFullYear();
+            let h = String(now.getHours()).padStart(2, '0');
+            let min = String(now.getMinutes()).padStart(2, '0');
+            return `${d}.${m}.${y} / ${h}:${min}`;
+        }
+
         const translations = {
             kk: {
                 subtitle: "Бірыңғай мектеп журналы және платформа[span_7](start_span)[span_7](end_span)",
@@ -379,6 +383,7 @@
                 adminSched: "📅 Сабақ кестесі",
                 adminUsers: "👥 Логин/парольдер & Ата-ана",
                 adminAnn: "📢 Хабарландыру",
+                adminNews: "📰 Жаңалықтар",
                 adminSupport: "🛟 Қолдау кірістері",
                 adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Басқару",
@@ -387,6 +392,7 @@
                 teachAtt: "📋 Қатысу журналы",
                 teachClass: "➕ Сынып ашу (DCA)",
                 teachSched: "📅 Сабақ кестесі",
+                teachNews: "📰 Жаңалықтар",
                 teachKtp: "📑 КТЖ (Күнтізбелік жоспар)",
                 teachSup: "🛟 Қолдау қызметі",
                 teachAI: "🤖 TeachGPT",
@@ -396,6 +402,7 @@
                 studGrades: "📊 Менің бағаларым",
                 studSched: "📅 Менің кестем",
                 studHw: "📚 Үй тапсырмасы",
+                studNews: "📰 Жаңалықтар",
                 studContact: "💬 Мұғаліммен байланыс",
                 studJoin: "🔑 DCA кодпен қосылу",
                 studSup: "🛟 Қолдау",
@@ -404,6 +411,7 @@
                 studID: "🪪 Менің BilimID-ім",
                 parentGrades: "👨‍👩‍👧 Баланың бағалары",
                 parentSched: "📅 Баланың кестесі",
+                parentNews: "📰 Жаңалықтар",
                 parentSupport: "🛟 Қолдау қызметі",
                 parentID: "🪪 Баланың BilimID-і",
                 parentSub: "📜 BilimSubscription (Табель қол қою)",
@@ -424,6 +432,7 @@
                 adminSched: "📅 Расписание",
                 adminUsers: "👥 Пользователи и Родители",
                 adminAnn: "📢 Объявления",
+                adminNews: "📰 Новости",
                 adminSupport: "🛟 Входящие тикеты",
                 adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 Управление BilimID",
@@ -432,6 +441,7 @@
                 teachAtt: "📋 Посещаемость",
                 teachClass: "➕ Создать класс (DCA)",
                 teachSched: "📅 Расписание",
+                teachNews: "📰 Новости",
                 teachKtp: "📑 КТП",
                 teachSup: "🛟 Поддержка",
                 teachAI: "🤖 TeachGPT",
@@ -441,6 +451,7 @@
                 studGrades: "📊 Мои оценки",
                 studSched: "📅 Мое расписание",
                 studHw: "📚 Домашка",
+                studNews: "📰 Новости",
                 studContact: "💬 Связь с учителем",
                 studJoin: "🔑 Вступить по DCA коду",
                 studSup: "🛟 Поддержка",
@@ -449,6 +460,7 @@
                 studID: "🪪 Мой BilimID",
                 parentGrades: "👨‍👩‍👧 Оценки ребенка",
                 parentSched: "📅 Расписание ребенка",
+                parentNews: "📰 Новости",
                 parentSupport: "🛟 Поддержка",
                 parentID: "🪪 BilimID ребенка",
                 parentSub: "📜 BilimSubscription (Подпись)",
@@ -469,6 +481,7 @@
                 adminSched: "📅 Schedule",
                 adminUsers: "👥 Users & Parents",
                 adminAnn: "📢 Announcements",
+                adminNews: "📰 News",
                 adminSupport: "🛟 Support Tickets",
                 adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Manage",
@@ -477,6 +490,7 @@
                 teachAtt: "📋 Attendance",
                 teachClass: "➕ Create Class (DCA)",
                 teachSched: "📅 Schedule",
+                teachNews: "📰 News",
                 teachKtp: "📑 KTP",
                 teachSup: "🛟 Support",
                 teachAI: "🤖 TeachGPT",
@@ -486,6 +500,7 @@
                 studGrades: "📊 My Grades",
                 studSched: "📅 My Schedule",
                 studHw: "📚 Homework",
+                studNews: "📰 News",
                 studContact: "💬 Contact",
                 studJoin: "🔑 Join via DCA Code",
                 studSup: "🛟 Support",
@@ -494,6 +509,7 @@
                 studID: "🪪 My BilimID",
                 parentGrades: "👨‍👩‍👧 Child Grades",
                 parentSched: "📅 Child Schedule",
+                parentNews: "📰 News",
                 parentSupport: "🛟 Support",
                 parentID: "🪪 Child BilimID",
                 parentSub: "📜 BilimSubscription",
@@ -540,6 +556,7 @@
                         ktpList = data.ktpList || [];
                         supportTickets = data.supportTickets || [];
                         currentAnnouncement = data.announcement || '';
+                        newsList = data.newsList || []; // Load news
                         activeSessionsStore = data.activeSessionsStore || {};
                         
                         bilimTests = data.bilimTests || [];
@@ -556,7 +573,7 @@
             if(useFirebase) {
                 try {
                     await db.collection("bilimal").doc("enterprise_v14_ai").set({
-                        users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, activeSessionsStore,
+                        users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeSessionsStore,
                         bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings
                     });
                 } catch(e) { console.error(e); }
@@ -897,6 +914,7 @@
                     { id: 'admin_bilimid', label: t.adminBilimID },
                     { id: 'admin_sub', label: t.adminSub },
                     { id: 'admin_announcement', label: t.adminAnn },
+                    { id: 'admin_news', label: t.adminNews }, // NEW
                     { id: 'admin_support', label: t.adminSupport },
                     { id: 'sessions_management', label: t.sessionsTab },
                     { id: 'admin_ai', label: t.adminAI }
@@ -910,6 +928,7 @@
                     { id: 'teacher_checkid', label: t.teachCheckID },
                     { id: 'teacher_id', label: t.teachID },
                     { id: 'teacher_schedule', label: t.teachSched },
+                    { id: 'teacher_news', label: t.teachNews }, // NEW
                     { id: 'teacher_ktp', label: t.teachKtp },
                     { id: 'teacher_support', label: t.teachSup },
                     { id: 'sessions_management', label: t.sessionsTab },
@@ -919,6 +938,7 @@
                 links = [
                     { id: 'parent_grades', label: t.parentGrades },
                     { id: 'parent_schedule', label: t.parentSched },
+                    { id: 'parent_news', label: t.parentNews }, // NEW
                     { id: 'parent_id', label: t.parentID },
                     { id: 'parent_sub', label: t.parentSub },
                     { id: 'sessions_management', label: t.sessionsTab },
@@ -930,6 +950,7 @@
                     { id: 'student_test', label: t.studTest },
                     { id: 'student_id', label: t.studID },
                     { id: 'student_schedule', label: t.studSched },
+                    { id: 'student_news', label: t.studNews }, // NEW
                     { id: 'student_homework', label: t.studHw },
                     { id: 'student_contact', label: t.studContact },
                     { id: 'student_join', label: t.studJoin },
@@ -995,6 +1016,67 @@
                             <tbody>${sessionRows}</tbody>
                         </table>
                     </div>
+                `;
+                return;
+            }
+
+            // NEW: Render News section for Admin
+            if (activeTab === 'admin_news') {
+                let autoDateTime = getCurrentDateDDMMYYYY();
+                let newsCards = newsList.length > 0 ? newsList.map((n, idx) => `
+                    <div class="p-4 bg-white border rounded-xl shadow-xs space-y-2 relative">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-xs font-extrabold text-blue-900">${n.title}</h4>
+                                <p class="text-[10px] text-slate-400 mt-0.5">📅 Жарияланған уақыты: ${n.datetime}</p>
+                            </div>
+                            <button onclick="deleteNewsItem(${idx})" class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-[10px]">🗑️ Өшіру</button>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed pt-1 border-t">${n.text}</p>
+                    </div>
+                `).join('') : '<p class="text-xs text-slate-400">Әлі жаңалықтар жарияланған жоқ.</p>';
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📰 Жаңалықтарды басқару (Админ панелі)</h3>
+                    
+                    <div class="p-4 bg-slate-50 border rounded-xl space-y-3 max-w-xl mb-6">
+                        <h4 class="text-xs font-bold text-slate-800 uppercase">Жаңа жаңалық жариялау</h4>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Автоматты дата / уақыт:</label>
+                            <input type="text" id="news-datetime" value="${autoDateTime}" readonly class="w-full border rounded p-2 text-xs bg-slate-100 font-bold text-blue-700">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Тақырыбы:</label>
+                            <input type="text" id="news-title" placeholder="Жаңалық тақырыбын енгізіңіз..." class="w-full border rounded p-2 text-xs bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Мәтіні:</label>
+                            <textarea id="news-text" rows="4" placeholder="Жаңалық мәтінін жазыңыз..." class="w-full border rounded p-2 text-xs bg-white"></textarea>
+                        </div>
+                        <button onclick="publishNews()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow">Жариялау</button>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-3">Барлық жарияланған жаңалықтар тізімі</h4>
+                    <div class="space-y-3 max-w-xl">${newsCards}</div>
+                `;
+                return;
+            }
+
+            // NEW: Render News section for Teacher, Student, Parent
+            if (activeTab === 'teacher_news' || activeTab === 'student_news' || activeTab === 'parent_news') {
+                let newsCards = newsList.length > 0 ? newsList.map(n => `
+                    <div class="p-4 bg-white border rounded-xl shadow-xs space-y-2">
+                        <div class="flex justify-between items-center border-b pb-1">
+                            <span class="text-xs font-extrabold text-blue-900">${n.title}</span>
+                            <span class="text-[10px] text-slate-400 font-medium">${n.datetime}</span>
+                        </div>
+                        <p class="text-xs text-slate-700 leading-relaxed pt-1">${n.text}</p>
+                    </div>
+                `).join('') : '<p class="text-xs text-slate-400 text-center py-6">Қазіргі уақытта жаңалықтар жоқ.</p>';
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📰 Мектеп жаңалықтары</h3>
+                    <div class="space-y-3 max-w-2xl mx-auto">${newsCards}</div>
                 `;
                 return;
             }
@@ -1357,8 +1439,7 @@
                                     <tr class="text-[11px]">
                                         <td class="font-bold">${users.find(u => u.username === st)?.name || st}</td>
                                         <td class="font-bold text-indigo-700">${resForTest[st].correctCount} / ${t.questions.length}</td>
-                                        <td class="font-extrabold text-amber-600">${resForTest[st].percent}%</td>
-                                        <td><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">${resForTest[st].suggestedGrade} (Формативті)</span></td>
+                                        <td><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">${resForTest[st].suggestedGrade} / 10 балл</span></td>
                                     </tr>
                                 `).join('');
 
@@ -1370,8 +1451,8 @@
                                         </div>
                                         <div class="overflow-x-auto">
                                             <table class="w-full gov-table">
-                                                <thead><tr><th>Оқушы</th><th>Дұрыс сұрақ</th><th>Жалпы (%)</th><th>Ұсынылған баға</th></tr></thead>
-                                                <tbody>${studentResultsRows || '<tr><td colspan="4" class="text-center text-slate-400 py-2">Әлі ешкім тапсырмады</td></tr>'}</tbody>
+                                                <thead><tr><th>Оқушы</th><th>Дұрыс сұрақ</th><th>Ұсынылған Формативті баға (10 б.)</th></tr></thead>
+                                                <tbody>${studentResultsRows || '<tr><td colspan="3" class="text-center text-slate-400 py-2">Әлі ешкім тапсырмады</td></tr>'}</tbody>
                                             </table>
                                         </div>
                                     </div>
@@ -1632,7 +1713,7 @@
                                             </div>
                                             <div>
                                                 ${myRes ? `
-                                                    <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded border border-emerald-200">Нәтиже: ${myRes.percent}% (${myRes.suggestedGrade} балл)</span>
+                                                    <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded border border-emerald-200">Нәтиже: ${myRes.correctCount}/${t.questions.length} | Ұсынылған баға: ${myRes.suggestedGrade} / 10 балл</span>
                                                 ` : `
                                                     <button onclick="startStudentTest('${t.id}')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded shadow">▶ Start Тест</button>
                                                 `}
@@ -1678,6 +1759,42 @@
                 } else if (activeTab === 'student_ai') {
                     renderAIChatPanel(panel, 'Study-GPT', 'Бүгінгі сабақ кестесі, үй тапсырмасының бар-жоғы, пәндер бойынша көрсеткіштерің, қай пәннен алғыр екенің және күрделі тақырыптарды түсіндіру.');
                 }
+            }
+        }
+
+        // NEW: Publish News function
+        async function publishNews() {
+            let datetime = document.getElementById('news-datetime').value.trim();
+            let title = document.getElementById('news-title').value.trim();
+            let text = document.getElementById('news-text').value.trim();
+
+            if(!title || !text) {
+                showIosToast(false, "Сәтсіз!", "Тақырып пен мәтінді толық жазыңыз!");
+                return;
+            }
+
+            showSpinner("Жаңалық жариялануда...");
+            newsList.unshift({
+                datetime: datetime,
+                title: title,
+                text: text
+            });
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Жаңалық сәтті жарияланды!");
+            renderTabContent();
+        }
+
+        // NEW: Delete News function
+        async function deleteNewsItem(index) {
+            if(confirm("Бұл жаңалықты өшіргіңіз келе ме?")) {
+                showSpinner("Өшірілуде...");
+                newsList.splice(index, 1);
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Жаңалық өшірілді.");
+                renderTabContent();
             }
         }
 
@@ -1925,23 +2042,21 @@
                 }
             });
 
-            let percent = Math.round(correctCount * 2); 
-            if(percent > 100) percent = 100;
-
-            let suggestedGrade = getStandardGrade(percent);
+            let totalQ = test.questions.length;
+            let suggestedGrade = Math.round((correctCount / totalQ) * 10);
+            if (suggestedGrade < 1 && correctCount > 0) suggestedGrade = 1;
 
             showSpinner("Тест нәтижесі есептелуде...");
 
             if(!testResults[testId]) testResults[testId] = {};
             testResults[testId][currentUser.username] = {
                 correctCount: correctCount,
-                percent: percent,
                 suggestedGrade: suggestedGrade
             };
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `Тест аяқталды! Нәтиже: ${percent}% (${suggestedGrade} балл)`);
+            showIosToast(true, "Сәтті!", `Тест аяқталды! Нәтиже: ${correctCount}/${totalQ} сұрақ. Ұсынылған баға: ${suggestedGrade} балл (Формативті)`);
             renderTabContent();
         }
 
@@ -2237,23 +2352,38 @@
             let tzhbVal = document.getElementById(`tzhb_${username}`).value.trim();
             let finalVal = document.getElementById(`final_${username}`).value.trim();
 
-            let totalScore = 0;
-            let count = 0;
-            if(bzhbVal) { 
-                let parts = bzhbVal.split('/'); 
-                let p = (parseFloat(parts[0]) / parseFloat(parts[1] || 20)) * 100; 
-                totalScore += p || 0; 
-                count++; 
-            }
-            if(tzhbVal) { 
-                let parts = tzhbVal.split('/'); 
-                let p = (parseFloat(parts[0]) / parseFloat(parts[1] || 30)) * 100; 
-                totalScore += p || 0; 
-                count++; 
+            let weightedScore = 0;
+            let totalWeight = 0;
+
+            if (formVal) {
+                let parts = formVal.split('/');
+                let obtained = parseFloat(parts[0]) || 0;
+                let max = parseFloat(parts[1]) || 10;
+                let formPercent = (obtained / max) * 100;
+                weightedScore += formPercent * 0.20;
+                totalWeight += 0.20;
             }
 
-            let finalPercent = count > 0 ? Math.round(totalScore / count) : 0;
-            let recommendedGrade = count > 0 ? getStandardGrade(finalPercent) : (finalVal || '-');
+            if (bzhbVal) {
+                let parts = bzhbVal.split('/');
+                let obtained = parseFloat(parts[0]) || 0;
+                let max = parseFloat(parts[1]) || 20;
+                let bzhbPercent = (obtained / max) * 100;
+                weightedScore += bzhbPercent * 0.30;
+                totalWeight += 0.30;
+            }
+
+            if (tzhbVal) {
+                let parts = tzhbVal.split('/');
+                let obtained = parseFloat(parts[0]) || 0;
+                let max = parseFloat(parts[1]) || 30;
+                let tzhbPercent = (obtained / max) * 100;
+                weightedScore += tzhbPercent * 0.50;
+                totalWeight += 0.50;
+            }
+
+            let finalPercent = totalWeight > 0 ? Math.round(weightedScore / totalWeight) : 0;
+            let recommendedGrade = totalWeight > 0 ? getStandardGrade(finalPercent) : (finalVal || '-');
 
             if(!grades[username]) grades[username] = {};
             grades[username][selectedTeacherSubject] = { 
@@ -2266,7 +2396,7 @@
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `[${selectedTeacherSubject}] бағасы сақталды!`);
+            showIosToast(true, "Сәтті!", `[${selectedTeacherSubject}] бағасы сақталды! Пайызы: ${finalPercent}%`);
             renderTabContent();
         }
 
@@ -2572,7 +2702,7 @@
             let content = `BILIMAL ENTERPRISE CLOUD - OFFICIAL REPORT\nOqushy: ${currentUser.name}\nDate: ${new Date().toLocaleDateString()}\n-------------------------------------\n`;
             let myGrades = grades[currentUser.username] || {};
             for(let sub in myGrades) {
-                content += `Pan: ${sub} | Format: ${myGrades[sub]?.form || ''} | BZHB: ${myGrades[sub]?.bzhb || ''} | TZHB: ${myGrgrades[sub]?.tzhb || ''} | Payiz: ${myGrgrades[sub]?.percent || 0}% | Qorytyndy: ${myGrgrades[sub]?.final || ''}\n`;
+                content += `Pan: ${sub} | Format: ${myGrades[sub]?.form || ''} | BZHB: ${myGrgrades[sub]?.bzhb || ''} | TZHB: ${myGrgrades[sub]?.tzhb || ''} | Payiz: ${myGrades[sub]?.percent || 0}% | Qorytyndy: ${myGrgrades[sub]?.final || ''}\n`;
             }
             let blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             let link = document.createElement('a');
