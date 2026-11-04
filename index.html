@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BilimClass Enterprise — Электронды білім беру платформасы</title>
+    <title>BilimAL Enterprise — Электронды білім беру платформасы</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -16,20 +16,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; overflow-x: hidden; }
-        
-        /* Photo style adjustments */
-        .gov-header { background: #1e3a8a; }
-        .bilim-sidebar { background-color: #f1f5f9; border-right: 1px solid #cbd5e1; }
-        .sidebar-btn { transition: all 0.25s ease; color: #475569; }
-        .sidebar-btn:hover { background-color: #e2e8f0; color: #1e293b; }
-        .sidebar-btn.active { background-color: #e2e8f0; color: #0f172a; font-weight: 700; border-left: 4px solid #16a34a; }
-
-        .green-banner-promo { background: linear-gradient(90deg, #15803d 0%, #16a34a 50%, #22c55e 100%); }
-        .day-tab-btn { background-color: #16a34a; color: white; transition: all 0.2s; }
-        .day-tab-btn.inactive { background-color: #cbd5e1; color: #475569; }
-
-        .gov-table th { background-color: #e2e8f0; color: #334155; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; border: 1px solid #cbd5e1; padding: 8px; }
-        .gov-table td { border: 1px solid #cbd5e1; padding: 8px; background-color: #ffffff; font-size: 11px; }
+        .gov-header { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); }
+        .gov-table th { background-color: #e2e8f0; color: #334155; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; border: 1px solid #cbd5e1; padding: 6px; }
+        .gov-table td { border: 1px solid #cbd5e1; padding: 6px; background-color: #ffffff; font-size: 11px; }
+        .sidebar-btn { transition: all 0.25s ease; }
+        .sidebar-btn:hover { background-color: #f8fafc; color: #2563eb; transform: translateX(2px); }
+        .sidebar-btn.active { background-color: #eff6ff; color: #1d4ed8; border-left: 4px solid #1d4ed8; font-weight: 700; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -40,24 +32,41 @@
         #gov-boot {
             position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #0f172a; transition: opacity 0.5s ease;
         }
-        .gov-loader-bar { width: 160px; height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden; position: relative; margin-top: 16px; }
-        .gov-loader-progress { position: absolute; left: 0; top: 0; bottom: 0; width: 40%; background: #16a34a; border-radius: 2px; animation: govMove 1.2s infinite ease-in-out; }
+        .gov-loader-bar {
+            width: 160px; height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden; position: relative; margin-top: 16px;
+        }
+        .gov-loader-progress {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 40%; background: #1e3a8a; border-radius: 2px; animation: govMove 1.2s infinite ease-in-out;
+        }
         @keyframes govMove { 0% { left: -40%; } 100% { left: 100%; } }
 
         .win10-spinner-overlay {
             position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(3px);
             z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
+
         .id-card-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); }
 
         #ios-toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px);
-            opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 999999; width: 90%; max-width: 400px;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-30px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 999999;
+            width: 90%;
+            max-width: 400px;
         }
-        #ios-toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; }
+        #ios-toast-container.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
     </style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col justify-between selection:bg-green-600 selection:text-white">
+<body class="text-slate-800 min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
 
     <div id="ios-toast-container">
         <div id="ios-toast-box" class="flex items-center gap-3 p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border text-white text-xs font-semibold">
@@ -76,10 +85,10 @@
 
     <div id="gov-boot">
         <div class="text-center space-y-3 animate-fade">
-            <div class="w-14 h-14 mx-auto bg-green-600 rounded-xl flex items-center justify-center shadow-md text-xl font-black text-white">BC</div>
+            <div class="w-14 h-14 mx-auto bg-blue-900 rounded-xl flex items-center justify-center shadow-md text-xl font-black text-white">BA</div>
             <div>
-                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">BilimClass</div>
-                <div class="text-base font-extrabold text-green-700 tracking-tight mt-0.5">Enterprise Platform</div>
+                <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">BilimAL</div>
+                <div class="text-base font-extrabold text-blue-900 tracking-tight mt-0.5">Enterprise Platform</div>
             </div>
             <div class="gov-loader-bar mx-auto">
                 <div class="gov-loader-progress"></div>
@@ -88,20 +97,15 @@
         </div>
     </div>
 
-    <!-- Top Navigation matching photo style -->
-    <header class="gov-header sticky top-0 z-50 py-2.5 px-4 md:px-6 shadow-md flex justify-between items-center text-white border-b border-blue-900">
+    <header class="gov-header sticky top-0 z-50 py-3 px-4 md:px-6 shadow-md flex justify-between items-center text-white">
         <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded bg-green-600 text-white flex items-center justify-center font-black text-xs shadow">i</div>
+            <div class="w-9 h-9 rounded bg-white text-blue-900 flex items-center justify-center font-black text-sm shadow">BA</div>
             <div>
-                <h1 class="text-xs font-extrabold tracking-wider">Bilim Class <span class="text-[9px] px-1.5 py-0.5 bg-green-600 text-white rounded font-bold ml-1">Enterprise</span></h1>
-                <p id="header-subtitle" class="text-[9px] text-slate-300">Бірыңғай мектеп журналы және платформа[span_0](start_span)[span_0](end_span)</p>
+                <h1 class="text-xs font-extrabold tracking-wider">BilimAL <span class="text-[9px] px-1.5 py-0.5 bg-blue-600 text-white rounded font-bold ml-1">Enterprise</span></h1>
+                <p id="header-subtitle" class="text-[9px] text-slate-300">Бірыңғай мектеп журналы және платформа</p>
             </div>
         </div>
         <div class="flex items-center space-x-3">
-            <div class="hidden md:flex items-center bg-blue-950/80 px-3 py-1 rounded-lg border border-blue-800 text-[11px] gap-2">
-                <span>ℹ️ Аккаунтыңыздың қауіпсіздігін арттырыңыз</span>
-                <button onclick="switchTab('sessions_management')" class="bg-blue-600 hover:bg-blue-700 px-2 py-0.5 rounded font-bold text-white text-[10px]">Толығырақ</button>
-            </div>
             <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-blue-900/80 text-white border border-blue-700 rounded px-2 py-1 text-[11px] font-bold focus:outline-none">
                 <option value="kk">Қаз</option>
                 <option value="ru">Рус</option>
@@ -110,32 +114,38 @@
             <div id="user-info" class="hidden flex items-center space-x-3">
                 <div class="text-right hidden sm:block">
                     <span id="welcome-text" class="text-xs font-bold block text-white"></span>
-                    <span id="welcome-role" class="text-[9px] text-green-300 font-semibold block uppercase tracking-wider"></span>
+                    <span id="welcome-role" class="text-[9px] text-blue-300 font-semibold block uppercase tracking-wider"></span>
                 </div>
-                <button onclick="logout()" id="btn-logout" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-bold transition-all shadow-xs">Шығу</button>
+                <button onclick="logout()" id="btn-logout" class="px-3 py-1.5 bg-red-600/80 hover:bg-red-600 text-white rounded text-xs font-bold transition-all shadow-xs">Шығу</button>
             </div>
         </div>
     </header>
 
-    <div class="flex-1 max-w-[1450px] w-full mx-auto p-2 md:p-3 flex flex-col">
+    <div class="flex-1 max-w-[1400px] w-full mx-auto p-3 md:p-4 flex flex-col">
         <div id="login-section" class="w-full max-w-4xl mx-auto my-auto space-y-6 animate-fade">
-            <div class="bg-white p-8 rounded-xl shadow-xl border border-slate-200 max-w-md mx-auto">
+            <!-- Decorative aesthetic elements on login screen -->
+            <div class="flex justify-center items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest pb-1">
+                <span class="px-3 py-1 bg-white border rounded-full shadow-xs flex items-center gap-1.5">📖 Кітап</span>
+                <span class="px-3 py-1 bg-white border rounded-full shadow-xs flex items-center gap-1.5">📔 Дәптер</span>
+                <span class="px-3 py-1 bg-white border rounded-full shadow-xs flex items-center gap-1.5">✒️ Қалам</span>
+            </div>
+
+            <div class="bg-white p-8 rounded-xl shadow-xl border border-slate-200 max-w-md mx-auto relative overflow-hidden">
                 <div class="text-center mb-6">
-                    <div class="w-12 h-12 bg-green-600 text-white rounded-xl mx-auto flex items-center justify-center font-black text-lg mb-2 shadow">i</div>
                     <h2 id="login-title" class="text-lg font-extrabold text-slate-900">Жүйеге кіру</h2>
-                    <p id="login-subtitle" class="text-slate-500 text-xs mt-1">BilimClass электронды журналы</p>
+                    <p id="login-subtitle" class="text-slate-500 text-xs mt-1">BilimAL электронды журналы</p>
                 </div>
                 <form onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
                         <label id="lbl-user" class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Логин</label>
-                        <input type="text" id="login-username" class="w-full border border-slate-300 rounded px-3 py-2 text-xs focus:outline-none focus:border-green-600" placeholder="Логиніңіз">
+                        <input type="text" id="login-username" class="w-full border border-slate-300 rounded px-3 py-2 text-xs focus:outline-none focus:border-blue-600" placeholder="Логиніңіз">
                     </div>
                     <div>
                         <label id="lbl-pass" class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Пароль</label>
-                        <input type="password" id="login-password" class="w-full border border-slate-300 rounded px-3 py-2 text-xs focus:outline-none focus:border-green-600" placeholder="••••••••">
+                        <input type="password" id="login-password" class="w-full border border-slate-300 rounded px-3 py-2 text-xs focus:outline-none focus:border-blue-600" placeholder="••••••••">
                     </div>
                     <div id="login-error" class="hidden text-red-600 text-xs text-center font-bold bg-red-50 p-2 rounded border border-red-200"></div>
-                    <button type="submit" id="btn-login" class="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded font-bold text-xs shadow transition-all">Кіру</button>
+                    <button type="submit" id="btn-login" class="w-full py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded font-bold text-xs shadow transition-all">Кіру</button>
                     
                     <div class="pt-1">
                         <button type="button" onclick="handleBiometricLoginClick()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs flex items-center justify-center gap-2 border border-slate-300 transition-all shadow-xs">
@@ -144,40 +154,49 @@
                     </div>
 
                     <div class="pt-1">
-                        <button type="button" onclick="openBilimWebQRModal()" class="w-full py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs">
+                        <button type="button" onclick="openBilimWebQRModal()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs">
                             <span>📱</span> BilimWeb (QR арқылы кіру)
                         </button>
                     </div>
                 </form>
             </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 rounded bg-blue-50 text-blue-700 flex items-center justify-center font-black text-xs">01</div>
+                    <h3 class="text-xs font-extrabold text-slate-900 uppercase">BilimAL деген не?</h3>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Мектептерге арналған заманауи, қатал әрі сенімді электронды журнал, бағалау, қатысу және бұлттық синхронизация платформасы.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 rounded bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-xs">02</div>
+                    <h3 class="text-xs font-extrabold text-slate-900 uppercase">Оқушы және ата-ана мүмкіндігі</h3>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Бағаларды, қатысуды бақылау, BilimTest тапсыру, BilimID картасын қолдану және табельдерге қол қою.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 rounded bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-xs">03</div>
+                    <h3 class="text-xs font-extrabold text-slate-900 uppercase">Мұғалім мүмкіндігі</h3>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Электронды журнал толтыру, сынып ашу (DCA код), BilimTest құру, CheckID камера арқылы тексеру және қатысуды бақылау.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 rounded bg-purple-50 text-purple-700 flex items-center justify-center font-black text-xs">04</div>
+                    <h3 class="text-xs font-extrabold text-slate-900 uppercase">Бас әкімші мүмкіндігі</h3>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Мектеп мониторингі, санкциялар мен модерация, BilimLimit, BilimSubscription мерзімдерін бекіту және Admin-GPT аналитикасы.</p>
+                </div>
+            </div>
         </div>
 
-        <div id="dashboard-section" class="hidden grid grid-cols-1 md:grid-cols-5 gap-3 w-full items-start animate-fade">
-            <!-- Sidebar matching photo style -->
-            <aside class="bilim-sidebar rounded-xl p-2 md:col-span-1 shadow-sm sticky top-16 min-h-[580px] flex flex-col justify-between">
-                <div>
-                    <div class="px-2 py-1.5 text-[11px] font-extrabold text-slate-800 flex items-center gap-2 border-b border-slate-300 mb-2">
-                        <span class="w-5 h-5 bg-green-600 text-white rounded flex items-center justify-center text-[10px] font-black">i</span>
-                        <span>BilimClass</span>
-                    </div>
-                    <nav id="sidebar-menu" class="space-y-0.5 text-xs font-semibold"></nav>
-                </div>
-                <div class="pt-3 border-t border-slate-300 text-[10px] text-slate-500 px-2">
-                    <div class="font-bold text-slate-700">Белсенді: 2026-2027</div>
-                </div>
+        <div id="dashboard-section" class="hidden grid grid-cols-1 md:grid-cols-5 gap-4 w-full items-start animate-fade">
+            <aside class="bg-white rounded-xl p-3 md:col-span-1 shadow-sm border border-slate-200 sticky top-16">
+                <div id="menu-title" class="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-2 px-2">Басқару панелі</div>
+                <nav id="sidebar-menu" class="space-y-1 text-xs font-semibold text-slate-600"></nav>
             </aside>
-
             <main class="md:col-span-4 space-y-3">
-                <!-- Promo banner matching photo style -->
-                <div class="green-banner-promo text-white p-3 rounded-xl shadow-md flex justify-between items-center animate-fade">
-                    <div class="flex items-center gap-3">
-                        <span class="text-xl bg-white/20 p-2 rounded-lg">🎁</span>
-                        <div>
-                            <div class="text-xs font-extrabold uppercase tracking-wide">Бағалар үшін жылына 45 000 теңгеге дейін табыңыз!</div>
-                            <div class="text-[10px] text-slate-100 opacity-90">10 балл = 100т • Freedom Bank интеграциясы</div>
-                        </div>
+                <div id="limit-notice-banner" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs shadow-xs flex items-center space-x-3 animate-fade">
+                    <span class="text-base">⏳</span>
+                    <div>
+                        <b class="font-extrabold uppercase text-[10px] text-amber-800">NOTICE OF LIMIT (Әкімшілік шектеу):</b>
+                        <p id="limit-notice-text" class="mt-0.5 font-semibold"></p>
                     </div>
-                    <button onclick="showIosToast(true, 'Freedom', 'Бағдарлама қосылған!')" class="bg-white text-green-700 px-3 py-1.5 rounded-lg font-extrabold text-xs shadow hover:bg-slate-100">Қатысу</button>
                 </div>
 
                 <div id="warning-banner" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs shadow-xs flex items-center space-x-3 animate-fade">
@@ -201,10 +220,9 @@
         </div>
     </div>
 
-    <!-- Modals -->
     <div id="bilimweb-qr-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center relative border border-slate-200">
-            <div class="w-12 h-12 bg-green-600 text-white rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-3">📱</div>
+            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-3">📱</div>
             <h3 class="text-base font-extrabold text-slate-900">BilimWeb QR арқылы кіру</h3>
             <p class="text-xs text-slate-500 mt-1 mb-4">Телефоныңызбен сканерлеп, аккаунтты таңдаңыз, парольді енгізіп биометриямен растаңыз</p>
             
@@ -212,7 +230,7 @@
                 <img id="bilimweb-qr-img" src="" alt="QR Code" class="w-48 h-48 mx-auto rounded-lg shadow-sm border border-slate-200" />
             </div>
 
-            <div class="text-xs text-green-600 font-bold animate-pulse mb-4">⏳ Телефон арқылы растау күтілуде...</div>
+            <div class="text-xs text-indigo-600 font-bold animate-pulse mb-4">⏳ Телефон арқылы растау күтілуде...</div>
             <button type="button" onclick="closeBilimWebQRModal()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs transition-all">Болдырмау</button>
         </div>
     </div>
@@ -220,23 +238,23 @@
     <div id="bilimweb-mobile-modal" class="fixed inset-0 bg-slate-900 hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 space-y-4">
             <div class="text-center">
-                <div class="w-12 h-12 bg-green-600 text-white rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-2">🔐</div>
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-2">🔐</div>
                 <h3 class="text-lg font-extrabold text-slate-900">BilimWeb Авторизациясы</h3>
                 <p class="text-xs text-slate-500 mt-1">Үлкен экранға қосылу үшін аккаунтты таңдаңыз, парольді жазыңыз және биометрия арқылы растаңыз</p>
             </div>
 
             <div>
                 <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Аккаунтты таңдаңыз:</label>
-                <select id="bilimweb-account-select" class="w-full border border-slate-300 rounded p-2.5 text-xs bg-slate-50 font-bold text-blue-700 focus:outline-none focus:border-green-600">
+                <select id="bilimweb-account-select" class="w-full border border-slate-300 rounded p-2.5 text-xs bg-slate-50 font-bold text-blue-700 focus:outline-none focus:border-indigo-600">
                 </select>
             </div>
 
             <div>
                 <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Қосымша растау (Пароль):</label>
-                <input type="password" id="bilimweb-confirm-password" placeholder="Аккаунт паролін енгізіңіз..." class="w-full border border-slate-300 rounded p-2.5 text-xs bg-slate-50 focus:outline-none focus:border-green-600">
+                <input type="password" id="bilimweb-confirm-password" placeholder="Аккаунт паролін енгізіңіз..." class="w-full border border-slate-300 rounded p-2.5 text-xs bg-slate-50 focus:outline-none focus:border-indigo-600">
             </div>
 
-            <button type="button" onclick="confirmMobileQRLogin()" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded font-bold text-xs shadow transition-all flex items-center justify-center gap-2">
+            <button type="button" onclick="confirmMobileQRLogin()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-xs shadow transition-all flex items-center justify-center gap-2">
                 <span>🔒</span> Пароль + Биометрия арқылы растау
             </button>
             <button type="button" onclick="cancelMobileQRLogin()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs transition-all">Бас тарту</button>
@@ -245,17 +263,17 @@
 
     <div id="passkey-prompt-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center relative border border-slate-200 space-y-4">
-            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black">🔒</div>
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black">🔒</div>
             <h3 class="text-base font-extrabold text-slate-900">Touch ID / Face ID байланыстыру</h3>
             <p class="text-xs text-slate-500">Бұл құрылғы арқылы жүйеге жылдам кіру үшін биометриялық растауды іске қосыңыз.</p>
-            <button type="button" onclick="registerPasskeyForCurrentAccount()" class="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white rounded font-bold text-xs shadow transition-all">Биометрияны қосу</button>
+            <button type="button" onclick="registerPasskeyForCurrentAccount()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow transition-all">Биометрияны қосу</button>
             <button type="button" onclick="closePasskeyPrompt()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs transition-all">Кейін</button>
         </div>
     </div>
 
     <footer class="bg-white py-3 px-6 border-t border-slate-200 text-[11px] text-slate-500 flex justify-between items-center">
-        <span id="footer-text" class="font-bold text-slate-700">BilimClass Enterprise Cloud © 2026. Барлық құқықтар қорғалған[span_1](start_span)[span_1](end_span).</span>
-        <span class="text-green-600 font-bold flex items-center gap-1">● Бұлттық база қосылған[span_2](start_span)[span_2](end_span)</span>
+        <span id="footer-text" class="font-bold text-slate-700">BilimAL Enterprise Cloud © 2026. Барлық құқықтар қорғалған.</span>
+        <span class="text-emerald-600 font-bold flex items-center gap-1">● Бұлттық база қосылған</span>
     </footer>
 
     <script>
@@ -299,15 +317,17 @@
         let currentAnnouncement = '';
         let newsList = []; 
         let activeLives = {}; 
+        let activeSessionsStore = {}; 
         let selectedTeacherSubject = subjectsList[0];
         let activeScheduleDay = 'Дүйсенбі';
+
+        let bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
 
         let aiModes = {}; 
         let aiHistories = {}; 
 
         let currentQrSessionId = null;
         let qrListenerUnsubscribe = null;
-        let activeSessionsStore = {}; 
 
         let bilimTests = [];
         let testResults = {}; 
@@ -370,15 +390,15 @@
 
         const translations = {
             kk: {
-                subtitle: "Бірыңғай мектеп журналы және платформа[span_3](start_span)[span_3](end_span)",
+                subtitle: "Бірыңғай мектеп журналы және платформа",
                 loginTitle: "Жүйеге кіру",
-                loginSub: "BilimClass электронды журналы",
+                loginSub: "BilimAL электронды журналы",
                 userLbl: "Логин",
                 passLbl: "Пароль",
                 loginBtn: "Кіру",
                 logoutBtn: "Шығу",
                 menuTitle: "Басқару панелі",
-                footer: "BilimClass Enterprise Cloud © 2026. Барлық құқықтар қорғалған[span_4](start_span)[span_4](end_span).",
+                footer: "BilimAL Enterprise Cloud © 2026. Барлық құқықтар қорғалған.",
                 adminMon: "📊 Мониторинг",
                 adminSanc: "🛡️ Moderations & Sanctions",
                 adminSched: "📅 Сабақ кестесі",
@@ -389,6 +409,7 @@
                 adminSupport: "🛟 Қолдау кірістері",
                 adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Басқару",
+                adminLimit: "⏳ BilimLimit (Шектеу)",
                 adminSub: "📜 BilimSubscription (Табельдер)",
                 teachJorn: "📖 Бағалар журналы",
                 teachAtt: "📋 Қатысу журналы",
@@ -423,15 +444,15 @@
                 sessionsTab: "💻 Белсенді сеанстар"
             },
             ru: {
-                subtitle: "Единая школьная система и платформа[span_5](start_span)[span_5](end_span)",
+                subtitle: "Единая школьная система и платформа",
                 loginTitle: "Вход в систему",
-                loginSub: "Электронный журнал BilimClass",
+                loginSub: "Электронный журнал BilimAL",
                 userLbl: "Логин",
                 passLbl: "Пароль",
                 loginBtn: "Войти",
                 logoutBtn: "Выйти",
                 menuTitle: "Панель управления",
-                footer: "BilimClass Enterprise Cloud © 2026. Все права защищены[span_6](start_span)[span_6](end_span).",
+                footer: "BilimAL Enterprise Cloud © 2026. Все права защищены.",
                 adminMon: "📊 Мониторинг",
                 adminSanc: "🛡️ Модерация и санкции",
                 adminSched: "📅 Расписание",
@@ -442,6 +463,7 @@
                 adminSupport: "🛟 Входящие тикеты",
                 adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 Управление BilimID",
+                adminLimit: "⏳ BilimLimit (Лимиты)",
                 adminSub: "📜 BilimSubscription (Табели)",
                 teachJorn: "📖 Журнал оценок",
                 teachAtt: "📋 Посещаемость",
@@ -476,15 +498,15 @@
                 sessionsTab: "💻 Активные сеансы"
             },
             en: {
-                subtitle: "Unified School System and Platform[span_7](start_span)[span_7](end_span)",
+                subtitle: "Unified School System and Platform",
                 loginTitle: "Sign In",
-                loginSub: "BilimClass Electronic Journal",
+                loginSub: "BilimAL Electronic Journal",
                 userLbl: "Username",
                 passLbl: "Password",
                 loginBtn: "Login",
                 logoutBtn: "Logout",
                 menuTitle: "Control Panel",
-                footer: "BilimClass Enterprise Cloud © 2026. All rights reserved[span_8](start_span)[span_8](end_span).",
+                footer: "BilimAL Enterprise Cloud © 2026. All rights reserved.",
                 adminMon: "📊 Monitoring",
                 adminSanc: "🛡️ Moderations & Sanctions",
                 adminSched: "📅 Schedule",
@@ -495,6 +517,7 @@
                 adminSupport: "🛟 Support Tickets",
                 adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Manage",
+                adminLimit: "⏳ BilimLimit",
                 adminSub: "📜 BilimSubscription",
                 teachJorn: "📖 Gradebook",
                 teachAtt: "📋 Attendance",
@@ -558,7 +581,7 @@
         async function loadDataFromCloud() {
             if(useFirebase) {
                 try {
-                    const snap = await db.collection("bilimal").doc("enterprise_v15_autolive").get();
+                    const snap = await db.collection("bilimal").doc("enterprise_v16_autolive").get();
                     if(snap.exists) {
                         let data = snap.data();
                         users = data.users || [];
@@ -572,6 +595,7 @@
                         newsList = data.newsList || [];
                         activeLives = data.activeLives || {}; 
                         activeSessionsStore = data.activeSessionsStore || {};
+                        bilimLimitSettings = data.bilimLimitSettings || { startDate: '', endDate: '', reason: '' };
                         
                         bilimTests = data.bilimTests || [];
                         testResults = data.testResults || {};
@@ -586,8 +610,8 @@
         async function saveDataToCloud() {
             if(useFirebase) {
                 try {
-                    await db.collection("bilimal").doc("enterprise_v15_autolive").set({
-                        users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeLives, activeSessionsStore,
+                    await db.collection("bilimal").doc("enterprise_v16_autolive").set({
+                        users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeLives, activeSessionsStore, bilimLimitSettings,
                         bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings
                     });
                 } catch(e) { console.error(e); }
@@ -604,6 +628,7 @@
             document.getElementById('lbl-pass').innerText = t.passLbl;
             document.getElementById('btn-login').innerText = t.loginBtn;
             document.getElementById('btn-logout').innerText = t.logoutBtn;
+            document.getElementById('menu-title').innerText = t.menuTitle;
             document.getElementById('footer-text').innerText = t.footer;
             if(currentUser) renderSidebar();
         }
@@ -745,7 +770,7 @@
                 const credential = await navigator.credentials.create({
                     publicKey: {
                         challenge: challenge,
-                        rp: { name: "BilimClass Enterprise", id: window.location.hostname },
+                        rp: { name: "BilimAL Enterprise", id: window.location.hostname },
                         user: {
                             id: userId,
                             name: currentUser.username,
@@ -784,7 +809,7 @@
                 
                 if (usernames.length === 0) {
                     hideSpinner();
-                    showIosToast(false, "Сәтсіз!", "Бұл құрылғыда биометриялық кілт табылмады. Алдымен логинмен кіриңіз.");
+                    showIosToast(false, "Сәтсіз!", "Бұл құрылғыда биометриялық кілт табылмады. Алдымен логинмен кіріңіз.");
                     return;
                 }
 
@@ -854,7 +879,9 @@
                 if (window.hanko && window.hanko.password) {
                     await window.hanko.password.login(usernameInput, passwordInput);
                 }
-            } catch(err) {}
+            } catch(err) {
+                console.log("Hanko pass check:", err);
+            }
 
             await loadDataFromCloud();
             hideSpinner();
@@ -894,6 +921,28 @@
             } else {
                 warnBanner.classList.add('hidden');
             }
+
+            // BilimLimit check
+            const limitBanner = document.getElementById('limit-notice-banner');
+            const limitText = document.getElementById('limit-notice-text');
+            let currentStr = getCurrentFormattedDateTime();
+            let startWin = bilimLimitSettings.startDate;
+            let endWin = bilimLimitSettings.endDate;
+
+            if (currentUser.role !== 'admin' && startWin && endWin && currentStr >= startWin && currentStr <= endWin) {
+                limitText.innerText = `Уақытша шектеу қойылды (${startWin} - ${endWin}). Себебі: ${bilimLimitSettings.reason || 'Көрсетілмеген'}`;
+                limitBanner.classList.remove('hidden');
+            } else {
+                limitBanner.classList.add('hidden');
+            }
+        }
+
+        function isBilimLimitActive() {
+            if (currentUser.role === 'admin') return false;
+            let currentStr = getCurrentFormattedDateTime();
+            let startWin = bilimLimitSettings.startDate;
+            let endWin = bilimLimitSettings.endDate;
+            return (startWin && endWin && currentStr >= startWin && currentStr <= endWin);
         }
 
         function logout() {
@@ -907,6 +956,7 @@
             document.getElementById('user-info').classList.add('hidden');
             document.getElementById('announcement-banner').classList.add('hidden');
             document.getElementById('warning-banner').classList.add('hidden');
+            document.getElementById('limit-notice-banner').classList.add('hidden');
             document.getElementById('login-username').value = '';
             document.getElementById('login-password').value = '';
             showIosToast(true, "Сәтті!", "Жүйеден сәтті шықтыңыз.");
@@ -923,6 +973,7 @@
                     { id: 'admin_schedule', label: t.adminSched },
                     { id: 'admin_users', label: t.adminUsers },
                     { id: 'admin_bilimid', label: t.adminBilimID },
+                    { id: 'admin_limit', label: t.adminLimit },
                     { id: 'admin_sub', label: t.adminSub },
                     { id: 'admin_announcement', label: t.adminAnn },
                     { id: 'admin_news', label: t.adminNews },
@@ -975,7 +1026,7 @@
                 ];
             }
             menu.innerHTML = links.map(l => `
-                <button onclick="switchTab('${l.id}')" class="sidebar-btn w-full text-left px-3 py-2 rounded-md flex items-center justify-between ${activeTab === l.id ? 'active' : ''}">
+                <button onclick="switchTab('${l.id}')" class="sidebar-btn w-full text-left px-3 py-2 rounded-lg flex items-center justify-between ${activeTab === l.id ? 'active' : 'text-slate-600'}">
                     <span>${l.label}</span>
                 </button>
             `).join('');
@@ -993,6 +1044,21 @@
         async function renderTabContent() {
             await loadDataFromCloud();
             const panel = document.getElementById('active-content-panel');
+
+            // If BilimLimit is active and user tries to open restricted sections
+            if (isBilimLimitActive() && activeTab !== 'sessions_management' && activeTab !== 'student_support' && activeTab !== 'teacher_support' && activeTab !== 'parent_support') {
+                panel.innerHTML = `
+                    <div class="p-8 text-center space-y-3 bg-amber-50 border border-amber-300 rounded-xl my-auto">
+                        <div class="text-3xl">⏳</div>
+                        <h3 class="text-base font-extrabold text-amber-900">Бұл қызмет уақытша шектелді (BilimLimit)</h3>
+                        <p class="text-xs text-amber-800 max-w-md mx-auto">Әкімшілік қойған лимит мерзіміне байланысты бұл бөлім қазіргі уақытта бұғатталды.</p>
+                        <div class="text-[11px] font-bold text-slate-700 bg-white p-3 rounded border border-amber-200 inline-block">
+                            Себебі: ${bilimLimitSettings.reason || 'Көрсетілмеген'} <br>Мерзімі: ${bilimLimitSettings.startDate} — ${bilimLimitSettings.endDate}
+                        </div>
+                    </div>
+                `;
+                return;
+            }
 
             if (activeTab === 'sessions_management') {
                 let mySessions = (activeSessionsStore[currentUser.username] || []);
@@ -1035,6 +1101,7 @@
                 return;
             }
 
+            // ================= AUTO-LIVE STUDIO (TEACHER) =================
             if (activeTab === 'teacher_live') {
                 let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
                 let myLive = activeLives[currentUser.username];
@@ -1043,14 +1110,14 @@
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🔴 AutoLIVE Студия (Тікелей эфир бастау)</h3>
                         <div class="p-4 bg-slate-50 border rounded-xl max-w-xl space-y-3">
-                            <div class="text-xs font-bold text-slate-700">Сыныбыңыз: <span class="text-green-700">${myClass ? myClass.name : 'Сынып тіркелмеген'}</span></div>
+                            <div class="text-xs font-bold text-slate-700">Сыныбыңыз: <span class="text-blue-700">${myClass ? myClass.name : 'Сынып тіркелмеген'}</span></div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 mb-1">Сабақ тақырыбы:</label>
                                 <input type="text" id="studio-live-title" placeholder="Мысалы: Квадрат теңдеулерді шешу жолдары" class="w-full border rounded p-2 text-xs bg-white">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 mb-1">Сыныпты таңдаңыз:</label>
-                                <select id="studio-live-class" class="w-full border rounded p-2 text-xs bg-white font-bold text-green-700">
+                                <select id="studio-live-class" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">
                                     ${myClass ? `<option value="${myClass.name}">${myClass.name}</option>` : '<option value="">Сынып жоқ</option>'}
                                 </select>
                             </div>
@@ -1061,7 +1128,7 @@
                     let viewersCount = (myLive.viewers || []).length;
                     let chatHTML = (myLive.chat || []).map(c => `
                         <div class="p-2 border-b text-xs">
-                            <b class="${c.senderRole === 'admin' ? 'text-purple-700' : 'text-green-800'}">${c.senderName}:</b> ${c.text}
+                            <b class="${c.senderRole === 'admin' ? 'text-purple-700' : 'text-blue-800'}">${c.senderName}:</b> ${c.text}
                         </div>
                     `).join('') || '<div class="text-slate-400 text-center py-4">Чат бос...</div>';
 
@@ -1085,7 +1152,7 @@
                             <div class="md:col-span-2 space-y-3">
                                 <div class="bg-slate-900 text-white rounded-xl aspect-video flex flex-col items-center justify-center p-6 text-center relative shadow-inner">
                                     <div class="w-16 h-16 rounded-full bg-red-600/30 flex items-center justify-center text-2xl mb-2 animate-pulse">🎥</div>
-                                    <div class="text-sm font-extrabold">BilimClass WebRTC Studio (Live Broadcaster)</div>
+                                    <div class="text-sm font-extrabold">BilimAL WebRTC Studio (Live Broadcaster)</div>
                                     <p class="text-[11px] text-slate-400 mt-1">Камера мен микрофон қосулы. Оқушылар мен ата-аналар сізді тікелей көріп жатыр.</p>
                                     <div class="absolute top-3 left-3 bg-red-600 px-2.5 py-1 rounded text-[10px] font-extrabold uppercase">Эфирде</div>
                                     <div class="absolute top-3 right-3 bg-black/60 px-3 py-1 rounded text-[11px] font-bold">👁️ Қосылғандар: ${viewersCount} адам</div>
@@ -1102,7 +1169,7 @@
                                 <div id="live-chat-box" class="flex-1 p-3 overflow-y-auto space-y-2 bg-white">${chatHTML}</div>
                                 <div class="p-2 border-t flex gap-1 bg-white">
                                     <input type="text" id="teacher-live-msg" placeholder="Хабарлама жазу..." class="flex-1 border rounded p-1.5 text-xs bg-slate-50" onkeydown="if(event.key==='Enter') sendLiveChatMsg('${currentUser.username}')">
-                                    <button onclick="sendLiveChatMsg('${currentUser.username}')" class="px-3 bg-green-600 text-white rounded font-bold text-xs">Жіберу</button>
+                                    <button onclick="sendLiveChatMsg('${currentUser.username}')" class="px-3 bg-blue-600 text-white rounded font-bold text-xs">Жіберу</button>
                                 </div>
                             </div>
                         </div>
@@ -1111,6 +1178,7 @@
                 return;
             }
 
+            // ================= AUTO-LIVE WATCH & CHAT & GUEST (STUDENT / PARENT) =================
             if (activeTab === 'student_live' || activeTab === 'parent_live') {
                 let targetClassName = '';
                 if (currentUser.role === 'student') {
@@ -1150,7 +1218,7 @@
                 let isGuest = (l.guests || []).some(g => g.username === currentUser.username);
                 let chatHTML = (l.chat || []).map(c => `
                     <div class="p-2 border-b text-xs">
-                        <b class="${c.senderRole === 'admin' ? 'text-purple-700' : 'text-green-800'}">${c.senderName}:</b> ${c.text}
+                        <b class="${c.senderRole === 'admin' ? 'text-purple-700' : 'text-blue-800'}">${c.senderName}:</b> ${c.text}
                     </div>
                 `).join('') || '<div class="text-slate-400 text-center py-4">Чат бос...</div>';
 
@@ -1160,7 +1228,7 @@
                             <span class="w-3 h-3 rounded-full bg-red-600 live-badge-pulse inline-block"></span>
                             <h3 class="text-sm font-extrabold text-red-700">LIVE: ${l.title} (Мұғалім: ${l.teacherName})</h3>
                         </div>
-                        <span class="bg-green-50 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">Сынып: ${l.className} | Қосылғандар: ${(l.viewers||[]).length}</span>
+                        <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[11px] font-bold">Сынып: ${l.className} | Қосылғандар: ${(l.viewers||[]).length}</span>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1180,7 +1248,7 @@
                                 ${isGuest ? `
                                     <button onclick="leaveLiveGuest('${tKey}')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow">Қонақ болудан шығу</button>
                                 ` : `
-                                    <button onclick="joinLiveGuest('${tKey}')" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-bold text-xs shadow">🎙️ Қонақ болуға сұрану</button>
+                                    <button onclick="joinLiveGuest('${tKey}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs shadow">🎙️ Қонақ болуға сұрану</button>
                                 `}
                             </div>
                         </div>
@@ -1190,7 +1258,7 @@
                             <div id="live-chat-box" class="flex-1 p-3 overflow-y-auto space-y-2 bg-white">${chatHTML}</div>
                             <div class="p-2 border-t flex gap-1 bg-white">
                                 <input type="text" id="student-live-msg" placeholder="Хабарлама жазу..." class="flex-1 border rounded p-1.5 text-xs bg-slate-50" onkeydown="if(event.key==='Enter') sendLiveChatMsg('${tKey}')">
-                                <button onclick="sendLiveChatMsg('${tKey}')" class="px-3 bg-green-600 text-white rounded font-bold text-xs">Жіберу</button>
+                                <button onclick="sendLiveChatMsg('${tKey}')" class="px-3 bg-blue-600 text-white rounded font-bold text-xs">Жіберу</button>
                             </div>
                         </div>
                     </div>
@@ -1198,6 +1266,7 @@
                 return;
             }
 
+            // ================= AUTO-LIVE MODERATION (ADMIN) =================
             if (activeTab === 'admin_live') {
                 let liveCards = Object.keys(activeLives).length > 0 ? Object.keys(activeLives).map(tKey => {
                     let l = activeLives[tKey];
@@ -1210,11 +1279,11 @@
                                     <span class="w-3 h-3 rounded-full bg-red-600 live-badge-pulse inline-block"></span>
                                     <span class="text-xs font-extrabold text-red-700 uppercase tracking-wider">LIVE Сабақ мониторингі</span>
                                 </div>
-                                <span class="px-2 py-0.5 bg-green-50 text-green-700 rounded text-[10px] font-bold">Сынып: ${l.className} | Көрермендер: ${(l.viewers||[]).length}</span>
+                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">Сынып: ${l.className} | Көрермендер: ${(l.viewers||[]).length}</span>
                             </div>
                             <div>
                                 <h4 class="text-sm font-extrabold text-slate-900">${l.title}</h4>
-                                <p class="text-xs text-slate-500 mt-0.5">Мұғалім: <b class="text-green-900">${l.teacherName}</b></p>
+                                <p class="text-xs text-slate-500 mt-0.5">Мұғалім: <b class="text-blue-900">${l.teacherName}</b></p>
                             </div>
                             <div class="p-3 bg-slate-50 border rounded text-xs space-y-1">
                                 <div class="font-bold text-[10px] text-slate-400 uppercase">Соңғы чат хабарламалары (AutoLIVE Moderation):</div>
@@ -1244,7 +1313,7 @@
                     <div class="p-4 bg-white border rounded-xl shadow-xs space-y-2 relative">
                         <div class="flex justify-between items-start">
                             <div>
-                                <h4 class="text-xs font-extrabold text-green-800">${n.title}</h4>
+                                <h4 class="text-xs font-extrabold text-blue-900">${n.title}</h4>
                                 <p class="text-[10px] text-slate-400 mt-0.5">📅 Жарияланған уақыты: ${n.datetime}</p>
                             </div>
                             <button onclick="deleteNewsItem(${idx})" class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-[10px]">🗑️ Өшіру</button>
@@ -1260,7 +1329,7 @@
                         <h4 class="text-xs font-bold text-slate-800 uppercase">Жаңа жаңалық жариялау</h4>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 mb-1">Автоматты дата / уақыт:</label>
-                            <input type="text" id="news-datetime" value="${autoDateTime}" readonly class="w-full border rounded p-2 text-xs bg-slate-100 font-bold text-green-700">
+                            <input type="text" id="news-datetime" value="${autoDateTime}" readonly class="w-full border rounded p-2 text-xs bg-slate-100 font-bold text-blue-700">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 mb-1">Тақырыбы:</label>
@@ -1270,7 +1339,7 @@
                             <label class="block text-[10px] font-bold text-slate-500 mb-1">Мәтіні:</label>
                             <textarea id="news-text" rows="4" placeholder="Жаңалық мәтінін жазыңыз..." class="w-full border rounded p-2 text-xs bg-white"></textarea>
                         </div>
-                        <button onclick="publishNews()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-bold text-xs shadow">Жариялау</button>
+                        <button onclick="publishNews()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow">Жариялау</button>
                     </div>
 
                     <h4 class="text-xs font-bold text-slate-800 uppercase mb-3">Барлық жарияланған жаңалықтар тізімі</h4>
@@ -1283,7 +1352,7 @@
                 let newsCards = newsList.length > 0 ? newsList.map(n => `
                     <div class="p-4 bg-white border rounded-xl shadow-xs space-y-2">
                         <div class="flex justify-between items-center border-b pb-1">
-                            <span class="text-xs font-extrabold text-green-800">${n.title}</span>
+                            <span class="text-xs font-extrabold text-blue-900">${n.title}</span>
                             <span class="text-[10px] text-slate-400 font-medium">${n.datetime}</span>
                         </div>
                         <p class="text-xs text-slate-700 leading-relaxed pt-1">${n.text}</p>
@@ -1306,13 +1375,13 @@
                             <td>${c.creator || c.teacher}</td>
                             <td>
                                 <div class="flex items-center gap-1.5">
-                                    <select id="admin_teacher_select_${idx}" class="border rounded p-1 text-[11px] bg-white font-bold text-green-700">
+                                    <select id="admin_teacher_select_${idx}" class="border rounded p-1 text-[11px] bg-white font-bold text-blue-700">
                                         ${teachersList.map(t => `<option value="${t.username}" ${t.username === c.teacherUsername ? 'selected' : ''}>${t.name}</option>`).join('')}
                                     </select>
-                                    <button onclick="adminUpdateClassTeacher(${idx})" class="px-2 py-1 bg-green-600 text-white rounded font-bold text-[10px]">Сақтау</button>
+                                    <button onclick="adminUpdateClassTeacher(${idx})" class="px-2 py-1 bg-blue-600 text-white rounded font-bold text-[10px]">Сақтау</button>
                                 </div>
                             </td>
-                            <td><code class="bg-green-50 px-2 py-0.5 rounded text-green-700 font-bold">${c.dcaCode}</code></td>
+                            <td><code class="bg-blue-50 px-2 py-0.5 rounded text-blue-700 font-bold">${c.dcaCode}</code></td>
                             <td>
                                 <button onclick="deleteClassRecord(${idx})" class="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-[10px] shadow-xs">🗑️ Сыныпты жою</button>
                             </td>
@@ -1339,7 +1408,7 @@
                 } else if (activeTab === 'admin_sanctions') {
                     let staffList = users.filter(u => u.role !== 'admin').map(u => `
                         <tr class="text-xs">
-                            <td class="font-bold">${u.name} (@${u.username}) <span class="text-green-600 uppercase text-[9px]">[${u.role}]</span></td>
+                            <td class="font-bold">${u.name} (@${u.username}) <span class="text-blue-600 uppercase text-[9px]">[${u.role}]</span></td>
                             <td><span class="px-2 py-0.5 rounded font-bold ${u.status === 'blocked' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}">${u.status === 'blocked' ? 'Бұғатталған' : 'Белсенді'}</span></td>
                             <td><span class="text-red-600 font-medium">${u.warningReason || 'Жоқ'}</span></td>
                             <td>
@@ -1351,12 +1420,12 @@
                     panel.innerHTML = `<h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🛡️ Moderations & Sanctions</h3><div class="overflow-x-auto"><table class="w-full gov-table"><thead><tr><th>Аты-жөні / Рөлі</th><th>Мәртебесі</th><th>Ескерту себебі</th><th>Әрекеттер</th></tr></thead><tbody>${staffList || '<tr><td colspan="4" class="text-center text-slate-400">Қолданушылар жоқ</td></tr>'}</tbody></table></div>`;
                 } else if (activeTab === 'admin_schedule') {
                     let classSelectOptions = classesList.length > 0 ? classesList.map(c => `<option value="${c.name}">${c.name} (Жетекшісі: ${c.teacher})</option>`).join('') : '<option value="">Сыныптар тіркелмеген</option>';
-                    let schedRows = schedules.length > 0 ? schedules.map((s, sIdx) => `<tr><td><b>${s.className}</b></td><td><span class="px-2 py-0.5 bg-green-50 text-green-700 rounded font-bold">${s.day || 'Дүйсенбі'}</span></td><td>${s.subject}</td><td>${s.time}</td><td><button onclick="deleteSchedule(${sIdx})" class="px-2 py-0.5 bg-red-100 text-red-600 rounded font-bold text-[10px]">Жою</button></td></tr>`).join('') : '<tr><td colspan="5" class="text-center text-slate-400">Кестелер жоқ</td></tr>';
+                    let schedRows = schedules.length > 0 ? schedules.map((s, sIdx) => `<tr><td><b>${s.className}</b></td><td><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-bold">${s.day || 'Дүйсенбі'}</span></td><td>${s.subject}</td><td><b>${s.topic || 'Тақырып көрсетілмеген'}</b></td><td>${s.homework || 'Жоқ'}</td><td>${s.time}</td><td><button onclick="deleteSchedule(${sIdx})" class="px-2 py-0.5 bg-red-100 text-red-600 rounded font-bold text-[10px]">Жою</button></td></tr>`).join('') : '<tr><td colspan="7" class="text-center text-slate-400">Кестелер жоқ</td></tr>';
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📅 Сыныптарға сабақ кестесін бекіту</h3>
                         <div class="p-4 bg-slate-50 rounded-lg border max-w-lg space-y-3 mb-4">
                             <label class="block text-[11px] font-bold uppercase text-slate-600">Сыныпты таңдаңыз:</label>
-                            <select id="sched-class" class="w-full border rounded p-2 text-xs bg-white font-bold text-green-700">
+                            <select id="sched-class" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">
                                 ${classSelectOptions}
                             </select>
                             <label class="block text-[11px] font-bold uppercase text-slate-600">Апта күні:</label>
@@ -1365,11 +1434,15 @@
                             </select>
                             <label class="block text-[11px] font-bold uppercase text-slate-600">Пән:</label>
                             <select id="sched-subject" class="w-full border rounded p-2 text-xs bg-white font-bold">${subjectsList.map(sub => `<option value="${sub}">${sub}</option>`).join('')}</select>
+                            <label class="block text-[11px] font-bold uppercase text-slate-600">Сабақ тақырыбы:</label>
+                            <input type="text" id="sched-topic" placeholder="Мысалы: Квадрат теңдеулер" class="w-full border rounded p-2 text-xs bg-white">
+                            <label class="block text-[11px] font-bold uppercase text-slate-600">Үй тапсырмасы:</label>
+                            <input type="text" id="sched-hw" placeholder="Мысалы: №24 есеп (154-бет)" class="w-full border rounded p-2 text-xs bg-white">
                             <label class="block text-[11px] font-bold uppercase text-slate-600">Уақыты / Сабақ реті:</label>
                             <input type="text" id="sched-time" placeholder="Мысалы: 08:30 - 09:15 (1-ші сабақ)" class="w-full border rounded p-2 text-xs bg-white">
-                            <button onclick="saveSchedule()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">Кестені бекіту және сақтау</button>
+                            <button onclick="saveSchedule()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Кестені бекіту және сақтау</button>
                         </div>
-                        <div class="overflow-x-auto"><table class="w-full gov-table"><thead><tr><th>Сынып</th><th>Күні</th><th>Пән</th><th>Уақыты</th><th>Әрекет</th></tr></thead><tbody>${schedRows}</tbody></table></div>
+                        <div class="overflow-x-auto"><table class="w-full gov-table"><thead><tr><th>Сынып</th><th>Күні</th><th>Пән</th><th>Тақырыбы</th><th>Үй жұмысы</th><th>Уақыты</th><th>Әрекет</th></tr></thead><tbody>${schedRows}</tbody></table></div>
                     `;
                 } else if (activeTab === 'admin_users') {
                     let studentsListOptions = users.filter(u => u.role === 'student').map(s => `<option value="${s.username}">${s.name} (@${s.username})</option>`).join('');
@@ -1378,7 +1451,7 @@
                             <td class="font-bold">${u.name}</td>
                             <td>@${u.username}</td>
                             <td><b>${u.password}</b></td>
-                            <td><span class="px-2 py-0.5 rounded font-bold uppercase text-[9px] ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'teacher' ? 'bg-green-100 text-green-700' : u.role === 'parent' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">${u.role}</span></td>
+                            <td><span class="px-2 py-0.5 rounded font-bold uppercase text-[9px] ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : u.role === 'teacher' ? 'bg-blue-100 text-blue-700' : u.role === 'parent' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}">${u.role}</span></td>
                             <td class="text-slate-500 font-semibold">${u.role === 'parent' ? (users.find(x => x.username === u.parentOf)?.name || u.parentOf || 'Бекітілмеген') : '—'}</td>
                             <td>${u.username !== 'admin' ? `<button onclick="deleteSystemUser('${u.username}')" class="px-2 py-1 bg-red-50 text-red-600 rounded font-bold">Жою</button>` : '—'}</td>
                         </tr>
@@ -1401,7 +1474,7 @@
                                     ${studentsListOptions}
                                 </select>
                             </div>
-                            <button onclick="registerNewUser()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">+ Тіркеу</button>
+                            <button onclick="registerNewUser()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">+ Тіркеу</button>
                         </div>
                         <div class="overflow-x-auto"><table class="w-full gov-table"><thead><tr><th>Аты-жөні</th><th>Логин</th><th>Пароль</th><th>Рөлі</th><th>Бекітілген баласы</th><th>Әрекет</th></tr></thead><tbody>${allUsersList}</tbody></table></div>
                     `;
@@ -1415,14 +1488,14 @@
                         return `
                             <tr class="text-xs">
                                 <td><b>${c.name}</b> (@${un})</td>
-                                <td><span class="px-2 py-0.5 rounded font-bold uppercase text-[9px] ${c.role === 'teacher' ? 'bg-green-100 text-green-700' : 'bg-indigo-100 text-indigo-700'}">${c.role === 'teacher' ? 'Мұғалім' : 'Оқушы'}</span></td>
+                                <td><span class="px-2 py-0.5 rounded font-bold uppercase text-[9px] ${c.role === 'teacher' ? 'bg-blue-100 text-blue-700' : 'bg-indigo-100 text-indigo-700'}">${c.role === 'teacher' ? 'Мұғалім' : 'Оқушы'}</span></td>
                                 <td>${c.school} (${c.className})</td>
                                 <td><code class="bg-slate-100 px-2 py-0.5 rounded font-mono font-bold">${c.idNumber}</code></td>
                                 <td>${c.issueDate} / ${c.approveDate}</td>
                                 <td><b>${c.validUntil}</b></td>
                                 <td><span class="px-2 py-0.5 rounded text-[10px] font-bold ${stColor}">${c.status === 'ACTIVE' ? '● ACTIVE' : (c.status === 'INACTIVE' ? '⚠️ INACTIVE' : '🚨 INVALID')}</span></td>
                                 <td>
-                                    <button onclick="extendBilimID('${un}')" class="px-2 py-1 bg-green-600 text-white rounded font-bold text-[10px] hover:bg-green-700">Ұзарту</button>
+                                    <button onclick="extendBilimID('${un}')" class="px-2 py-1 bg-indigo-600 text-white rounded font-bold text-[10px] hover:bg-indigo-700">Ұзарту</button>
                                     <button onclick="deleteBilimID('${un}')" class="px-2 py-1 bg-red-600 text-white rounded font-bold text-[10px] hover:bg-red-700">Жою</button>
                                 </td>
                             </tr>
@@ -1436,7 +1509,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Қолданушыны таңдаңыз:</label>
-                                    <select id="id-username" class="w-full border rounded p-2 text-xs bg-white font-bold text-green-700">
+                                    <select id="id-username" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">
                                         ${userSelectOptions}
                                     </select>
                                 </div>
@@ -1467,7 +1540,7 @@
                                     <input type="text" id="id-valid" value="31.05.2027" class="w-full border rounded p-2 text-xs bg-white font-bold">
                                 </div>
                             </div>
-                            <button onclick="createOrUpdateBilimID()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-bold">🪪 BilimID сақтау және ID генерациялау</button>
+                            <button onclick="createOrUpdateBilimID()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold">🪪 BilimID сақтау және ID генерациялау</button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full gov-table min-w-[800px]">
@@ -1485,6 +1558,34 @@
                                 </thead>
                                 <tbody>${idCardRows}</tbody>
                             </table>
+                        </div>
+                    `;
+                } else if (activeTab === 'admin_limit') {
+                    let startLimitUI = bilimLimitSettings.startDate ? bilimLimitSettings.startDate.replace(/\//g, '-').replace('-', 'T') : '';
+                    let endLimitUI = bilimLimitSettings.endDate ? bilimLimitSettings.endDate.replace(/\//g, '-').replace('-', 'T') : '';
+
+                    panel.innerHTML = `
+                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">⏳ BilimLimit — Қызметтерге уақытша шектеу қою</h3>
+                        <div class="p-4 bg-slate-50 rounded-lg border max-w-xl space-y-3">
+                            <p class="text-xs text-slate-600">Админ оқушыларға, ата-аналарға және мұғалімдерге қолжетімді сервистерді уақытша шектейді. Күнді таңдап, себебін жазыңыз.</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Басталу уақыты:</label>
+                                    <input type="datetime-local" id="limit-start-datetime" value="${startLimitUI}" class="w-full border rounded p-2 text-xs bg-white font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Аяқталу уақыты:</label>
+                                    <input type="datetime-local" id="limit-end-datetime" value="${endLimitUI}" class="w-full border rounded p-2 text-xs bg-white font-bold">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Шектеу себебі (Түсіндірме):</label>
+                                <textarea id="limit-reason-input" rows="3" placeholder="Мысалы: Техникалық жұмыстар жүргізілуде..." class="w-full border rounded p-2 text-xs bg-white">${bilimLimitSettings.reason || ''}</textarea>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="saveBilimLimit()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">💾 Шектеуді бекіту және сақтау</button>
+                                <button onclick="clearBilimLimit()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded text-xs font-bold">Шектеуді алып тастау</button>
+                            </div>
                         </div>
                     `;
                 } else if (activeTab === 'admin_sub') {
@@ -1509,12 +1610,12 @@
                                 </div>
                             </div>
                             <div class="text-[11px] text-slate-500">Ағымдағы белсенді терезе: <b>${subscriptionSettings.startDate || '—'}</b> мен <b>${subscriptionSettings.endDate || '—'}</b> арасы</div>
-                            <button onclick="saveSubscriptionSettings()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">Мерзімді сақтау</button>
+                            <button onclick="saveSubscriptionSettings()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Мерзімді сақтау</button>
                         </div>
 
-                        <div class="p-3 bg-green-50 border border-green-200 rounded mb-3 flex items-center gap-3">
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded mb-3 flex items-center gap-3">
                             <label class="text-xs font-bold text-slate-700">Сыныпты таңдаңыз:</label>
-                            <select id="admin-sub-class-select" onchange="renderAdminSubTable()" class="border rounded p-1.5 text-xs bg-white font-bold text-green-700">
+                            <select id="admin-sub-class-select" onchange="renderAdminSubTable()" class="border rounded p-1.5 text-xs bg-white font-bold text-blue-700">
                                 ${classOptions || '<option value="">Сыныптар жоқ</option>'}
                             </select>
                         </div>
@@ -1528,7 +1629,7 @@
                         <div class="p-4 bg-slate-50 rounded-lg border space-y-3 max-w-xl">
                             <textarea id="announcement-input" rows="4" class="w-full border rounded p-3 text-xs bg-white" placeholder="Барлық оқушылар мен мұғалімдерге хабарлама жазыңыз...">${currentAnnouncement}</textarea>
                             <div class="flex space-x-2">
-                                <button onclick="saveAnnouncement()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">📢 Жариялау</button>
+                                <button onclick="saveAnnouncement()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">📢 Жариялау</button>
                                 <button onclick="clearAnnouncement()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded text-xs font-bold">Өшіру</button>
                             </div>
                         </div>
@@ -1538,10 +1639,10 @@
                         <tr class="text-xs">
                             <td><b>@${t.from}</b> ${t.flagged ? '<span class="text-red-600 font-bold">[🚨 AI Security Violation]</span>' : ''}</td>
                             <td class="${t.flagged ? 'text-red-700 font-semibold bg-red-50' : ''}">${t.text}</td>
-                            <td><span class="text-green-600 font-bold">${t.reply || 'Жауап берілмеді'}</span></td>
+                            <td><span class="text-blue-600 font-bold">${t.reply || 'Жауап берілмеді'}</span></td>
                             <td>
                                 <input type="text" id="reply_${idx}" placeholder="Жауап жазу..." class="border rounded p-1 text-xs bg-white mr-1">
-                                <button onclick="replyTicket(${idx})" class="px-2 py-1 bg-green-600 text-white rounded font-bold text-[10px]">Жіберу</button>
+                                <button onclick="replyTicket(${idx})" class="px-2 py-1 bg-blue-600 text-white rounded font-bold text-[10px]">Жіберу</button>
                             </td>
                         </tr>
                     `).join('') : '<tr><td colspan="4" class="text-center text-slate-400">Қолдау сұраулары жоқ</td></tr>';
@@ -1558,13 +1659,13 @@
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📖 Электронды журнал (Тек сіздің сыныптағы оқушылар)</h3>
                         ${!myClass ? '<div class="p-4 bg-amber-50 text-amber-800 rounded text-xs mb-3 font-bold">⚠️ Назар аударыңыз: Сіз әлі сынып ашпадыңыз немесе әкімші сынып бекітпеді! «Сынып ашу» бөліміне өтіп сынып ашыңыз және DCA кодын оқушыларға беріңіз.</div>' : `
-                        <div class="p-3 bg-green-50 border border-green-200 rounded mb-3 text-xs text-green-900 font-bold flex justify-between items-center">
-                            <span>Сыныбыңыз: <b class="text-indigo-900">${myClass.name}</b> (Сынып жетекшісі: <span class="text-green-700">${myClass.teacher}</span>)</span>
-                            <span>DCA Коды: <code class="bg-white px-2 py-1 rounded text-green-700 font-extrabold border">${myClass.dcaCode}</code></span>
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded mb-3 text-xs text-blue-900 font-bold flex justify-between items-center">
+                            <span>Сыныбыңыз: <b class="text-indigo-900">${myClass.name}</b> (Сынып жетекшісі: <span class="text-blue-700">${myClass.teacher}</span>)</span>
+                            <span>DCA Коды: <code class="bg-white px-2 py-1 rounded text-blue-700 font-extrabold border">${myClass.dcaCode}</code></span>
                         </div>`}
                         <div class="p-3 bg-slate-50 rounded border mb-3 flex items-center gap-3">
                             <label class="text-xs font-bold uppercase text-slate-600">Пәнді таңдау:</label>
-                            <select id="selected-subject" onchange="updateSelectedSubject(this)" class="border rounded p-1.5 text-xs bg-white font-bold text-green-700">
+                            <select id="selected-subject" onchange="updateSelectedSubject(this)" class="border rounded p-1.5 text-xs bg-white font-bold text-blue-700">
                                 ${subjectsList.map(sub => `<option value="${sub}" ${sub === selectedTeacherSubject ? 'selected' : ''}>${sub}</option>`).join('')}
                             </select>
                         </div>
@@ -1588,14 +1689,14 @@
                                             <tr>
                                                 <td class="font-bold text-left">${s.name}</td>
                                                 <td><input type="text" id="form_${s.username}" class="w-16 text-center border rounded py-1" placeholder="9/10" value="${studentGrade.form}"></td>
-                                                <td><input type="text" id="bzhb_${s.username}" class="w-20 text-center border rounded py-1 font-bold text-green-600" placeholder="18/20" value="${studentGrade.bzhb}"></td>
+                                                <td><input type="text" id="bzhb_${s.username}" class="w-20 text-center border rounded py-1 font-bold text-blue-600" placeholder="18/20" value="${studentGrade.bzhb}"></td>
                                                 <td><input type="text" id="tzhb_${s.username}" class="w-20 text-center border rounded py-1 font-bold text-indigo-600" placeholder="27/30" value="${studentGrade.tzhb}"></td>
                                                 <td class="font-extrabold text-amber-600 text-center">${studentGrade.percent || 0}%</td>
                                                 <td>
                                                     <input type="text" id="final_${s.username}" class="w-16 text-center border rounded py-1 font-extrabold text-emerald-600" placeholder="5" value="${studentGrade.final}">
                                                 </td>
                                                 <td>
-                                                    <button onclick="calculateAndSaveGrade('${s.username}')" class="px-2.5 py-1 bg-green-600 text-white rounded font-bold text-[10px] mr-1">Сақтау</button>
+                                                    <button onclick="calculateAndSaveGrade('${s.username}')" class="px-2.5 py-1 bg-blue-600 text-white rounded font-bold text-[10px] mr-1">Сақтау</button>
                                                     <button onclick="deleteGradeRecord('${s.username}')" class="px-2.5 py-1 bg-red-100 text-red-600 rounded font-bold text-[10px]">Жою</button>
                                                 </td>
                                             </tr>
@@ -1617,7 +1718,7 @@
                                 <h4 class="text-xs font-bold text-slate-800 uppercase">1. Жаңа тест баптауы</h4>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-500 mb-1">Сыныпты таңдаңыз:</label>
-                                    <select id="test-class-select" class="w-full border rounded p-2 text-xs bg-white font-bold text-green-700">
+                                    <select id="test-class-select" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">
                                         ${myClassOptions || '<option value="">Сыныптар тіркелмеген</option>'}
                                     </select>
                                 </div>
@@ -1625,7 +1726,7 @@
                                     <label class="block text-[10px] font-bold text-slate-500 mb-1">Тест тақырыбы:</label>
                                     <input type="text" id="test-title-input" placeholder="Мысалы: Квадрат теңдеулер тоқсандық тесті" class="w-full border rounded p-2 text-xs bg-white">
                                 </div>
-                                <button onclick="startAddingQuestions()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-bold text-xs font-bold w-full">Сұрақтар қосуға өту ➔</button>
+                                <button onclick="startAddingQuestions()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs font-bold w-full">Сұрақтар қосуға өту ➔</button>
                             </div>
 
                             <div id="test-questions-builder" class="p-4 bg-slate-50 border rounded-xl space-y-3 hidden">
@@ -1662,7 +1763,7 @@
                                 return `
                                     <div class="p-3 bg-white border rounded-lg shadow-xs space-y-2">
                                         <div class="flex justify-between items-center border-b pb-1">
-                                            <span class="font-extrabold text-xs text-green-800">${t.title} <span class="text-slate-500 font-normal">(${t.className} сыныбы, ${t.questions.length} сұрақ)</span></span>
+                                            <span class="font-extrabold text-xs text-blue-900">${t.title} <span class="text-slate-500 font-normal">(${t.className} сыныбы, ${t.questions.length} сұрақ)</span></span>
                                             <button onclick="deleteBilimTest('${t.id}')" class="text-red-600 text-[10px] font-bold underline">Тестті жою</button>
                                         </div>
                                         <div class="overflow-x-auto">
@@ -1683,7 +1784,7 @@
                         
                         <div class="max-w-md mx-auto space-y-3">
                             <div id="qr-reader" class="w-full rounded-xl overflow-hidden border border-slate-300 shadow-inner bg-slate-100 min-h-[250px]"></div>
-                            <button onclick="startQRScanner()" class="w-full py-2 bg-green-600 text-white rounded font-bold text-xs shadow">📷 Камераны іске қосу</button>
+                            <button onclick="startQRScanner()" class="w-full py-2 bg-indigo-600 text-white rounded font-bold text-xs shadow">📷 Камераны іске қосу</button>
                             
                             <div id="scan-result-card" class="hidden p-4 rounded-xl border text-xs space-y-2 animate-fade"></div>
                         </div>
@@ -1714,7 +1815,7 @@
                                                 <td class="font-bold text-left">${s.name}</td>
                                                 <td><span class="font-bold">${attRecord}</span></td>
                                                 <td><select id="att_status_${s.username}" class="border rounded p-1 text-xs bg-white"><option value="-">Белгіленбеді (-)</option><option value="+">Қатысты (+)</option><option value="С">Себепті (С)</option><option value="А">Ауырып жатыр (А)</option></select></td>
-                                                <td><button onclick="saveAttendance('${s.username}')" class="px-3 py-1 bg-green-600 text-white rounded font-bold text-[10px]">Сақтау</button></td>
+                                                <td><button onclick="saveAttendance('${s.username}')" class="px-3 py-1 bg-blue-600 text-white rounded font-bold text-[10px]">Сақтау</button></td>
                                             </tr>
                                         `;
                                     }).join('') || '<tr><td colspan="4" class="text-center text-slate-400">Оқушылар жоқ (Алдымен сынып ашып, оқушыларды қосыңыз)</td></tr>'}
@@ -1728,13 +1829,13 @@
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">➕ Сынып ашу және DCA кодын алу</h3>
                         ${myClass ? `
                             <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg max-w-md space-y-2 mb-4">
-                                <div class="text-xs font-bold text-emerald-900">Сіздің сыныбыңыз: <span class="text-indigo-900 text-sm">${myClass.name}</span> (Сынып жетекшісі: <span class="text-green-700">${myClass.teacher}</span>)</div>
-                                <div class="text-xs font-bold text-emerald-900">Сыныптың DCA Коды: <code class="bg-white px-2 py-1 rounded border text-green-700 font-extrabold text-sm">${myClass.dcaCode}</code></div>
+                                <div class="text-xs font-bold text-emerald-900">Сіздің сыныбыңыз: <span class="text-indigo-900 text-sm">${myClass.name}</span> (Сынып жетекшісі: <span class="text-blue-700">${myClass.teacher}</span>)</div>
+                                <div class="text-xs font-bold text-emerald-900">Сыныптың DCA Коды: <code class="bg-white px-2 py-1 rounded border text-blue-700 font-extrabold text-sm">${myClass.dcaCode}</code></div>
                             </div>
                         ` : `
                             <div class="p-4 bg-slate-50 rounded-lg border max-w-md space-y-3">
-                                <input type="text" id="new-class-name" placeholder="Сынып аты (Мысалы: 8 «Г»)" class="w-full border rounded p-2 text-xs bg-white">
-                                <button onclick="createNewClass()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">Сыныпты тіркеу және DCA код генерациялау</button>
+                                <input type="text" id="new-class-name" placeholder="Сынып аты (Мысалы: 7 «Е»)" class="w-full border rounded p-2 text-xs bg-white">
+                                <button onclick="createNewClass()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Сыныпты тіркеу және DCA код генерациялау</button>
                             </div>
                         `}
                     `;
@@ -1747,17 +1848,17 @@
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📑 КТЖ (Күнтізбелік-тематикалық жоспарлау)</h3>
                         <div class="p-4 bg-slate-50 rounded-lg border max-w-lg space-y-3 mb-3">
                             <input type="text" id="ktp-title" placeholder="Тақырып / Бөлім атауы" class="w-full border rounded p-2 text-xs bg-white">
-                            <button onclick="saveKtp()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">КТЖ қосу</button>
+                            <button onclick="saveKtp()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">КТЖ қосу</button>
                         </div>
                         <ul class="list-disc pl-5 text-xs space-y-1">${ktpList.map(k => `<li>${k}</li>`).join('') || '<p class="text-slate-400">КТЖ жазбалары жоқ</p>'}</ul>
                     `;
                 } else if (activeTab === 'teacher_support') {
-                    let myTickets = supportTickets.filter(t => t.from === currentUser.username).map(t => `<div class="p-2 border-b text-xs"><b>Сіз:</b> ${t.text} <br><span class="text-green-600"><b>Әкімші жауабы:</b> ${t.reply || 'Күтуде...'}</span></div>`).join('');
+                    let myTickets = supportTickets.filter(t => t.from === currentUser.username).map(t => `<div class="p-2 border-b text-xs"><b>Сіз:</b> ${t.text} <br><span class="text-blue-600"><b>Әкімші жауабы:</b> ${t.reply || 'Күтуде...'}</span></div>`).join('');
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🛟 Қолдау қызметі (Әкімшіге хат жазу)</h3>
                         <div class="p-4 bg-slate-50 rounded-lg border max-w-lg space-y-3 mb-4">
                             <textarea id="support-msg" rows="3" class="w-full border rounded p-2 text-xs bg-white" placeholder="Техникалық сұрақ немесе көмек туралы жазыңыз..."></textarea>
-                            <button onclick="sendSupportMessage()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">Өтініш жіберу</button>
+                            <button onclick="sendSupportMessage()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Өтініш жіберу</button>
                         </div>
                         <div class="bg-white border rounded p-3 max-h-40 overflow-y-auto">${myTickets || '<p class="text-xs text-slate-400">Өтініштер жоқ</p>'}</div>
                     `;
@@ -1790,7 +1891,7 @@
 
                     panel.innerHTML = `
                         <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-3 text-xs text-amber-900 font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                            <span>👨‍👩‍👧 Бала: <b class="text-indigo-900 text-sm">${childName}</b> | Сыныбы: <span class="text-green-700">${classNameStr}</span> | Сынып жетекшісі: <span class="text-purple-800 underline">${classTeacherStr} (Бекітілген тұрақты/уақытша)</span></span>
+                            <span>👨‍👩‍👧 Бала: <b class="text-indigo-900 text-sm">${childName}</b> | Сыныбы: <span class="text-blue-700">${classNameStr}</span> | Сынып жетекшісі: <span class="text-purple-800 underline">${classTeacherStr}</span></span>
                             <span class="bg-white px-2 py-1 rounded border text-emerald-700 font-extrabold">Қатысуы: [ ${childAtt} ]</span>
                         </div>
                         <div class="overflow-x-auto">
@@ -1826,8 +1927,8 @@
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📜 BilimSubscription — Сабаққа қатысу табельін растау</h3>
                         
                         <div class="p-4 bg-slate-50 border rounded-xl max-w-lg space-y-3">
-                            <div class="text-xs font-bold text-slate-800">Бала: <span class="text-green-700">${childName}</span> (${classNameStr})</div>
-                            <div class="text-xs text-slate-600 p-2 bg-green-50 border border-green-200 rounded">
+                            <div class="text-xs font-bold text-slate-800">Бала: <span class="text-blue-700">${childName}</span> (${classNameStr})</div>
+                            <div class="text-xs text-slate-600 p-2 bg-blue-50 border border-blue-200 rounded">
                                 Әкімші бекіткен қол қою мерзімі: <br><b>${startWin || 'Бекітілмеген'}</b> мен <b>${endWin || 'Бекітілмеген'}</b> арасы.
                             </div>
                             
@@ -1856,12 +1957,12 @@
                 } else if (activeTab === 'parent_schedule') {
                     panel.innerHTML = renderScheduleView("📅 Баланың сабақ кестесі", classNameStr);
                 } else if (activeTab === 'parent_support') {
-                    let myTickets = supportTickets.filter(t => t.from === currentUser.username).map(t => `<div class="p-2 border-b text-xs"><b>Сіз:</b> ${t.text} <br><span class="text-green-600"><b>Әкімші жауабы:</b> ${t.reply || 'Күтуде...'}</span></div>`).join('');
+                    let myTickets = supportTickets.filter(t => t.from === currentUser.username).map(t => `<div class="p-2 border-b text-xs"><b>Сіз:</b> ${t.text} <br><span class="text-blue-600"><b>Әкімші жауабы:</b> ${t.reply || 'Күтуде...'}</span></div>`).join('');
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🛟 Мектеп әкімшілігіне хат жазу</h3>
                         <div class="p-4 bg-slate-50 rounded-lg border max-w-lg space-y-3 mb-4">
                             <textarea id="stud-support-msg" rows="3" class="w-full border rounded p-2 text-xs bg-white" placeholder="Сұрағыңызды жазыңыз..."></textarea>
-                            <button onclick="sendSupportMessage()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">Жіберу</button>
+                            <button onclick="sendSupportMessage()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Жіберу</button>
                         </div>
                         <div class="bg-white border rounded p-3 max-h-40 overflow-y-auto">${myTickets || '<p class="text-xs text-slate-400">Өтініштер жоқ</p>'}</div>
                     `;
@@ -1876,7 +1977,7 @@
                             <div class="p-6 text-center space-y-3">
                                 <div class="text-amber-600 font-bold text-sm">⚠️ Сіз әлі ешқандай сыныпқа қосылмадыңыз!</div>
                                 <p class="text-xs text-slate-500">Бағаларыңызды көру үшін «🔑 DCA кодпен қосылу» бөліміне өтіп, мұғалім берген кодты енгізіңіз.</p>
-                                <button onclick="switchTab('student_join')" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">Сыныпқа қосылуға өту</button>
+                                <button onclick="switchTab('student_join')" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Сыныпқа қосылуға өту</button>
                             </div>
                         `;
                         return;
@@ -1900,8 +2001,8 @@
                             <h3 class="text-sm font-extrabold text-slate-900">📊 Менің бағаларым</h3>
                             <button onclick="downloadPDFReport()" class="px-3 py-1.5 bg-indigo-600 text-white rounded text-xs font-bold shadow-xs">📥 PDF жүктеу</button>
                         </div>
-                        <div class="p-3 bg-green-50 border border-green-200 rounded-lg mb-3 text-xs text-green-900 font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                            <span>Сыныбыңыз: <b class="text-indigo-900 text-sm">${studentClass.name}</b> | Сынып жетекшісі: <b class="text-green-700 underline">${studentClass.teacher} (Бекітілген жетекші)</b></span>
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-3 text-xs text-blue-900 font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                            <span>Сыныбыңыз: <b class="text-indigo-900 text-sm">${studentClass.name}</b> | Сынып жетекшісі: <b class="text-blue-700 underline">${studentClass.teacher}</b></span>
                             <span>Бүгінгі қатысу: <span class="text-emerald-700 font-extrabold text-sm">[ ${myAtt} ]</span></span>
                         </div>
                         <div class="overflow-x-auto">
@@ -1924,14 +2025,14 @@
                                     return `
                                         <div class="p-4 bg-slate-50 border rounded-xl flex justify-between items-center">
                                             <div>
-                                                <h4 class="text-xs font-extrabold text-green-800">${t.title}</h4>
+                                                <h4 class="text-xs font-extrabold text-blue-900">${t.title}</h4>
                                                 <p class="text-[10px] text-slate-500">Сұрақ саны: ${t.questions.length} | Мұғалім: @${t.author}</p>
                                             </div>
                                             <div>
                                                 ${myRes ? `
                                                     <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded border border-emerald-200">Нәтиже: ${myRes.correctCount}/${t.questions.length} | Ұсынылған баға: ${myRes.suggestedGrade} / 10 балл</span>
                                                 ` : `
-                                                    <button onclick="startStudentTest('${t.id}')" class="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded shadow">▶ Start Тест</button>
+                                                    <button onclick="startStudentTest('${t.id}')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded shadow">▶ Start Тест</button>
                                                 `}
                                             </div>
                                         </div>
@@ -1950,7 +2051,23 @@
                     let targetClassName = studentClass ? studentClass.name : '';
                     panel.innerHTML = renderScheduleView("📅 Менің сабақ кестем", targetClassName);
                 } else if (activeTab === 'student_homework') {
-                    panel.innerHTML = `<h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📚 Үй тапсырмалары</h3><p class="text-xs text-slate-500">Мұғалімдер берген үй тапсырмалары осында көрінеді.</p>`;
+                    let targetClassName = studentClass ? studentClass.name : '';
+                    let filteredSchedules = targetClassName ? schedules.filter(s => s.className === targetClassName) : [];
+                    let hwRows = filteredSchedules.length > 0 ? filteredSchedules.map(s => `
+                        <div class="p-3 bg-white border rounded-lg shadow-xs space-y-1">
+                            <div class="flex justify-between items-center text-xs">
+                                <b class="text-blue-900">${s.subject}</b>
+                                <span class="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${s.day || 'Дүйсенбі'}</span>
+                            </div>
+                            <div class="text-xs text-slate-700"><b>Тақырыбы:</b> ${s.topic || 'Көрсетілмеген'}</div>
+                            <div class="text-xs text-emerald-800 bg-emerald-50 p-2 rounded border border-emerald-200"><b>📚 Үй тапсырмасы:</b> ${s.homework || 'Үй жұмысы берілмеді'}</div>
+                        </div>
+                    `).join('') : '<p class="text-xs text-slate-400">Үй тапсырмалары тіркелмеген.</p>';
+
+                    panel.innerHTML = `
+                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📚 Үй тапсырмалары</h3>
+                        <div class="space-y-3 max-w-2xl">${hwRows}</div>
+                    `;
                 } else if (activeTab === 'student_contact') {
                     panel.innerHTML = `<h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💬 Мұғаліммен байланыс</h3><p class="text-xs text-slate-500">Мұғалімдермен хат алмасу модулі қосылды.</p>`;
                 } else if (activeTab === 'student_join') {
@@ -1959,16 +2076,16 @@
                         <div class="p-4 bg-slate-50 rounded-lg border max-w-md space-y-3">
                             <p class="text-xs text-slate-600">Мұғаліміңізден алған <b>DCA кодын</b> енгізіп, сыныпқа қосылыңыз:</p>
                             <input type="text" id="dca-code-input" placeholder="Мысалы: DCA-7482" class="border rounded p-2 text-xs w-full bg-white font-bold uppercase">
-                            <button onclick="joinClassByDCA()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold w-full">Сыныпқа қосылу</button>
+                            <button onclick="joinClassByDCA()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold w-full">Сыныпқа қосылу</button>
                         </div>
                     `;
                 } else if (activeTab === 'student_support') {
-                    let myTickets = supportTickets.filter(t => t.from === currentUser.username).map(t => `<div class="p-2 border-b text-xs"><b>Сіз:</b> ${t.text} <br><span class="text-green-600"><b>Әкімші жауабы:</b> ${t.reply || 'Күтуде...'}</span></div>`).join('');
+                    let myTickets = supportTickets.filter(t => t.from === currentUser.username).map(t => `<div class="p-2 border-b text-xs"><b>Сіз:</b> ${t.text} <br><span class="text-blue-600"><b>Әкімші жауабы:</b> ${t.reply || 'Күтуде...'}</span></div>`).join('');
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🛟 Қолдау қызметі (Әкімшіге хат жазу)</h3>
                         <div class="p-4 bg-slate-50 rounded-lg border max-w-lg space-y-3 mb-4">
                             <textarea id="stud-support-msg" rows="3" class="w-full border rounded p-2 text-xs bg-white" placeholder="Сұрағыңызды жазыңыз..."></textarea>
-                            <button onclick="sendSupportMessage()" class="px-4 py-2 bg-green-600 text-white rounded text-xs font-bold">Өтініш жіберу</button>
+                            <button onclick="sendSupportMessage()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Өтініш жіберу</button>
                         </div>
                         <div class="bg-white border rounded p-3 max-h-40 overflow-y-auto">${myTickets || '<p class="text-xs text-slate-400">Өтініштер жоқ</p>'}</div>
                     `;
@@ -2148,7 +2265,7 @@
                 <div class="max-w-sm mx-auto id-card-gradient text-white p-5 rounded-2xl shadow-2xl relative border border-blue-400/30 space-y-4">
                     <div class="flex justify-between items-center border-b border-blue-400/30 pb-3">
                         <div class="flex items-center space-x-2">
-                            <div class="w-7 h-7 rounded bg-green-600 text-white font-black flex items-center justify-center text-xs">i</div>
+                            <div class="w-7 h-7 rounded bg-white text-blue-900 font-black flex items-center justify-center text-xs">BA</div>
                             <div>
                                 <div class="text-[10px] font-extrabold uppercase tracking-wider text-blue-200">${cardData.school}</div>
                                 <div class="text-[8px] text-slate-300">БІРЫҢҒАЙ ЦИФРЛЫҚ ИДЕНТИФИКАТОР</div>
@@ -2246,6 +2363,37 @@
             }
         }
 
+        async function saveBilimLimit() {
+            showSpinner("Шектеу сақталуда...");
+            let startVal = document.getElementById('limit-start-datetime').value;
+            let endVal = document.getElementById('limit-end-datetime').value;
+            let reasonVal = document.getElementById('limit-reason-input').value.trim();
+
+            if(!startVal || !endVal) {
+                hideSpinner();
+                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын енгізіңіз!");
+                return;
+            }
+
+            bilimLimitSettings.startDate = startVal.replace(/-/g, '/').replace('T', '-');
+            bilimLimitSettings.endDate = endVal.replace(/-/g, '/').replace('T', '-');
+            bilimLimitSettings.reason = reasonVal || 'Әкімшілік шектеу';
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "BilimLimit сәтті бекітілді!");
+            renderTabContent();
+        }
+
+        async function clearBilimLimit() {
+            showSpinner("Шектеу алынуда...");
+            bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "BilimLimit алынып тасталды.");
+            renderTabContent();
+        }
+
         function startAddingQuestions() {
             let title = document.getElementById('test-title-input').value.trim();
             if(!title) {
@@ -2335,7 +2483,7 @@
 
             let questionsHTML = test.questions.map((q, idx) => `
                 <div class="p-4 bg-white border rounded-xl space-y-2">
-                    <div class="font-bold text-xs text-green-800">Сұрақ ${idx + 1}: ${q.q}</div>
+                    <div class="font-bold text-xs text-blue-900">Сұрақ ${idx + 1}: ${q.q}</div>
                     <div class="space-y-1 text-xs">
                         ${q.options.map((opt, oIdx) => opt ? `
                             <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 border cursor-pointer">
@@ -2349,8 +2497,8 @@
 
             document.getElementById('student-test-view').innerHTML = `
                 <div class="space-y-4 max-w-2xl mx-auto">
-                    <div class="p-3 bg-green-50 border rounded-lg flex justify-between items-center">
-                        <span class="font-extrabold text-xs text-green-900">${test.title}</span>
+                    <div class="p-3 bg-blue-50 border rounded-lg flex justify-between items-center">
+                        <span class="font-extrabold text-xs text-blue-900">${test.title}</span>
                         <span class="text-xs font-bold text-slate-500">Барлық сұрақ: ${test.questions.length}</span>
                     </div>
                     ${questionsHTML}
@@ -2449,7 +2597,7 @@
                         <td>${statusStr}</td>
                         <td>
                             <button onclick="setStudentSubStatus('${s.username}', 'expelled')" class="px-2 py-1 bg-red-600 text-white rounded font-bold text-[10px] mr-1">Сыныптан босату</button>
-                            <button onclick="setStudentSubStatus('${s.username}', 'normal')" class="px-2 py-1 bg-green-600 text-white rounded font-bold text-[10px]">Сыныпта қалдыру</button>
+                            <button onclick="setStudentSubStatus('${s.username}', 'normal')" class="px-2 py-1 bg-blue-600 text-white rounded font-bold text-[10px]">Сыныпта қалдыру</button>
                         </td>
                     </tr>
                 `;
@@ -2545,22 +2693,36 @@
 
         function renderScheduleView(panelTitle, targetClassName) {
             let dayButtonsHTML = daysList.map(d => `
-                <button onclick="switchScheduleDay('${d}')" class="px-3 py-1.5 rounded text-xs font-bold transition-all day-tab-btn ${activeScheduleDay === d ? '' : 'inactive'}">${d}</button>
+                <button onclick="switchScheduleDay('${d}')" class="px-3 py-1.5 rounded text-xs font-bold transition-all ${activeScheduleDay === d ? 'bg-blue-600 text-white shadow' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}">${d}</button>
             `).join('');
 
             let filteredSchedules = targetClassName ? schedules.filter(s => s.className === targetClassName && (s.day || 'Дүйсенбі') === activeScheduleDay) : [];
 
-            let rows = filteredSchedules.length > 0 ? filteredSchedules.map(s => `<tr><td><b>${s.className}</b></td><td>${s.subject}</td><td>${s.time}</td></tr>`).join('') : '<tr><td colspan="3" class="text-center text-slate-400 py-4">Бұл сыныпқа бұл күнге сабақ кестесі бекітілмеген</td></tr>';
+            // Find teacher name for each subject
+            let classObj = classesList.find(c => c.name === targetClassName);
+            let teacherNameStr = classObj ? classObj.teacher : 'Мұғалім';
+
+            let rows = filteredSchedules.length > 0 ? filteredSchedules.map(s => `
+                <tr>
+                    <td><b>${s.className}</b></td>
+                    <td>
+                        <div class="font-bold text-blue-900">${s.subject}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">👨‍🏫 Мұғалім: <b>${teacherNameStr}</b></div>
+                    </td>
+                    <td><b>${s.topic || 'Көрсетілмеген'}</b></td>
+                    <td><span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold">${s.homework || 'Жоқ'}</span></td>
+                    <td>${s.time}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="text-center text-slate-400 py-4">Бұл сыныпқа бұл күнге сабақ кестесі бекітілмеген</td></tr>';
 
             return `
-                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${panelTitle} ${targetClassName ? `(Сыныбы: <span class="text-green-700">${targetClassName}</span>)` : ''}</h3>
+                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${panelTitle} ${targetClassName ? `(Сыныбы: <span class="text-blue-700">${targetClassName}</span>)` : ''}</h3>
                 <div class="flex gap-2 mb-4 overflow-x-auto pb-1">
                     ${dayButtonsHTML}
-                    <button onclick="showIosToast(true, 'Кесте', 'Келесі апта жүктелуде...')" class="px-3 py-1.5 rounded text-xs font-bold bg-slate-200 text-slate-700 hover:bg-slate-300">Келесі апта ></button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full gov-table">
-                        <thead><tr><th>Сынып</th><th>Пән</th><th>Уақыты / Сабақ реті</th></tr></thead>
+                        <thead><tr><th>Сынып</th><th>Пән және Мұғалім</th><th>Сабақ тақырыбы</th><th>Үй тапсырмасы</th><th>Уақыты</th></tr></thead>
                         <tbody>${rows}</tbody>
                     </table>
                 </div>
@@ -2588,24 +2750,24 @@
                             <p class="text-[10px] text-slate-300">${aiDesc}</p>
                         </div>
                         <div class="flex items-center gap-1 text-[10px]">
-                            <button onclick="setAIMode('${aiName}', 'auto')" class="px-2 py-1 rounded font-bold ${currentMode === 'auto' ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-300'}">Auto</button>
+                            <button onclick="setAIMode('${aiName}', 'auto')" class="px-2 py-1 rounded font-bold ${currentMode === 'auto' ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-300'}">Auto</button>
                             <button onclick="setAIMode('${aiName}', 'think_hard')" class="px-2 py-1 rounded font-bold ${currentMode === 'think_hard' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300'}">Think Hard</button>
                             <button onclick="setAIMode('${aiName}', 'search')" class="px-2 py-1 rounded font-bold ${currentMode === 'search' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300'}">Search</button>
                         </div>
                     </div>
                     <div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs bg-white">
-                        <div class="p-3 bg-green-50 border border-green-200 rounded-lg text-green-900 leading-relaxed">
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 leading-relaxed">
                             <b>🤖 ${aiName}:</b> Сәлеметсіз бе, ${currentUser.name}! Мен сіздің жеке интеллектуалды көмекшіңізбін. Жүйедегі нақты деректерді талдап, кез келген сұрағыңызға жан-жақты жауап беремін!
                         </div>
                         ${history.map(m => `
-                            <div class="p-3 rounded-lg leading-relaxed ${m.sender === 'user' ? 'bg-slate-100 text-slate-800 ml-8' : 'bg-green-50 border border-green-200 text-green-950 mr-8'}">
+                            <div class="p-3 rounded-lg leading-relaxed ${m.sender === 'user' ? 'bg-slate-100 text-slate-800 ml-8' : 'bg-indigo-50 border border-indigo-200 text-indigo-950 mr-8'}">
                                 <b>${m.sender === 'user' ? 'Сіз' : aiName}:</b> ${m.text}
                             </div>
                         `).join('')}
                     </div>
                     <div class="p-3 bg-slate-100 border-t flex gap-2">
-                        <input type="text" id="ai-input-msg" placeholder="${aiName}-ке сұрағыңызды толық жазыңыз..." class="flex-1 border rounded px-3 py-2 text-xs bg-white focus:outline-none focus:border-green-600" onkeydown="if(event.key==='Enter') sendAIMessage('${aiName}')">
-                        <button onclick="sendAIMessage('${aiName}')" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-bold text-xs transition-all">Жіберу</button>
+                        <input type="text" id="ai-input-msg" placeholder="${aiName}-ке сұрағыңызды толық жазыңыз..." class="flex-1 border rounded px-3 py-2 text-xs bg-white focus:outline-none focus:border-blue-600" onkeydown="if(event.key==='Enter') sendAIMessage('${aiName}')">
+                        <button onclick="sendAIMessage('${aiName}')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs transition-all">Жіберу</button>
                     </div>
                 </div>
             `;
@@ -2816,16 +2978,18 @@
             let className = document.getElementById('sched-class').value;
             let day = document.getElementById('sched-day').value;
             let subject = document.getElementById('sched-subject').value;
+            let topic = document.getElementById('sched-topic').value.trim();
+            let homework = document.getElementById('sched-hw').value.trim();
             let time = document.getElementById('sched-time').value.trim();
             if(!className || !time) {
-                showIosToast(false, "Сәтсіз!", "Барлық өрістерді толтырыңыз!");
+                showIosToast(false, "Сәтсіз!", "Сынып пен уақытты толтырыңыз!");
                 return;
             }
             showSpinner("Кесте бекітілуде...");
-            schedules.push({ className, day, subject, time });
+            schedules.push({ className, day, subject, topic, homework, time });
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Сабақ кестесі бекітілді!");
+            showIosToast(true, "Сәтті!", "Сабақ кестесі, тақырыбы және үй тапсырмасы сақталды!");
             renderTabContent();
         }
 
@@ -3029,15 +3193,15 @@
         }
 
         function downloadPDFReport() {
-            let content = `BILIMCLASS ENTERPRISE CLOUD - OFFICIAL REPORT\nOqushy: ${currentUser.name}\nDate: ${new Date().toLocaleDateString()}\n-------------------------------------\n`;
+            let content = `BILIMAL ENTERPRISE CLOUD - OFFICIAL REPORT\nOqushy: ${currentUser.name}\nDate: ${new Date().toLocaleDateString()}\n-------------------------------------\n`;
             let myGrades = grades[currentUser.username] || {};
-            for(let sub in myGrades) {
-                content += `Pan: ${sub} | Format: ${myGrades[sub]?.form || ''} | BZHB: ${myGrades[sub]?.bzhb || ''} | TZHB: ${myGrades[sub]?.tzhb || ''} | Payiz: ${myGrades[sub]?.percent || 0}% | Qorytyndy: ${myGrades[sub]?.final || ''}\n`;
+            for(let sub in myGrgrades) {
+                content += `Pan: ${sub} | Format: ${myGrades[sub]?.form || ''} | BZHB: ${myGrades[sub]?.bzhb || ''} | TZHB: ${myGrades[sub]?.tzhb || ''} | Payiz: ${myGrades[sub]?.percent || 0}% | Qorytyndy: ${myGrgrades[sub]?.final || ''}\n`;
             }
             let blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             let link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `BilimClass_Report_${currentUser.username}.txt`;
+            link.download = `BilimAL_Report_${currentUser.username}.txt`;
             link.click();
             showIosToast(true, "Сәтті!", "Тоқсандық есеп файл түрінде жүктелді!");
         }
