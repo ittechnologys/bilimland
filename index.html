@@ -48,22 +48,11 @@
         .id-card-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); }
 
         #ios-toast-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 999999;
-            width: 90%;
-            max-width: 400px;
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px);
+            opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 999999; width: 90%; max-width: 400px;
         }
-        #ios-toast-container.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-            visibility: visible;
-        }
+        #ios-toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; }
     </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
@@ -90,9 +79,7 @@
                 <div class="text-xs font-bold text-slate-500 uppercase tracking-widest">BilimAL</div>
                 <div class="text-base font-extrabold text-blue-900 tracking-tight mt-0.5">Enterprise Platform</div>
             </div>
-            <div class="gov-loader-bar mx-auto">
-                <div class="gov-loader-progress"></div>
-            </div>
+            <div class="gov-loader-bar mx-auto"><div class="gov-loader-progress"></div></div>
             <div class="text-[10px] text-slate-400 font-medium pt-1">Жүйе жүктелуде...</div>
         </div>
     </div>
@@ -123,7 +110,6 @@
 
     <div class="flex-1 max-w-[1400px] w-full mx-auto p-3 md:p-4 flex flex-col">
         <div id="login-section" class="w-full max-w-4xl mx-auto my-auto space-y-6 animate-fade">
-            <!-- Decorative aesthetic elements on login screen -->
             <div class="flex justify-center items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest pb-1">
                 <span class="px-3 py-1 bg-white border rounded-full shadow-xs flex items-center gap-1.5">📖 Кітап</span>
                 <span class="px-3 py-1 bg-white border rounded-full shadow-xs flex items-center gap-1.5">📔 Дәптер</span>
@@ -225,11 +211,9 @@
             <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-3">📱</div>
             <h3 class="text-base font-extrabold text-slate-900">BilimWeb QR арқылы кіру</h3>
             <p class="text-xs text-slate-500 mt-1 mb-4">Телефоныңызбен сканерлеп, аккаунтты таңдаңыз, парольді енгізіп биометриямен растаңыз</p>
-            
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 inline-block mb-4">
                 <img id="bilimweb-qr-img" src="" alt="QR Code" class="w-48 h-48 mx-auto rounded-lg shadow-sm border border-slate-200" />
             </div>
-
             <div class="text-xs text-indigo-600 font-bold animate-pulse mb-4">⏳ Телефон арқылы растау күтілуде...</div>
             <button type="button" onclick="closeBilimWebQRModal()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs transition-all">Болдырмау</button>
         </div>
@@ -242,18 +226,14 @@
                 <h3 class="text-lg font-extrabold text-slate-900">BilimWeb Авторизациясы</h3>
                 <p class="text-xs text-slate-500 mt-1">Үлкен экранға қосылу үшін аккаунтты таңдаңыз, парольді жазыңыз және биометрия арқылы растаңыз</p>
             </div>
-
             <div>
                 <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Аккаунтты таңдаңыз:</label>
-                <select id="bilimweb-account-select" class="w-full border border-slate-300 rounded p-2.5 text-xs bg-slate-50 font-bold text-blue-700 focus:outline-none focus:border-indigo-600">
-                </select>
+                <select id="bilimweb-account-select" class="w-full border border-slate-300 rounded p-2.5 text-xs bg-slate-50 font-bold text-blue-700 focus:outline-none focus:border-indigo-600"></select>
             </div>
-
             <div>
                 <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Қосымша растау (Пароль):</label>
                 <input type="password" id="bilimweb-confirm-password" placeholder="Аккаунт паролін енгізіңіз..." class="w-full border border-slate-300 rounded p-2.5 text-xs bg-slate-50 focus:outline-none focus:border-indigo-600">
             </div>
-
             <button type="button" onclick="confirmMobileQRLogin()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-xs shadow transition-all flex items-center justify-center gap-2">
                 <span>🔒</span> Пароль + Биометрия арқылы растау
             </button>
@@ -363,9 +343,7 @@
             descElem.innerText = desc || "";
             container.classList.add('show');
 
-            iosToastTimer = setTimeout(() => {
-                container.classList.remove('show');
-            }, 3500);
+            iosToastTimer = setTimeout(() => { container.classList.remove('show'); }, 3500);
         }
 
         function getCurrentFormattedDateTime() {
@@ -391,165 +369,58 @@
         const translations = {
             kk: {
                 subtitle: "Бірыңғай мектеп журналы және платформа",
-                loginTitle: "Жүйеге кіру",
-                loginSub: "BilimAL электронды журналы",
-                userLbl: "Логин",
-                passLbl: "Пароль",
-                loginBtn: "Кіру",
-                logoutBtn: "Шығу",
-                menuTitle: "Басқару панелі",
+                loginTitle: "Жүйеге кіру", loginSub: "BilimAL электронды журналы",
+                userLbl: "Логин", passLbl: "Пароль", loginBtn: "Кіру", logoutBtn: "Шығу", menuTitle: "Басқару панелі",
                 footer: "BilimAL Enterprise Cloud © 2026. Барлық құқықтар қорғалған.",
-                adminMon: "📊 Мониторинг",
-                adminSanc: "🛡️ Moderations & Sanctions",
-                adminSched: "📅 Сабақ кестесі",
-                adminUsers: "👥 Логин/парольдер & Ата-ана",
-                adminAnn: "📢 Хабарландыру",
-                adminNews: "📰 Жаңалықтар",
-                adminLive: "🔴 AutoLIVE Мониторинг",
-                adminSupport: "🛟 Қолдау кірістері",
-                adminAI: "🤖 Admin-GPT",
-                adminBilimID: "🪪 BilimID Басқару",
-                adminLimit: "⏳ BilimLimit (Шектеу)",
-                adminSub: "📜 BilimSubscription (Табельдер)",
-                teachJorn: "📖 Бағалар журналы",
-                teachAtt: "📋 Қатысу журналы",
-                teachClass: "➕ Сынып ашу (DCA)",
-                teachSched: "📅 Сабақ кестесі",
-                teachNews: "📰 Жаңалықтар",
-                teachLive: "🔴 AutoLIVE Студия",
-                teachKtp: "📑 КТЖ (Күнтізбелік жоспар)",
-                teachSup: "🛟 Қолдау қызметі",
-                teachAI: "🤖 TeachGPT",
-                teachTest: "📝 BilimTest (Тест)",
-                teachCheckID: "🔍 CheckID (Камера)",
-                teachID: "🪪 Менің BilimID-ім",
-                studGrades: "📊 Менің бағаларым",
-                studSched: "📅 Менің кестем",
-                studHw: "📚 Үй тапсырмасы",
-                studNews: "📰 Жаңалықтар",
-                studLive: "🔴 AutoLIVE Сабақтар",
-                studContact: "💬 Мұғаліммен байланыс",
-                studJoin: "🔑 DCA кодпен қосылу",
-                studSup: "🛟 Қолдау",
-                studAI: "🤖 Study-GPT",
-                studTest: "📝 BilimTest Тапсыру",
-                studID: "🪪 Менің BilimID-ім",
-                parentGrades: "👨‍👩‍👧 Баланың бағалары",
-                parentSched: "📅 Баланың кестесі",
-                parentNews: "📰 Жаңалықтар",
-                parentLive: "🔴 AutoLIVE Сабақтар",
-                parentSupport: "🛟 Қолдау қызметі",
-                parentID: "🪪 Баланың BilimID-і",
-                parentSub: "📜 BilimSubscription (Табель қол қою)",
-                sessionsTab: "💻 Белсенді сеанстар"
+                adminMon: "📊 Мониторинг", adminSanc: "🛡️ Moderations & Sanctions", adminSched: "📅 Сабақ кестесі",
+                adminUsers: "👥 Логин/парольдер & Ата-ана", adminAnn: "📢 Хабарландыру", adminNews: "📰 Жаңалықтар",
+                adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Қолдау кірістері", adminAI: "🤖 Admin-GPT",
+                adminBilimID: "🪪 BilimID Басқару", adminLimit: "⏳ BilimLimit (Шектеу)", adminSub: "📜 BilimSubscription (Табельдер)",
+                teachJorn: "📖 Бағалар журналы", teachAtt: "📋 Қатысу журналы", teachClass: "➕ Сынып ашу (DCA)",
+                teachSched: "📅 Сабақ кестесі", teachNews: "📰 Жаңалықтар", teachLive: "🔴 AutoLIVE Студия",
+                teachKtp: "📑 КТЖ (Күнтізбелік жоспар)", teachSup: "🛟 Қолдау қызметі", teachAI: "🤖 TeachGPT",
+                teachTest: "📝 BilimTest (Тест)", teachCheckID: "🔍 CheckID (Камера)", teachID: "🪪 Менің BilimID-ім",
+                studGrades: "📊 Менің бағаларым", studSched: "📅 Менің кестем", studHw: "📚 Үй тапсырмасы",
+                studNews: "📰 Жаңалықтар", studLive: "🔴 AutoLIVE Сабақтар", studContact: "💬 Мұғаліммен байланыс",
+                studJoin: "🔑 DCA кодпен қосылу", studSup: "🛟 Қолдау", studAI: "🤖 Study-GPT", studTest: "📝 BilimTest Тапсыру",
+                studID: "🪪 Менің BilimID-ім", parentGrades: "👨‍👩‍👧 Баланың бағалары", parentSched: "📅 Баланың кестесі",
+                parentNews: "📰 Жаңалықтар", parentLive: "🔴 AutoLIVE Сабақтар", parentSupport: "🛟 Қолдау қызметі",
+                parentID: "🪪 Баланың BilimID-і", parentSub: "📜 BilimSubscription (Табель қол қою)", sessionsTab: "💻 Белсенді сеанстар"
             },
             ru: {
-                subtitle: "Единая школьная система и платформа",
-                loginTitle: "Вход в систему",
-                loginSub: "Электронный журнал BilimAL",
-                userLbl: "Логин",
-                passLbl: "Пароль",
-                loginBtn: "Войти",
-                logoutBtn: "Выйти",
-                menuTitle: "Панель управления",
+                subtitle: "Единая школьная система и платформа", loginTitle: "Вход в систему", loginSub: "Электронный журнал BilimAL",
+                userLbl: "Логин", passLbl: "Пароль", loginBtn: "Войти", logoutBtn: "Выйти", menuTitle: "Панель управления",
                 footer: "BilimAL Enterprise Cloud © 2026. Все права защищены.",
-                adminMon: "📊 Мониторинг",
-                adminSanc: "🛡️ Модерация и санкции",
-                adminSched: "📅 Расписание",
-                adminUsers: "👥 Пользователи и Родители",
-                adminAnn: "📢 Объявления",
-                adminNews: "📰 Новости",
-                adminLive: "🔴 AutoLIVE Мониторинг",
-                adminSupport: "🛟 Входящие тикеты",
-                adminAI: "🤖 Admin-GPT",
-                adminBilimID: "🪪 Управление BilimID",
-                adminLimit: "⏳ BilimLimit (Лимиты)",
-                adminSub: "📜 BilimSubscription (Табели)",
-                teachJorn: "📖 Журнал оценок",
-                teachAtt: "📋 Посещаемость",
-                teachClass: "➕ Создать класс (DCA)",
-                teachSched: "📅 Расписание",
-                teachNews: "📰 Новости",
-                teachLive: "🔴 AutoLIVE Студия",
-                teachKtp: "📑 КТП",
-                teachSup: "🛟 Поддержка",
-                teachAI: "🤖 TeachGPT",
-                teachTest: "📝 BilimTest (Тесты)",
-                teachCheckID: "🔍 CheckID (Камера)",
-                teachID: "🪪 Мой BilimID",
-                studGrades: "📊 Мои оценки",
-                studSched: "📅 Мое расписание",
-                studHw: "📚 Домашка",
-                studNews: "📰 Новости",
-                studLive: "🔴 AutoLIVE Уроки",
-                studContact: "💬 Связь с учителем",
-                studJoin: "🔑 Вступить по DCA коду",
-                studSup: "🛟 Поддержка",
-                studAI: "🤖 Study-GPT",
-                studTest: "📝 Пройти BilimTest",
-                studID: "🪪 Мой BilimID",
-                parentGrades: "👨‍👩‍👧 Оценки ребенка",
-                parentSched: "📅 Расписание ребенка",
-                parentNews: "📰 Новости",
-                parentLive: "🔴 AutoLIVE Уроки",
-                parentSupport: "🛟 Поддержка",
-                parentID: "🪪 BilimID ребенка",
-                parentSub: "📜 BilimSubscription (Подпись)",
-                sessionsTab: "💻 Активные сеансы"
+                adminMon: "📊 Мониторинг", adminSanc: "🛡️ Модерация и санкции", adminSched: "📅 Расписание",
+                adminUsers: "👥 Пользователи и Родители", adminAnn: "📢 Объявления", adminNews: "📰 Новости",
+                adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Входящие тикеты", adminAI: "🤖 Admin-GPT",
+                adminBilimID: "🪪 Управление BilimID", adminLimit: "⏳ BilimLimit (Лимиты)", adminSub: "📜 BilimSubscription (Табели)",
+                teachJorn: "📖 Журнал оценок", teachAtt: "📋 Посещаемость", teachClass: "➕ Создать класс (DCA)",
+                teachSched: "📅 Расписание", teachNews: "📰 Новости", teachLive: "🔴 AutoLIVE Студия",
+                teachKtp: "📑 КТП", teachSup: "🛟 Поддержка", teachAI: "🤖 TeachGPT", teachTest: "📝 BilimTest (Тесты)",
+                teachCheckID: "🔍 CheckID (Камера)", teachID: "🪪 Мой BilimID", studGrades: "📊 Мои оценки",
+                studSched: "📅 Мое расписание", studHw: "📚 Домашка", studNews: "📰 Новости", studLive: "🔴 AutoLIVE Уроки",
+                studContact: "💬 Связь с учителем", studJoin: "🔑 Вступить по DCA коду", studSup: "🛟 Поддержка",
+                studAI: "🤖 Study-GPT", studTest: "📝 Пройти BilimTest", studID: "🪪 Мой BilimID", parentGrades: "👨‍👩‍👧 Оценки ребенка",
+                parentSched: "📅 Расписание ребенка", parentNews: "📰 Новости", parentLive: "🔴 AutoLIVE Уроки",
+                parentSupport: "🛟 Поддержка", parentID: "🪪 BilimID ребенка", parentSub: "📜 BilimSubscription (Подпись)", sessionsTab: "💻 Активные сеансы"
             },
             en: {
-                subtitle: "Unified School System and Platform",
-                loginTitle: "Sign In",
-                loginSub: "BilimAL Electronic Journal",
-                userLbl: "Username",
-                passLbl: "Password",
-                loginBtn: "Login",
-                logoutBtn: "Logout",
-                menuTitle: "Control Panel",
+                subtitle: "Unified School System and Platform", loginTitle: "Sign In", loginSub: "BilimAL Electronic Journal",
+                userLbl: "Username", passLbl: "Password", loginBtn: "Login", logoutBtn: "Logout", menuTitle: "Control Panel",
                 footer: "BilimAL Enterprise Cloud © 2026. All rights reserved.",
-                adminMon: "📊 Monitoring",
-                adminSanc: "🛡️ Moderations & Sanctions",
-                adminSched: "📅 Schedule",
-                adminUsers: "👥 Users & Parents",
-                adminAnn: "📢 Announcements",
-                adminNews: "📰 News",
-                adminLive: "🔴 AutoLIVE Monitoring",
-                adminSupport: "🛟 Support Tickets",
-                adminAI: "🤖 Admin-GPT",
-                adminBilimID: "🪪 BilimID Manage",
-                adminLimit: "⏳ BilimLimit",
-                adminSub: "📜 BilimSubscription",
-                teachJorn: "📖 Gradebook",
-                teachAtt: "📋 Attendance",
-                teachClass: "➕ Create Class (DCA)",
-                teachSched: "📅 Schedule",
-                teachNews: "📰 News",
-                teachLive: "🔴 AutoLIVE Studio",
-                teachKtp: "📑 KTP",
-                teachSup: "🛟 Support",
-                teachAI: "🤖 TeachGPT",
-                teachTest: "📝 BilimTest",
-                teachCheckID: "🔍 CheckID (Camera)",
-                teachID: "🪪 My BilimID",
-                studGrades: "📊 My Grades",
-                studSched: "📅 My Schedule",
-                studHw: "📚 Homework",
-                studNews: "📰 News",
-                studLive: "🔴 AutoLIVE Lessons",
-                studContact: "💬 Contact",
-                studJoin: "🔑 Join via DCA Code",
-                studSup: "🛟 Support",
-                studAI: "🤖 Study-GPT",
-                studTest: "📝 Pass BilimTest",
-                studID: "🪪 My BilimID",
-                parentGrades: "👨‍👩‍👧 Child Grades",
-                parentSched: "📅 Child Schedule",
-                parentNews: "📰 News",
-                parentLive: "🔴 AutoLIVE Lessons",
-                parentSupport: "🛟 Support",
-                parentID: "🪪 Child BilimID",
-                parentSub: "📜 BilimSubscription",
-                sessionsTab: "💻 Active Sessions"
+                adminMon: "📊 Monitoring", adminSanc: "🛡️ Moderations & Sanctions", adminSched: "📅 Schedule",
+                adminUsers: "👥 Users & Parents", adminAnn: "📢 Announcements", adminNews: "📰 News",
+                adminLive: "🔴 AutoLIVE Monitoring", adminSupport: "🛟 Support Tickets", adminAI: "🤖 Admin-GPT",
+                adminBilimID: "🪪 BilimID Manage", adminLimit: "⏳ BilimLimit", adminSub: "📜 BilimSubscription",
+                teachJorn: "📖 Gradebook", teachAtt: "📋 Attendance", teachClass: "➕ Create Class (DCA)",
+                teachSched: "📅 Schedule", teachNews: "📰 News", teachLive: "🔴 AutoLIVE Studio", teachKtp: "📑 KTP",
+                teachSup: "🛟 Support", teachAI: "🤖 TeachGPT", teachTest: "📝 BilimTest", teachCheckID: "🔍 CheckID (Camera)",
+                teachID: "🪪 My BilimID", studGrades: "📊 My Grades", studSched: "📅 My Schedule", studHw: "📚 Homework",
+                studNews: "📰 News", studLive: "🔴 AutoLIVE Lessons", studContact: "💬 Contact", studJoin: "🔑 Join via DCA Code",
+                studSup: "🛟 Support", studAI: "🤖 Study-GPT", studTest: "📝 Pass BilimTest", studID: "🪪 My BilimID",
+                parentGrades: "👨‍👩‍👧 Child Grades", parentSched: "📅 Child Schedule", parentNews: "📰 News",
+                parentLive: "🔴 AutoLIVE Lessons", parentSupport: "🛟 Support", parentID: "🪪 Child BilimID", parentSub: "📜 BilimSubscription", sessionsTab: "💻 Active Sessions"
             }
         };
 
@@ -596,7 +467,6 @@
                         activeLives = data.activeLives || {}; 
                         activeSessionsStore = data.activeSessionsStore || {};
                         bilimLimitSettings = data.bilimLimitSettings || { startDate: '', endDate: '', reason: '' };
-                        
                         bilimTests = data.bilimTests || [];
                         testResults = data.testResults || {};
                         bilimCards = data.bilimCards || {};
@@ -647,7 +517,6 @@
                         let approvedUser = doc.data().user;
                         closeBilimWebQRModal();
                         if (qrListenerUnsubscribe) qrListenerUnsubscribe();
-                        
                         registerAndCheckSession(approvedUser);
                     }
                 });
@@ -666,7 +535,6 @@
                 currentQrSessionId = qrSession;
                 let selectElem = document.getElementById('bilimweb-account-select');
                 selectElem.innerHTML = users.map(u => `<option value="${u.username}">${u.name} (@${u.username} - [${u.role}])</option>`).join('');
-                
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('bilimweb-mobile-modal').classList.remove('hidden');
             }
@@ -687,7 +555,6 @@
             }
 
             showSpinner("Пароль тексерілуде...");
-
             try {
                 if (window.hanko && window.hanko.password) {
                     await window.hanko.password.login(selectedUsername, passwordInput);
@@ -748,7 +615,6 @@
 
             localStorage.setItem('bilim_current_session_id', sessionId);
             authenticateUserSession(userObj);
-            
             checkAndPromptPasskeyRegistration(userObj.username);
         }
 
@@ -771,15 +637,10 @@
                     publicKey: {
                         challenge: challenge,
                         rp: { name: "BilimAL Enterprise", id: window.location.hostname },
-                        user: {
-                            id: userId,
-                            name: currentUser.username,
-                            displayName: currentUser.name
-                        },
+                        user: { id: userId, name: currentUser.username, displayName: currentUser.name },
                         pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
                         authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
-                        timeout: 60000,
-                        attestation: "none"
+                        timeout: 60000, attestation: "none"
                     }
                 });
 
@@ -792,7 +653,6 @@
                 }
             } catch(e) {
                 hideSpinner();
-                console.error(e);
                 showIosToast(false, "Сәтсіз!", "Биометрияны тіркеуден бас тартылды: " + e.message);
             }
         }
@@ -817,11 +677,7 @@
                 window.crypto.getRandomValues(challenge);
 
                 const assertion = await navigator.credentials.get({
-                    publicKey: {
-                        challenge: challenge,
-                        rpId: window.location.hostname,
-                        userVerification: "required"
-                    }
+                    publicKey: { challenge: challenge, rpId: window.location.hostname, userVerification: "required" }
                 });
 
                 if (assertion) {
@@ -838,7 +694,6 @@
                 }
             } catch(e) {
                 hideSpinner();
-                console.error(e);
                 showIosToast(false, "Сәтсіз!", "Биометриямен кіру сәтсіз аяқталды.");
             }
             hideSpinner();
@@ -879,9 +734,7 @@
                 if (window.hanko && window.hanko.password) {
                     await window.hanko.password.login(usernameInput, passwordInput);
                 }
-            } catch(err) {
-                console.log("Hanko pass check:", err);
-            }
+            } catch(err) {}
 
             await loadDataFromCloud();
             hideSpinner();
@@ -922,7 +775,6 @@
                 warnBanner.classList.add('hidden');
             }
 
-            // BilimLimit check
             const limitBanner = document.getElementById('limit-notice-banner');
             const limitText = document.getElementById('limit-notice-text');
             let currentStr = getCurrentFormattedDateTime();
@@ -946,9 +798,7 @@
         }
 
         function logout() {
-            if(html5QrScanner) {
-                try { html5QrScanner.clear(); } catch(e){}
-            }
+            if(html5QrScanner) { try { html5QrScanner.clear(); } catch(e){} }
             currentUser = null;
             localStorage.removeItem('bilim_current_session_id');
             document.getElementById('login-section').classList.remove('hidden');
@@ -1033,9 +883,7 @@
         }
 
         function switchTab(tabId) {
-            if(html5QrScanner) {
-                try { html5QrScanner.clear(); } catch(e){}
-            }
+            if(html5QrScanner) { try { html5QrScanner.clear(); } catch(e){} }
             activeTab = tabId;
             renderSidebar();
             renderTabContent();
@@ -1045,7 +893,6 @@
             await loadDataFromCloud();
             const panel = document.getElementById('active-content-panel');
 
-            // If BilimLimit is active and user tries to open restricted sections
             if (isBilimLimitActive() && activeTab !== 'sessions_management' && activeTab !== 'student_support' && activeTab !== 'teacher_support' && activeTab !== 'parent_support') {
                 panel.innerHTML = `
                     <div class="p-8 text-center space-y-3 bg-amber-50 border border-amber-300 rounded-xl my-auto">
@@ -1087,12 +934,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full gov-table">
                             <thead>
-                                <tr>
-                                    <th>Құрылғы атауы</th>
-                                    <th>Браузері</th>
-                                    <th>Күні / Уақыты</th>
-                                    <th>Әрекет</th>
-                                </tr>
+                                <tr><th>Құрылғы атауы</th><th>Браузері</th><th>Күні / Уақыты</th><th>Әрекет</th></tr>
                             </thead>
                             <tbody>${sessionRows}</tbody>
                         </table>
@@ -1147,7 +989,6 @@
                             </div>
                             <button onclick="stopAutoLiveStudio()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow">⏹ Эфирді тоқтату</button>
                         </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="md:col-span-2 space-y-3">
                                 <div class="bg-slate-900 text-white rounded-xl aspect-video flex flex-col items-center justify-center p-6 text-center relative shadow-inner">
@@ -1157,13 +998,11 @@
                                     <div class="absolute top-3 left-3 bg-red-600 px-2.5 py-1 rounded text-[10px] font-extrabold uppercase">Эфирде</div>
                                     <div class="absolute top-3 right-3 bg-black/60 px-3 py-1 rounded text-[11px] font-bold">👁️ Қосылғандар: ${viewersCount} адам</div>
                                 </div>
-
                                 <div class="p-3 bg-slate-50 border rounded-xl space-y-2">
                                     <h4 class="text-xs font-bold text-slate-800 uppercase">🎙️ Қонақ ретінде қосылғандар (Соучастниктер):</h4>
                                     <div class="space-y-1">${guestsHTML}</div>
                                 </div>
                             </div>
-
                             <div class="bg-slate-50 border rounded-xl flex flex-col h-[420px]">
                                 <div class="p-3 bg-slate-100 border-b text-xs font-bold uppercase text-slate-700">💬 Эфир чаты</div>
                                 <div id="live-chat-box" class="flex-1 p-3 overflow-y-auto space-y-2 bg-white">${chatHTML}</div>
@@ -1239,7 +1078,6 @@
                                 <p class="text-[11px] text-slate-400 mt-1">${isGuest ? '🎙️ Сіз қазір эфирде соучастник (қонақ) ретінде қосылып тұрсыз!' : 'Эфир онлайн режимде көрсетілуде.'}</p>
                                 <div class="absolute top-3 left-3 bg-red-600 px-2.5 py-1 rounded text-[10px] font-extrabold uppercase">LIVE BROADCAST</div>
                             </div>
-
                             <div class="p-4 bg-slate-50 border rounded-xl flex items-center justify-between">
                                 <div>
                                     <h4 class="text-xs font-bold text-slate-900">Эфирге қонақ / соучастник ретінде қосылу</h4>
@@ -1252,7 +1090,6 @@
                                 `}
                             </div>
                         </div>
-
                         <div class="bg-slate-50 border rounded-xl flex flex-col h-[420px]">
                             <div class="p-3 bg-slate-100 border-b text-xs font-bold uppercase text-slate-700">💬 Эфир чаты</div>
                             <div id="live-chat-box" class="flex-1 p-3 overflow-y-auto space-y-2 bg-white">${chatHTML}</div>
@@ -1324,7 +1161,6 @@
 
                 panel.innerHTML = `
                     <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📰 Жаңалықтарды басқару (Админ панелі)</h3>
-                    
                     <div class="p-4 bg-slate-50 border rounded-xl space-y-3 max-w-xl mb-6">
                         <h4 class="text-xs font-bold text-slate-800 uppercase">Жаңа жаңалық жариялау</h4>
                         <div>
@@ -1419,30 +1255,50 @@
                     `).join('');
                     panel.innerHTML = `<h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🛡️ Moderations & Sanctions</h3><div class="overflow-x-auto"><table class="w-full gov-table"><thead><tr><th>Аты-жөні / Рөлі</th><th>Мәртебесі</th><th>Ескерту себебі</th><th>Әрекеттер</th></tr></thead><tbody>${staffList || '<tr><td colspan="4" class="text-center text-slate-400">Қолданушылар жоқ</td></tr>'}</tbody></table></div>`;
                 } else if (activeTab === 'admin_schedule') {
-                    let classSelectOptions = classesList.length > 0 ? classesList.map(c => `<option value="${c.name}">${c.name} (Жетекшісі: ${c.teacher})</option>`).join('') : '<option value="">Сыныптар тіркелмеген</option>';
-                    let schedRows = schedules.length > 0 ? schedules.map((s, sIdx) => `<tr><td><b>${s.className}</b></td><td><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-bold">${s.day || 'Дүйсенбі'}</span></td><td>${s.subject}</td><td><b>${s.topic || 'Тақырып көрсетілмеген'}</b></td><td>${s.homework || 'Жоқ'}</td><td>${s.time}</td><td><button onclick="deleteSchedule(${sIdx})" class="px-2 py-0.5 bg-red-100 text-red-600 rounded font-bold text-[10px]">Жою</button></td></tr>`).join('') : '<tr><td colspan="7" class="text-center text-slate-400">Кестелер жоқ</td></tr>';
+                    let teachersList = users.filter(u => u.role === 'teacher');
+                    let classSelectOptions = classesList.length > 0 ? classesList.map(c => `<option value="${c.name}">${c.name}</option>`).join('') : '<option value="">Сыныптар жоқ</option>';
+                    
+                    let schedRows = schedules.length > 0 ? schedules.map((s, sIdx) => `
+                        <tr>
+                            <td><b>${s.className}</b></td>
+                            <td><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-bold">${s.day || 'Дүйсенбі'}</span></td>
+                            <td><b>${s.subject}</b></td>
+                            <td>
+                                <div class="flex items-center gap-1">
+                                    <select id="admin_sched_teacher_${sIdx}" class="border rounded p-1 text-[11px] bg-white font-bold text-blue-700">
+                                        <option value="">-- Мұғалімсіз --</option>
+                                        ${teachersList.map(t => `<option value="${t.name}" ${t.name === s.teacherName ? 'selected' : ''}>${t.name}</option>`).join('')}
+                                    </select>
+                                    <button onclick="adminSaveTeacherToSchedule(${sIdx})" class="px-2 py-1 bg-emerald-600 text-white rounded font-bold text-[10px]">Бекіту</button>
+                                </div>
+                            </td>
+                            <td>${s.topic || '<span class="text-slate-400">Мұғалім енгізеді</span>'}</td>
+                            <td>${s.homework || '<span class="text-slate-400">Мұғалім енгізеді</span>'}</td>
+                            <td>${s.time}</td>
+                            <td><button onclick="deleteSchedule(${sIdx})" class="px-2 py-0.5 bg-red-100 text-red-600 rounded font-bold text-[10px]">Жою</button></td>
+                        </tr>
+                    `).join('') : '<tr><td colspan="8" class="text-center text-slate-400 py-4">Кестелер тіркелмеген</td></tr>';
+
                     panel.innerHTML = `
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📅 Сыныптарға сабақ кестесін бекіту</h3>
+                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📅 Сыныптарға сабақ кестесін жасау және Мұғалім тағайындау (Админ)</h3>
+                        <p class="text-xs text-slate-500 mb-3">Админ пәнге мұғалімді бекітеді/өзгертеді (жарияланғаннан кейін де өзгертуге болады). Ал сабақ тақырыбы мен үй тапсырмасын мұғалім өз кабинетінен жазады.</p>
                         <div class="p-4 bg-slate-50 rounded-lg border max-w-lg space-y-3 mb-4">
                             <label class="block text-[11px] font-bold uppercase text-slate-600">Сыныпты таңдаңыз:</label>
-                            <select id="sched-class" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">
-                                ${classSelectOptions}
-                            </select>
+                            <select id="sched-class" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">${classSelectOptions}</select>
                             <label class="block text-[11px] font-bold uppercase text-slate-600">Апта күні:</label>
-                            <select id="sched-day" class="w-full border rounded p-2 text-xs bg-white font-bold">
-                                ${daysList.map(d => `<option value="${d}">${d}</option>`).join('')}
-                            </select>
+                            <select id="sched-day" class="w-full border rounded p-2 text-xs bg-white font-bold">${daysList.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
                             <label class="block text-[11px] font-bold uppercase text-slate-600">Пән:</label>
                             <select id="sched-subject" class="w-full border rounded p-2 text-xs bg-white font-bold">${subjectsList.map(sub => `<option value="${sub}">${sub}</option>`).join('')}</select>
-                            <label class="block text-[11px] font-bold uppercase text-slate-600">Сабақ тақырыбы:</label>
-                            <input type="text" id="sched-topic" placeholder="Мысалы: Квадрат теңдеулер" class="w-full border rounded p-2 text-xs bg-white">
-                            <label class="block text-[11px] font-bold uppercase text-slate-600">Үй тапсырмасы:</label>
-                            <input type="text" id="sched-hw" placeholder="Мысалы: №24 есеп (154-бет)" class="w-full border rounded p-2 text-xs bg-white">
+                            <label class="block text-[11px] font-bold uppercase text-slate-600">Пән мұғалімі:</label>
+                            <select id="sched-teacher-select" class="w-full border rounded p-2 text-xs bg-white font-bold text-indigo-700">
+                                <option value="">-- Мұғалім таңдау --</option>
+                                ${teachersList.map(t => `<option value="${t.name}">${t.name} (@${t.username})</option>`).join('')}
+                            </select>
                             <label class="block text-[11px] font-bold uppercase text-slate-600">Уақыты / Сабақ реті:</label>
                             <input type="text" id="sched-time" placeholder="Мысалы: 08:30 - 09:15 (1-ші сабақ)" class="w-full border rounded p-2 text-xs bg-white">
-                            <button onclick="saveSchedule()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Кестені бекіту және сақтау</button>
+                            <button onclick="saveScheduleByAdmin()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Кестені жариялау</button>
                         </div>
-                        <div class="overflow-x-auto"><table class="w-full gov-table"><thead><tr><th>Сынып</th><th>Күні</th><th>Пән</th><th>Тақырыбы</th><th>Үй жұмысы</th><th>Уақыты</th><th>Әрекет</th></tr></thead><tbody>${schedRows}</tbody></table></div>
+                        <div class="overflow-x-auto"><table class="w-full gov-table min-w-[750px]"><thead><tr><th>Сынып</th><th>Күні</th><th>Пән</th><th>Мұғалім</th><th>Тақырыбы</th><th>Үй жұмысы</th><th>Уақыты</th><th>Әрекет</th></tr></thead><tbody>${schedRows}</tbody></table></div>
                     `;
                 } else if (activeTab === 'admin_users') {
                     let studentsListOptions = users.filter(u => u.role === 'student').map(s => `<option value="${s.username}">${s.name} (@${s.username})</option>`).join('');
@@ -1509,9 +1365,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Қолданушыны таңдаңыз:</label>
-                                    <select id="id-username" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">
-                                        ${userSelectOptions}
-                                    </select>
+                                    <select id="id-username" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">${userSelectOptions}</select>
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Мектеп атауы:</label>
@@ -1519,9 +1373,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Сыныбы:</label>
-                                    <select id="id-class" class="w-full border rounded p-2 text-xs bg-white font-bold">
-                                        ${classOptions}
-                                    </select>
+                                    <select id="id-class" class="w-full border rounded p-2 text-xs bg-white font-bold">${classOptions}</select>
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Туған күні (кк.аа.жжжж):</label>
@@ -1546,14 +1398,8 @@
                             <table class="w-full gov-table min-w-[800px]">
                                 <thead>
                                     <tr>
-                                        <th>Аты-жөні</th>
-                                        <th>Қызметі</th>
-                                        <th>Мектеп / Сынып</th>
-                                        <th>Bilim ID</th>
-                                        <th>Берілген / Мақұлданған</th>
-                                        <th>Жарамдылығы</th>
-                                        <th>Мәртебесі</th>
-                                        <th>Әрекет</th>
+                                        <th>Аты-жөні</th><th>Қызметі</th><th>Мектеп / Сынып</th><th>Bilim ID</th>
+                                        <th>Берілді / Мақұлданды</th><th>Жарамдылығы</th><th>Мәртебесі</th><th>Әрекет</th>
                                     </tr>
                                 </thead>
                                 <tbody>${idCardRows}</tbody>
@@ -1567,7 +1413,7 @@
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">⏳ BilimLimit — Қызметтерге уақытша шектеу қою</h3>
                         <div class="p-4 bg-slate-50 rounded-lg border max-w-xl space-y-3">
-                            <p class="text-xs text-slate-600">Админ оқушыларға, ата-аналарға және мұғалімдерге қолжетімді сервистерді уақытша шектейді. Күнді таңдап, себебін жазыңыз.</p>
+                            <p class="text-xs text-slate-600">Админ оқушыларға, ата-аналарға және мұғалімдерге қолжетімді сервистерді уақытша шектейді.</p>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-500 mb-1">Басталу уақыты:</label>
@@ -1590,15 +1436,13 @@
                     `;
                 } else if (activeTab === 'admin_sub') {
                     let classOptions = classesList.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-
                     let startValUI = subscriptionSettings.startDate ? subscriptionSettings.startDate.replace(/\//g, '-').replace('-', 'T') : '';
                     let endValUI = subscriptionSettings.endDate ? subscriptionSettings.endDate.replace(/\//g, '-').replace('-', 'T') : '';
 
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📜 BilimSubscription — Ата-аналардың қатысу табельдерін бақылау</h3>
-                        
                         <div class="p-4 bg-slate-50 rounded-lg border mb-4 space-y-3 max-w-xl">
-                            <h4 class="text-xs font-bold text-slate-700">Табельге қол қою уақыт терезесін бекіту (YYYY/MM/DD-HH:mm)</h4>
+                            <h4 class="text-xs font-bold text-slate-700">Табельге қол қою уақыт терезесін бекіту</h4>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-500 mb-1">Басталу уақыты:</label>
@@ -1609,17 +1453,14 @@
                                     <input type="datetime-local" id="sub-end-datetime" value="${endValUI}" class="w-full border rounded p-2 text-xs bg-white font-bold">
                                 </div>
                             </div>
-                            <div class="text-[11px] text-slate-500">Ағымдағы белсенді терезе: <b>${subscriptionSettings.startDate || '—'}</b> мен <b>${subscriptionSettings.endDate || '—'}</b> арасы</div>
                             <button onclick="saveSubscriptionSettings()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Мерзімді сақтау</button>
                         </div>
-
                         <div class="p-3 bg-blue-50 border border-blue-200 rounded mb-3 flex items-center gap-3">
                             <label class="text-xs font-bold text-slate-700">Сыныпты таңдаңыз:</label>
-                            <select id="admin-sub-class-select" onchange="renderAdminSubTable()" class="border rounded p-1.5 text-xs bg-white font-bold text-blue-700">
+                            <select id="admin-sub-class-select" onchange="renderAdminSubTable()" class="border rounded p-1.5 text-xs bg-white font-bold text-blue-700 font-bold">
                                 ${classOptions || '<option value="">Сыныптар жоқ</option>'}
                             </select>
                         </div>
-
                         <div id="admin-sub-table-container" class="overflow-x-auto"></div>
                     `;
                     renderAdminSubTable();
@@ -1657,10 +1498,10 @@
                     let students = myClass ? users.filter(u => u.role === 'student' && (myClass.students || []).includes(u.username)) : [];
 
                     panel.innerHTML = `
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📖 Электронды журнал (Тек сіздің сыныптағы оқушылар)</h3>
-                        ${!myClass ? '<div class="p-4 bg-amber-50 text-amber-800 rounded text-xs mb-3 font-bold">⚠️ Назар аударыңыз: Сіз әлі сынып ашпадыңыз немесе әкімші сынып бекітпеді! «Сынып ашу» бөліміне өтіп сынып ашыңыз және DCA кодын оқушыларға беріңіз.</div>' : `
+                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📖 Электронды журнал</h3>
+                        ${!myClass ? '<div class="p-4 bg-amber-50 text-amber-800 rounded text-xs mb-3 font-bold">⚠️ Назар аударыңыз: Сіз әлі сынып ашпадыңыз немесе әкімші сынып бекітпеді!</div>' : `
                         <div class="p-3 bg-blue-50 border border-blue-200 rounded mb-3 text-xs text-blue-900 font-bold flex justify-between items-center">
-                            <span>Сыныбыңыз: <b class="text-indigo-900">${myClass.name}</b> (Сынып жетекшісі: <span class="text-blue-700">${myClass.teacher}</span>)</span>
+                            <span>Сыныбыңыз: <b class="text-indigo-900">${myClass.name}</b></span>
                             <span>DCA Коды: <code class="bg-white px-2 py-1 rounded text-blue-700 font-extrabold border">${myClass.dcaCode}</code></span>
                         </div>`}
                         <div class="p-3 bg-slate-50 rounded border mb-3 flex items-center gap-3">
@@ -1673,13 +1514,8 @@
                             <table class="w-full gov-table">
                                 <thead>
                                     <tr>
-                                        <th>Оқушы аты-жөні</th>
-                                        <th>Формативті (макс. 10)</th>
-                                        <th>БЖБ</th>
-                                        <th>ТЖБ</th>
-                                        <th>Пайыз (%)</th>
-                                        <th>Қорытынды баға</th>
-                                        <th>Әрекет</th>
+                                        <th>Оқушы аты-жөні</th><th>Формативті (макс. 10)</th><th>БЖБ</th><th>ТЖБ</th>
+                                        <th>Пайыз (%)</th><th>Қорытынды баға</th><th>Әрекет</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1692,17 +1528,57 @@
                                                 <td><input type="text" id="bzhb_${s.username}" class="w-20 text-center border rounded py-1 font-bold text-blue-600" placeholder="18/20" value="${studentGrade.bzhb}"></td>
                                                 <td><input type="text" id="tzhb_${s.username}" class="w-20 text-center border rounded py-1 font-bold text-indigo-600" placeholder="27/30" value="${studentGrade.tzhb}"></td>
                                                 <td class="font-extrabold text-amber-600 text-center">${studentGrade.percent || 0}%</td>
-                                                <td>
-                                                    <input type="text" id="final_${s.username}" class="w-16 text-center border rounded py-1 font-extrabold text-emerald-600" placeholder="5" value="${studentGrade.final}">
-                                                </td>
+                                                <td><input type="text" id="final_${s.username}" class="w-16 text-center border rounded py-1 font-extrabold text-emerald-600" placeholder="5" value="${studentGrade.final}"></td>
                                                 <td>
                                                     <button onclick="calculateAndSaveGrade('${s.username}')" class="px-2.5 py-1 bg-blue-600 text-white rounded font-bold text-[10px] mr-1">Сақтау</button>
                                                     <button onclick="deleteGradeRecord('${s.username}')" class="px-2.5 py-1 bg-red-100 text-red-600 rounded font-bold text-[10px]">Жою</button>
                                                 </td>
                                             </tr>
                                         `;
-                                    }).join('') : '<tr><td colspan="7" class="text-center text-slate-400 py-4">Бұл сыныпта әлі оқушылар жоқ (Оқушылар DCA код арқылы қосылуы тиіс)</td></tr>'}
+                                    }).join('') : '<tr><td colspan="7" class="text-center text-slate-400 py-4">Бұл сыныпта әлі оқушылар жоқ</td></tr>'}
                                 </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else if (activeTab === 'teacher_schedule') {
+                    // TEACHER SCHEDULE: Teacher edits Topic and Homework for their class / subjects
+                    let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
+                    let myClassName = myClass ? myClass.name : '';
+                    let teacherSchedules = schedules.filter(s => s.className === myClassName || s.teacherName === currentUser.name);
+
+                    let schedRows = teacherSchedules.length > 0 ? teacherSchedules.map((s, idx) => {
+                        let realIndex = schedules.indexOf(s);
+                        return `
+                            <tr>
+                                <td><b>${s.className}</b></td>
+                                <td><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded font-bold">${s.day || 'Дүйсенбі'}</span></td>
+                                <td><b>${s.subject}</b></td>
+                                <td>${s.time}</td>
+                                <td>
+                                    <input type="text" id="teach_topic_${realIndex}" value="${s.topic || ''}" placeholder="Тақырыпты жазыңыз..." class="w-full border rounded p-1 text-xs bg-white font-semibold">
+                                </td>
+                                <td>
+                                    <input type="text" id="teach_hw_${realIndex}" value="${s.homework || ''}" placeholder="Үй тапсырмасы..." class="w-full border rounded p-1 text-xs bg-white text-emerald-700 font-semibold">
+                                </td>
+                                <td>
+                                    <button onclick="teacherSaveTopicAndHW(${realIndex})" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-[10px] shadow-xs">💾 Сақтау</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('') : '<tr><td colspan="7" class="text-center text-slate-400 py-4">Сізге бекітілген сабақ кестесі жоқ (Админ кесте жариялауы тиіс)</td></tr>';
+
+                    panel.innerHTML = `
+                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📅 Менің сабақ кестем (Тақырып пен Үй тапсырмасын енгізу)</h3>
+                        <p class="text-xs text-slate-500 mb-3">Төменде сабақ тақырыбы мен үй тапсырмасын толтырып, «Сақтау» батырмасын басыңыз. Сақтағаннан кейін ол автоматты түрде оқушы мен ата-анаға көрінеді.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full gov-table min-w-[750px]">
+                                <thead>
+                                    <tr>
+                                        <th>Сынып</th><th>Апта күні</th><th>Пән</th><th>Уақыты</th>
+                                        <th>Сабақ тақырыбы</th><th>Үй тапсырмасы</th><th>Әрекет</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${schedRows}</tbody>
                             </table>
                         </div>
                     `;
@@ -1712,27 +1588,22 @@
 
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📝 BilimTest — Интерактивті тест құрастыру және нәтижелер</h3>
-                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
                                 <h4 class="text-xs font-bold text-slate-800 uppercase">1. Жаңа тест баптауы</h4>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-500 mb-1">Сыныпты таңдаңыз:</label>
-                                    <select id="test-class-select" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">
-                                        ${myClassOptions || '<option value="">Сыныптар тіркелмеген</option>'}
-                                    </select>
+                                    <select id="test-class-select" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">${myClassOptions || '<option value="">Сыныптар тіркелмеген</option>'}</select>
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-500 mb-1">Тест тақырыбы:</label>
                                     <input type="text" id="test-title-input" placeholder="Мысалы: Квадрат теңдеулер тоқсандық тесті" class="w-full border rounded p-2 text-xs bg-white">
                                 </div>
-                                <button onclick="startAddingQuestions()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs font-bold w-full">Сұрақтар қосуға өту ➔</button>
+                                <button onclick="startAddingQuestions()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded shadow w-full">Сұрақтар қосуға өту ➔</button>
                             </div>
-
                             <div id="test-questions-builder" class="p-4 bg-slate-50 border rounded-xl space-y-3 hidden">
                                 <h4 class="text-xs font-bold text-indigo-900 uppercase">2. Сұрақ №<span id="current-q-num">1</span> (Карточка)</h4>
                                 <textarea id="q-text" rows="2" placeholder="Сұрақ мәтінін жазыңыз..." class="w-full border rounded p-2 text-xs bg-white"></textarea>
-                                
                                 <div class="space-y-1">
                                     <label class="block text-[10px] font-bold text-slate-500">Нұсқалар (дұрысын таңдаңыз):</label>
                                     <div class="flex items-center gap-2"><input type="radio" name="correct_opt" value="0" checked><input type="text" id="opt_0" placeholder="А нұсқасы" class="border rounded p-1 text-xs w-full bg-white"></div>
@@ -1740,14 +1611,12 @@
                                     <div class="flex items-center gap-2"><input type="radio" name="correct_opt" value="2"><input type="text" id="opt_2" placeholder="В нұсқасы" class="border rounded p-1 text-xs w-full bg-white"></div>
                                     <div class="flex items-center gap-2"><input type="radio" name="correct_opt" value="3"><input type="text" id="opt_3" placeholder="Г нұсқасы" class="border rounded p-1 text-xs w-full bg-white"></div>
                                 </div>
-
                                 <div class="flex justify-between items-center pt-2">
                                     <button onclick="addQuestionCard()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded text-xs font-bold">+ Келесі сұрақ</button>
                                     <button onclick="publishBilimTest()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold shadow">🚀 Жариялау</button>
                                 </div>
                             </div>
                         </div>
-
                         <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Жарияланған тесттер және оқушылар нәтижесі</h4>
                         <div class="space-y-3">
                             ${myTests.length > 0 ? myTests.map(t => {
@@ -1759,7 +1628,6 @@
                                         <td><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">${resForTest[st].suggestedGrade} / 10 балл</span></td>
                                     </tr>
                                 `).join('');
-
                                 return `
                                     <div class="p-3 bg-white border rounded-lg shadow-xs space-y-2">
                                         <div class="flex justify-between items-center border-b pb-1">
@@ -1780,12 +1648,10 @@
                 } else if (activeTab === 'teacher_checkid') {
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🔍 CheckID — Камера арқылы BilimID сканерлеу</h3>
-                        <p class="text-xs text-slate-500 mb-3">Оқушының BilimID QR-кодын камераға жақындатып, қауіпсіздік статусын тексеріңіз.</p>
-                        
+                        <p class="text-xs text-slate-500 mb-3">Оқушының BilimID QR-кодын камераға жақындатып тексеріңіз.</p>
                         <div class="max-w-md mx-auto space-y-3">
                             <div id="qr-reader" class="w-full rounded-xl overflow-hidden border border-slate-300 shadow-inner bg-slate-100 min-h-[250px]"></div>
                             <button onclick="startQRScanner()" class="w-full py-2 bg-indigo-600 text-white rounded font-bold text-xs shadow">📷 Камераны іске қосу</button>
-                            
                             <div id="scan-result-card" class="hidden p-4 rounded-xl border text-xs space-y-2 animate-fade"></div>
                         </div>
                     `;
@@ -1818,7 +1684,7 @@
                                                 <td><button onclick="saveAttendance('${s.username}')" class="px-3 py-1 bg-blue-600 text-white rounded font-bold text-[10px]">Сақтау</button></td>
                                             </tr>
                                         `;
-                                    }).join('') || '<tr><td colspan="4" class="text-center text-slate-400">Оқушылар жоқ (Алдымен сынып ашып, оқушыларды қосыңыз)</td></tr>'}
+                                    }).join('') || '<tr><td colspan="4" class="text-center text-slate-400">Оқушылар жоқ</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -1829,8 +1695,8 @@
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">➕ Сынып ашу және DCA кодын алу</h3>
                         ${myClass ? `
                             <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-lg max-w-md space-y-2 mb-4">
-                                <div class="text-xs font-bold text-emerald-900">Сіздің сыныбыңыз: <span class="text-indigo-900 text-sm">${myClass.name}</span> (Сынып жетекшісі: <span class="text-blue-700">${myClass.teacher}</span>)</div>
-                                <div class="text-xs font-bold text-emerald-900">Сыныптың DCA Коды: <code class="bg-white px-2 py-1 rounded border text-blue-700 font-extrabold text-sm">${myClass.dcaCode}</code></div>
+                                <div class="text-xs font-bold text-emerald-900">Сіздің сыныбыңыз: <span class="text-indigo-900 text-sm">${myClass.name}</span></div>
+                                <div class="text-xs font-bold text-emerald-900">DCA Коды: <code class="bg-white px-2 py-1 rounded border text-blue-700 font-extrabold text-sm">${myClass.dcaCode}</code></div>
                             </div>
                         ` : `
                             <div class="p-4 bg-slate-50 rounded-lg border max-w-md space-y-3">
@@ -1839,10 +1705,6 @@
                             </div>
                         `}
                     `;
-                } else if (activeTab === 'teacher_schedule') {
-                    let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
-                    let targetClassName = myClass ? myClass.name : '';
-                    panel.innerHTML = renderScheduleView("📅 Менің сынып кестем", targetClassName);
                 } else if (activeTab === 'teacher_ktp') {
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📑 КТЖ (Күнтізбелік-тематикалық жоспарлау)</h3>
@@ -1857,13 +1719,13 @@
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🛟 Қолдау қызметі (Әкімшіге хат жазу)</h3>
                         <div class="p-4 bg-slate-50 rounded-lg border max-w-lg space-y-3 mb-4">
-                            <textarea id="support-msg" rows="3" class="w-full border rounded p-2 text-xs bg-white" placeholder="Техникалық сұрақ немесе көмек туралы жазыңыз..."></textarea>
+                            <textarea id="support-msg" rows="3" class="w-full border rounded p-2 text-xs bg-white" placeholder="Техникалық сұрақ жазыңыз..."></textarea>
                             <button onclick="sendSupportMessage()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Өтініш жіберу</button>
                         </div>
                         <div class="bg-white border rounded p-3 max-h-40 overflow-y-auto">${myTickets || '<p class="text-xs text-slate-400">Өтініштер жоқ</p>'}</div>
                     `;
                 } else if (activeTab === 'teacher_ai') {
-                    renderAIChatPanel(panel, 'TeachGPT', 'Бүгінгі сабақ кестесі, сыныптың және оқушылардың білім көрсеткіші (GPT-Analytics), жаңа тапсырмалар генерациялау және пайыздарды есептеу.');
+                    renderAIChatPanel(panel, 'TeachGPT', 'Сабақ кестесі, білім көрсеткіші, жаңа тапсырмалар генерациялау және пайыздарды есептеу.');
                 }
             }
             else if (currentUser.role === 'parent') {
@@ -1872,7 +1734,7 @@
                 let childName = childObj ? childObj.name : 'Бекітілген бала табылмады';
 
                 let assignedClass = classesList.find(c => (c.students || []).includes(childUsername));
-                let classNameStr = assignedClass ? assignedClass.name : 'Әлі ешқандай сыныпқа қосылмаған';
+                let classNameStr = assignedClass ? assignedClass.name : 'Сыныпқа қосылмаған';
                 let classTeacherStr = assignedClass ? assignedClass.teacher : 'Бекітілмеген';
 
                 if (activeTab === 'parent_grades') {
@@ -1891,7 +1753,7 @@
 
                     panel.innerHTML = `
                         <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-3 text-xs text-amber-900 font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                            <span>👨‍👩‍👧 Бала: <b class="text-indigo-900 text-sm">${childName}</b> | Сыныбы: <span class="text-blue-700">${classNameStr}</span> | Сынып жетекшісі: <span class="text-purple-800 underline">${classTeacherStr}</span></span>
+                            <span>👨‍👩‍👧 Бала: <b class="text-indigo-900 text-sm">${childName}</b> | Сыныбы: <span class="text-blue-700">${classNameStr}</span></span>
                             <span class="bg-white px-2 py-1 rounded border text-emerald-700 font-extrabold">Қатысуы: [ ${childAtt} ]</span>
                         </div>
                         <div class="overflow-x-auto">
@@ -1925,7 +1787,6 @@
 
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📜 BilimSubscription — Сабаққа қатысу табельін растау</h3>
-                        
                         <div class="p-4 bg-slate-50 border rounded-xl max-w-lg space-y-3">
                             <div class="text-xs font-bold text-slate-800">Бала: <span class="text-blue-700">${childName}</span> (${classNameStr})</div>
                             <div class="text-xs text-slate-600 p-2 bg-blue-50 border border-blue-200 rounded">
@@ -1947,7 +1808,6 @@
                                     🔒 Қазіргі уақытта қол қою мерзімі аяқталды немесе әкімші әлі жаңа мерзім бекітпеді.
                                 </div>
                             `)}
-
                             <div class="mt-4 pt-3 border-t">
                                 <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">📜 Барлық қол қою тарихы (Архів):</h4>
                                 <ul class="space-y-1 bg-white p-2 border rounded-lg">${historyListHTML}</ul>
@@ -2017,7 +1877,6 @@
 
                     panel.innerHTML = `
                         <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📝 BilimTest — Тапсыру бөлімі</h3>
-                        
                         <div id="student-test-view">
                             <div class="space-y-3">
                                 ${availableTests.length > 0 ? availableTests.map(t => {
@@ -2059,6 +1918,7 @@
                                 <b class="text-blue-900">${s.subject}</b>
                                 <span class="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-bold">${s.day || 'Дүйсенбі'}</span>
                             </div>
+                            <div class="text-[11px] text-slate-500">👨‍🏫 Мұғалім: <b>${s.teacherName || 'Мұғалім көрсетілмеген'}</b></div>
                             <div class="text-xs text-slate-700"><b>Тақырыбы:</b> ${s.topic || 'Көрсетілмеген'}</div>
                             <div class="text-xs text-emerald-800 bg-emerald-50 p-2 rounded border border-emerald-200"><b>📚 Үй тапсырмасы:</b> ${s.homework || 'Үй жұмысы берілмеді'}</div>
                         </div>
@@ -2095,6 +1955,91 @@
             }
         }
 
+        // ================= NEW/UPDATED FUNCTIONS FOR SCHEDULE LOGIC =================
+        async function saveScheduleByAdmin() {
+            let className = document.getElementById('sched-class').value;
+            let day = document.getElementById('sched-day').value;
+            let subject = document.getElementById('sched-subject').value;
+            let teacherName = document.getElementById('sched-teacher-select').value;
+            let time = document.getElementById('sched-time').value.trim();
+
+            if(!className || !time) {
+                showIosToast(false, "Сәтсіз!", "Сынып пен уақытты толтырыңыз!");
+                return;
+            }
+
+            showSpinner("Кесте жариялануда...");
+            schedules.push({ className, day, subject, teacherName: teacherName || '', topic: '', homework: '', time });
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Сабақ кестесі жарияланды!");
+            renderTabContent();
+        }
+
+        async function adminSaveTeacherToSchedule(sIdx) {
+            let selectElem = document.getElementById(`admin_sched_teacher_${sIdx}`);
+            let chosenTeacher = selectElem.value;
+            
+            showSpinner("Мұғалім бекітілуде...");
+            schedules[sIdx].teacherName = chosenTeacher;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `Пәнге мұғалім бекітілді: ${chosenTeacher || 'Жоқ'}`);
+            renderTabContent();
+        }
+
+        async function teacherSaveTopicAndHW(sIdx) {
+            let topicVal = document.getElementById(`teach_topic_${sIdx}`).value.trim();
+            let hwVal = document.getElementById(`teach_hw_${sIdx}`).value.trim();
+
+            showSpinner("Сабақ тақырыбы мен үй тапсырмасы сақталуда...");
+            schedules[sIdx].topic = topicVal;
+            schedules[sIdx].homework = hwVal;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Сабақ тақырыбы мен үй тапсырмасы сақталды және оқушыларға көрсетілді!");
+            renderTabContent();
+        }
+
+        function renderScheduleView(panelTitle, targetClassName) {
+            let dayButtonsHTML = daysList.map(d => `
+                <button onclick="switchScheduleDay('${d}')" class="px-3 py-1.5 rounded text-xs font-bold transition-all ${activeScheduleDay === d ? 'bg-blue-600 text-white shadow' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}">${d}</button>
+            `).join('');
+
+            let filteredSchedules = targetClassName ? schedules.filter(s => s.className === targetClassName && (s.day || 'Дүйсенбі') === activeScheduleDay) : [];
+
+            let rows = filteredSchedules.length > 0 ? filteredSchedules.map(s => `
+                <tr>
+                    <td><b>${s.className}</b></td>
+                    <td>
+                        <div class="font-bold text-blue-900">${s.subject}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">👨‍🏫 Мұғалім: <b class="text-indigo-900">${s.teacherName || 'Бекітілмеген'}</b></div>
+                    </td>
+                    <td><b>${s.topic || '<span class="text-slate-400 font-normal">—</span>'}</b></td>
+                    <td><span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold">${s.homework || 'Жоқ'}</span></td>
+                    <td>${s.time}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="text-center text-slate-400 py-4">Бұл күнге бекітілген сабақ кестесі жоқ</td></tr>';
+
+            return `
+                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${panelTitle} ${targetClassName ? `(Сыныбы: <span class="text-blue-700">${targetClassName}</span>)` : ''}</h3>
+                <div class="flex gap-2 mb-4 overflow-x-auto pb-1">
+                    ${dayButtonsHTML}
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full gov-table min-w-[700px]">
+                        <thead><tr><th>Сынып</th><th>Пән және Мұғалім</th><th>Сабақ тақырыбы</th><th>Үй тапсырмасы</th><th>Уақыты</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function switchScheduleDay(day) {
+            activeScheduleDay = day;
+            renderTabContent();
+        }
+
         async function startAutoLiveStudio() {
             let title = document.getElementById('studio-live-title').value.trim();
             let className = document.getElementById('studio-live-class').value;
@@ -2106,14 +2051,7 @@
 
             showSpinner("AutoLIVE студия іске қосылуда...");
             activeLives[currentUser.username] = {
-                title: title,
-                className: className,
-                teacherName: currentUser.name,
-                teacherUsername: currentUser.username,
-                viewers: [],
-                chat: [],
-                guests: [],
-                active: true
+                title: title, className: className, teacherName: currentUser.name, teacherUsername: currentUser.username, viewers: [], chat: [], guests: [], active: true
             };
 
             await saveDataToCloud();
@@ -2160,10 +2098,7 @@
 
             if(!liveObj.chat) liveObj.chat = [];
             liveObj.chat.push({
-                senderName: currentUser.name,
-                senderRole: currentUser.role,
-                text: text,
-                time: getCurrentFormattedDateTime()
+                senderName: currentUser.name, senderRole: currentUser.role, text: text, time: getCurrentFormattedDateTime()
             });
 
             await saveDataToCloud();
@@ -2314,24 +2249,15 @@
             }
 
             showSpinner("BilimID жасалуда...");
-
             let now = new Date();
             let dateStr = `${now.getDate().toString().padStart(2, '0')}.${(now.getMonth()+1).toString().padStart(2, '0')}.${now.getFullYear()}`;
-            
             let randomId = Math.floor(10000 + Math.random() * 90000) + '-' + Math.floor(10000 + Math.random() * 90000);
 
             bilimCards[username] = {
-                username: username,
-                name: targetUser.name,
-                role: targetUser.role,
-                school: school || "№12 Мектеп-Гимназиясы",
-                className: className,
-                dob: dob || "12.05.2012",
-                idNumber: (bilimCards[username]?.idNumber || randomId),
-                issueDate: (bilimCards[username]?.issueDate || dateStr),
-                approveDate: dateStr,
-                validUntil: validUntil || "31.05.2027",
-                status: status
+                username: username, name: targetUser.name, role: targetUser.role,
+                school: school || "№12 Мектеп-Гимназиясы", className: className, dob: dob || "12.05.2012",
+                idNumber: (bilimCards[username]?.idNumber || randomId), issueDate: (bilimCards[username]?.issueDate || dateStr),
+                approveDate: dateStr, validUntil: validUntil || "31.05.2027", status: status
             };
 
             await saveDataToCloud();
@@ -2400,7 +2326,6 @@
                 showIosToast(false, "Сәтсіз!", "Тест тақырыбын енгізіңіз!");
                 return;
             }
-            
             tempQuestions = [];
             document.getElementById('test-questions-builder').classList.remove('hidden');
             document.getElementById('current-q-num').innerText = '1';
@@ -2420,12 +2345,7 @@
                 return;
             }
 
-            tempQuestions.push({
-                q: qText,
-                options: [opt0, opt1, opt2, opt3],
-                correct: correctIdx
-            });
-
+            tempQuestions.push({ q: qText, options: [opt0, opt1, opt2, opt3], correct: correctIdx });
             document.getElementById('q-text').value = '';
             document.getElementById('opt_0').value = '';
             document.getElementById('opt_1').value = '';
@@ -2437,9 +2357,7 @@
 
         async function publishBilimTest() {
             let qText = document.getElementById('q-text').value.trim();
-            if(qText) {
-                addQuestionCard();
-            }
+            if(qText) addQuestionCard();
 
             if(tempQuestions.length === 0) {
                 showIosToast(false, "Сәтсіз!", "Кемінде 1 сұрақ қосылуы тиіс!");
@@ -2451,14 +2369,7 @@
             let className = document.getElementById('test-class-select').value;
             let title = document.getElementById('test-title-input').value.trim();
 
-            bilimTests.push({
-                id: testId,
-                className: className,
-                title: title,
-                author: currentUser.username,
-                questions: tempQuestions
-            });
-
+            bilimTests.push({ id: testId, className, title, author: currentUser.username, questions: tempQuestions });
             await saveDataToCloud();
             hideSpinner();
             showIosToast(true, "Сәтті!", "BilimTest сәтті жарияланды!");
@@ -2514,9 +2425,7 @@
             let correctCount = 0;
             test.questions.forEach((q, idx) => {
                 let selected = document.querySelector(`input[name="ans_${idx}"]:checked`);
-                if(selected && parseInt(selected.value) === q.correct) {
-                    correctCount++;
-                }
+                if(selected && parseInt(selected.value) === q.correct) correctCount++;
             });
 
             let totalQ = test.questions.length;
@@ -2524,12 +2433,8 @@
             if (suggestedGrade < 1 && correctCount > 0) suggestedGrade = 1;
 
             showSpinner("Тест нәтижесі есептелуде...");
-
             if(!testResults[testId]) testResults[testId] = {};
-            testResults[testId][currentUser.username] = {
-                correctCount: correctCount,
-                suggestedGrade: suggestedGrade
-            };
+            testResults[testId][currentUser.username] = { correctCount, suggestedGrade };
 
             await saveDataToCloud();
             hideSpinner();
@@ -2538,10 +2443,7 @@
         }
 
         function startQRScanner() {
-            if (html5QrScanner) {
-                try { html5QrScanner.clear(); } catch(e){}
-            }
-
+            if (html5QrScanner) { try { html5QrScanner.clear(); } catch(e){} }
             html5QrScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 200 });
             html5QrScanner.render(onScanSuccess, onScanFailure);
         }
@@ -2560,17 +2462,14 @@
                 resultDiv.className = `p-4 rounded-xl border text-xs space-y-2 animate-fade ${statusBg}`;
                 resultDiv.innerHTML = `
                     <div class="font-extrabold text-sm flex justify-between">
-                        <span>${card.name}</span>
-                        <span>${statusBadge}</span>
+                        <span>${card.name}</span><span>${statusBadge}</span>
                     </div>
                     <div>Мектеп: <b>${card.school}</b> | Сынып: <b>${card.className}</b></div>
                     <div>Bilim ID: <code class="font-mono font-bold">${card.idNumber}</code></div>
                 `;
 
                 showIosToast(true, "Сәтті!", "BilimID сканерлеу сәтті аяқталды.");
-                if(html5QrScanner) {
-                    html5QrScanner.clear();
-                }
+                if(html5QrScanner) html5QrScanner.clear();
             } catch(e) {
                 showIosToast(false, "Сәтсіз!", "QR код BilimID форматына сәйкес келмейді!");
             }
@@ -2638,12 +2537,8 @@
             showSpinner("Табельге қол қойылуда...");
             let currentStr = getCurrentFormattedDateTime();
 
-            if(!bilimSubscriptions[childUsername]) {
-                bilimSubscriptions[childUsername] = { signed: false, history: [] };
-            }
-            if(!bilimSubscriptions[childUsername].history) {
-                bilimSubscriptions[childUsername].history = [];
-            }
+            if(!bilimSubscriptions[childUsername]) bilimSubscriptions[childUsername] = { signed: false, history: [] };
+            if(!bilimSubscriptions[childUsername].history) bilimSubscriptions[childUsername].history = [];
 
             bilimSubscriptions[childUsername].signed = true;
             bilimSubscriptions[childUsername].signedAt = currentStr;
@@ -2651,10 +2546,7 @@
             bilimSubscriptions[childUsername].status = 'normal';
 
             bilimSubscriptions[childUsername].history.push({
-                signedAt: currentStr,
-                periodStart: subscriptionSettings.startDate,
-                periodEnd: subscriptionSettings.endDate,
-                signedBy: currentUser.username
+                signedAt: currentStr, periodStart: subscriptionSettings.startDate, periodEnd: subscriptionSettings.endDate, signedBy: currentUser.username
             });
 
             await saveDataToCloud();
@@ -2689,49 +2581,6 @@
 
         function keepSession(sessionId) {
             showIosToast(true, "Сәтті!", "Сеанс сақталды.");
-        }
-
-        function renderScheduleView(panelTitle, targetClassName) {
-            let dayButtonsHTML = daysList.map(d => `
-                <button onclick="switchScheduleDay('${d}')" class="px-3 py-1.5 rounded text-xs font-bold transition-all ${activeScheduleDay === d ? 'bg-blue-600 text-white shadow' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}">${d}</button>
-            `).join('');
-
-            let filteredSchedules = targetClassName ? schedules.filter(s => s.className === targetClassName && (s.day || 'Дүйсенбі') === activeScheduleDay) : [];
-
-            // Find teacher name for each subject
-            let classObj = classesList.find(c => c.name === targetClassName);
-            let teacherNameStr = classObj ? classObj.teacher : 'Мұғалім';
-
-            let rows = filteredSchedules.length > 0 ? filteredSchedules.map(s => `
-                <tr>
-                    <td><b>${s.className}</b></td>
-                    <td>
-                        <div class="font-bold text-blue-900">${s.subject}</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5">👨‍🏫 Мұғалім: <b>${teacherNameStr}</b></div>
-                    </td>
-                    <td><b>${s.topic || 'Көрсетілмеген'}</b></td>
-                    <td><span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold">${s.homework || 'Жоқ'}</span></td>
-                    <td>${s.time}</td>
-                </tr>
-            `).join('') : '<tr><td colspan="5" class="text-center text-slate-400 py-4">Бұл сыныпқа бұл күнге сабақ кестесі бекітілмеген</td></tr>';
-
-            return `
-                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${panelTitle} ${targetClassName ? `(Сыныбы: <span class="text-blue-700">${targetClassName}</span>)` : ''}</h3>
-                <div class="flex gap-2 mb-4 overflow-x-auto pb-1">
-                    ${dayButtonsHTML}
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full gov-table">
-                        <thead><tr><th>Сынып</th><th>Пән және Мұғалім</th><th>Сабақ тақырыбы</th><th>Үй тапсырмасы</th><th>Уақыты</th></tr></thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function switchScheduleDay(day) {
-            activeScheduleDay = day;
-            renderTabContent();
         }
 
         function renderAIChatPanel(panel, aiName, aiDesc) {
@@ -2879,11 +2728,7 @@
 
             if(!grades[username]) grades[username] = {};
             grades[username][selectedTeacherSubject] = { 
-                form: formVal, 
-                bzhb: bzhbVal, 
-                tzhb: tzhbVal, 
-                final: finalVal || recommendedGrade, 
-                percent: finalPercent 
+                form: formVal, bzhb: bzhbVal, tzhb: tzhbVal, final: finalVal || recommendedGrade, percent: finalPercent 
             };
 
             await saveDataToCloud();
@@ -2929,12 +2774,7 @@
             showSpinner("Сынып тіркеліп, DCA код жасалуда...");
             let randomDca = 'DCA-' + Math.floor(1000 + Math.random() * 9000);
             classesList.push({ 
-                name: className, 
-                creator: currentUser.name,
-                teacher: currentUser.name, 
-                teacherUsername: currentUser.username,
-                dcaCode: randomDca,
-                students: [] 
+                name: className, creator: currentUser.name, teacher: currentUser.name, teacherUsername: currentUser.username, dcaCode: randomDca, students: [] 
             });
             await saveDataToCloud();
             hideSpinner();
@@ -2953,14 +2793,12 @@
             let targetClass = classesList.find(c => c.dcaCode === code);
             if(!targetClass) {
                 hideSpinner();
-                showIosToast(false, "Сәтсіз!", "Қате DCA коды! Мұғалімнен дұрыс кодты сұраңыз.");
+                showIosToast(false, "Сәтсіз!", "Қате DCA коды!");
                 return;
             }
 
             classesList.forEach(c => {
-                if(c.students) {
-                    c.students = c.students.filter(s => s !== currentUser.username);
-                }
+                if(c.students) c.students = c.students.filter(s => s !== currentUser.username);
             });
 
             if(!targetClass.students) targetClass.students = [];
@@ -2972,25 +2810,6 @@
             hideSpinner();
             showIosToast(true, "Сәтті!", `Сыныпқа қосылдыңыз: ${targetClass.name}`);
             switchTab('student_grades');
-        }
-
-        async function saveSchedule() {
-            let className = document.getElementById('sched-class').value;
-            let day = document.getElementById('sched-day').value;
-            let subject = document.getElementById('sched-subject').value;
-            let topic = document.getElementById('sched-topic').value.trim();
-            let homework = document.getElementById('sched-hw').value.trim();
-            let time = document.getElementById('sched-time').value.trim();
-            if(!className || !time) {
-                showIosToast(false, "Сәтсіз!", "Сынып пен уақытты толтырыңыз!");
-                return;
-            }
-            showSpinner("Кесте бекітілуде...");
-            schedules.push({ className, day, subject, topic, homework, time });
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Сабақ кестесі, тақырыбы және үй тапсырмасы сақталды!");
-            renderTabContent();
         }
 
         async function deleteSchedule(sIdx) {
@@ -3029,10 +2848,7 @@
             if(hasViolation) {
                 currentUser.warningReason = "Smart Security: Дөрекілік немесе әдепсіз сөз қолданылды!";
                 supportTickets.push({ 
-                    from: currentUser.username, 
-                    text: `[БҰҒАТТАЛДЫ / СӨЗ ЕРЕЖЕСІ БҰЗЫЛДЫ]: ${msg}`, 
-                    reply: 'Автоматты түрде ескерту берілді.',
-                    flagged: true 
+                    from: currentUser.username, text: `[БҰҒАТТАЛДЫ / СӨЗ ЕРЕЖЕСІ БҰЗЫЛДЫ]: ${msg}`, reply: 'Автоматты түрде ескерту берілді.', flagged: true 
                 });
                 await saveDataToCloud();
                 hideSpinner();
@@ -3164,30 +2980,22 @@
 
         async function deleteClassRecord(classIdx) {
             let targetClass = classesList[classIdx];
-            if(confirm(`"${targetClass.name}" сыныбын және оған қатысты БҮКІЛ деректерді толығымен жойғыңыз келе ме?`)) {
+            if(confirm(`"${targetClass.name}" сыныбын толығымен жойғыңыз келе ме?`)) {
                 showSpinner("Сынып пен деректер тазартылуда...");
-                
                 let studentUsernames = targetClass.students || [];
-                
                 studentUsernames.forEach(sUser => {
-                    delete grades[sUser];
-                    delete attendance[sUser];
-                    delete bilimCards[sUser];
-                    delete bilimSubscriptions[sUser];
+                    delete grades[sUser]; delete attendance[sUser]; delete bilimCards[sUser]; delete bilimSubscriptions[sUser];
                 });
-
                 users = users.filter(u => {
                     if (studentUsernames.includes(u.username)) return false;
                     if (u.role === 'parent' && studentUsernames.includes(u.parentOf)) return false;
                     return true;
                 });
-
                 schedules = schedules.filter(s => s.className !== targetClass.name);
                 classesList.splice(classIdx, 1);
-
                 await saveDataToCloud();
                 hideSpinner();
-                showIosToast(true, "Сәтті!", "Сынып пен барлық қатысты деректер жойылды!");
+                showIosToast(true, "Сәтті!", "Сынып жойылды!");
                 renderTabContent();
             }
         }
@@ -3195,8 +3003,8 @@
         function downloadPDFReport() {
             let content = `BILIMAL ENTERPRISE CLOUD - OFFICIAL REPORT\nOqushy: ${currentUser.name}\nDate: ${new Date().toLocaleDateString()}\n-------------------------------------\n`;
             let myGrades = grades[currentUser.username] || {};
-            for(let sub in myGrgrades) {
-                content += `Pan: ${sub} | Format: ${myGrades[sub]?.form || ''} | BZHB: ${myGrades[sub]?.bzhb || ''} | TZHB: ${myGrades[sub]?.tzhb || ''} | Payiz: ${myGrades[sub]?.percent || 0}% | Qorytyndy: ${myGrgrades[sub]?.final || ''}\n`;
+            for(let sub in myGrades) {
+                content += `Pan: ${sub} | Format: ${myGrades[sub]?.form || ''} | BZHB: ${myGrades[sub]?.bzhb || ''} | TZHB: ${myGrades[sub]?.tzhb || ''} | Payiz: ${myGrades[sub]?.percent || 0}% | Qorytyndy: ${myGrades[sub]?.final || ''}\n`;
             }
             let blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             let link = document.createElement('a');
