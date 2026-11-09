@@ -156,7 +156,7 @@
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
                     <div class="w-8 h-8 rounded bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-xs">02</div>
                     <h3 class="text-xs font-extrabold text-slate-900 uppercase">Оқушы және ата-ана мүмкіндігі</h3>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">Бағаларды, қатысуды бақылау, BilimTest тапсыру, BilimID картасын қолдану және табельдерге қол қою.</p>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Бағаларды, қатысуды бақылау, BilimTest тапсыру, BilimID картасын қолдану және B-Pay арқылы төлем жасау.</p>
                 </div>
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
                     <div class="w-8 h-8 rounded bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-xs">03</div>
@@ -166,7 +166,7 @@
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
                     <div class="w-8 h-8 rounded bg-purple-50 text-purple-700 flex items-center justify-center font-black text-xs">04</div>
                     <h3 class="text-xs font-extrabold text-slate-900 uppercase">Бас әкімші мүмкіндігі</h3>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">Мектеп мониторингі, санкциялар мен модерация, BilimLimit, BilimSubscription мерзімдерін бекіту және Admin-GPT аналитикасы.</p>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Мектеп мониторингі, санкциялар мен модерация, BilimLimit, B-Pay бақылау және Admin-GPT аналитикасы.</p>
                 </div>
             </div>
         </div>
@@ -314,6 +314,9 @@
         let bilimCards = {}; 
         let bilimSubscriptions = {}; 
         let subscriptionSettings = { startDate: '', endDate: '' };
+        
+        // B-Pay Store
+        let bpayData = {}; // { username: { balance: 0, history: [{id, amount, desc, date, type}] } }
 
         let tempQuestions = [];
         let html5QrScanner = null;
@@ -376,6 +379,7 @@
                 adminUsers: "👥 Логин/парольдер & Ата-ана", adminAnn: "📢 Хабарландыру", adminNews: "📰 Жаңалықтар",
                 adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Қолдау кірістері", adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Басқару", adminLimit: "⏳ BilimLimit (Шектеу)", adminSub: "📜 BilimSubscription (Табельдер)",
+                adminBPay: "💳 B-Pay Мониторинг",
                 teachJorn: "📖 Бағалар журналы", teachAtt: "📋 Қатысу журналы", teachClass: "➕ Сынып ашу (DCA)",
                 teachSched: "📅 Сабақ кестесі", teachNews: "📰 Жаңалықтар", teachLive: "🔴 AutoLIVE Студия",
                 teachKtp: "📑 КТЖ (Күнтізбелік жоспар)", teachSup: "🛟 Қолдау қызметі", teachAI: "🤖 TeachGPT",
@@ -383,9 +387,11 @@
                 studGrades: "📊 Менің бағаларым", studSched: "📅 Менің кестем", studHw: "📚 Үй тапсырмасы",
                 studNews: "📰 Жаңалықтар", studLive: "🔴 AutoLIVE Сабақтар", studContact: "💬 Мұғаліммен байланыс",
                 studJoin: "🔑 DCA кодпен қосылу", studSup: "🛟 Қолдау", studAI: "🤖 Study-GPT", studTest: "📝 BilimTest Тапсыру",
-                studID: "🪪 Менің BilimID-ім", parentGrades: "👨‍👩‍👧 Баланың бағалары", parentSched: "📅 Баланың кестесі",
+                studID: "🪪 Менің BilimID-ім", studBPay: "💳 B-Pay Төлемдер",
+                parentGrades: "👨‍👩‍👧 Баланың бағалары", parentSched: "📅 Баланың кестесі",
                 parentNews: "📰 Жаңалықтар", parentLive: "🔴 AutoLIVE Сабақтар", parentSupport: "🛟 Қолдау қызметі",
-                parentID: "🪪 Баланың BilimID-і", parentSub: "📜 BilimSubscription (Табель қол қою)", sessionsTab: "💻 Белсенді сеанстар"
+                parentID: "🪪 Баланың BilimID-і", parentSub: "📜 BilimSubscription (Табель қол қою)", parentBPay: "💳 B-Pay Төлемдер",
+                sessionsTab: "💻 Белсенді сеанстар"
             },
             ru: {
                 subtitle: "Единая школьная система и платформа", loginTitle: "Вход в систему", loginSub: "Электронный журнал BilimAL",
@@ -395,15 +401,16 @@
                 adminUsers: "👥 Пользователи и Родители", adminAnn: "📢 Объявления", adminNews: "📰 Новости",
                 adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Входящие тикеты", adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 Управление BilimID", adminLimit: "⏳ BilimLimit (Лимиты)", adminSub: "📜 BilimSubscription (Табели)",
+                adminBPay: "💳 B-Pay Мониторинг",
                 teachJorn: "📖 Журнал оценок", teachAtt: "📋 Посещаемость", teachClass: "➕ Создать класс (DCA)",
                 teachSched: "📅 Расписание", teachNews: "📰 Новости", teachLive: "🔴 AutoLIVE Студия",
                 teachKtp: "📑 КТП", teachSup: "🛟 Поддержка", teachAI: "🤖 TeachGPT", teachTest: "📝 BilimTest (Тесты)",
                 teachCheckID: "🔍 CheckID (Камера)", teachID: "🪪 Мой BilimID", studGrades: "📊 Мои оценки",
                 studSched: "📅 Мое расписание", studHw: "📚 Домашка", studNews: "📰 Новости", studLive: "🔴 AutoLIVE Уроки",
                 studContact: "💬 Связь с учителем", studJoin: "🔑 Вступить по DCA коду", studSup: "🛟 Поддержка",
-                studAI: "🤖 Study-GPT", studTest: "📝 Пройти BilimTest", studID: "🪪 Мой BilimID", parentGrades: "👨‍👩‍👧 Оценки ребенка",
-                parentSched: "📅 Расписание ребенка", parentNews: "📰 Новости", parentLive: "🔴 AutoLIVE Уроки",
-                parentSupport: "🛟 Поддержка", parentID: "🪪 BilimID ребенка", parentSub: "📜 BilimSubscription (Подпись)", sessionsTab: "💻 Активные сеансы"
+                studAI: "🤖 Study-GPT", studTest: "📝 Пройти BilimTest", studID: "🪪 Мой BilimID", studBPay: "💳 B-Pay Оплата",
+                parentGrades: "👨‍👩‍👧 Оценки ребенка", parentSched: "📅 Расписание ребенка", parentNews: "📰 Новости",
+                parentLive: "🔴 AutoLIVE Уроки", parentSupport: "🛟 Поддержка", parentID: "🪪 BilimID ребенка", parentSub: "📜 BilimSubscription (Подпись)", parentBPay: "💳 B-Pay Оплата", sessionsTab: "💻 Активные сеансы"
             },
             en: {
                 subtitle: "Unified School System and Platform", loginTitle: "Sign In", loginSub: "BilimAL Electronic Journal",
@@ -413,14 +420,15 @@
                 adminUsers: "👥 Users & Parents", adminAnn: "📢 Announcements", adminNews: "📰 News",
                 adminLive: "🔴 AutoLIVE Monitoring", adminSupport: "🛟 Support Tickets", adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Manage", adminLimit: "⏳ BilimLimit", adminSub: "📜 BilimSubscription",
+                adminBPay: "💳 B-Pay Monitoring",
                 teachJorn: "📖 Gradebook", teachAtt: "📋 Attendance", teachClass: "➕ Create Class (DCA)",
                 teachSched: "📅 Schedule", teachNews: "📰 News", teachLive: "🔴 AutoLIVE Studio", teachKtp: "📑 KTP",
                 teachSup: "🛟 Support", teachAI: "🤖 TeachGPT", teachTest: "📝 BilimTest", teachCheckID: "🔍 CheckID (Camera)",
                 teachID: "🪪 My BilimID", studGrades: "📊 My Grades", studSched: "📅 My Schedule", studHw: "📚 Homework",
                 studNews: "📰 News", studLive: "🔴 AutoLIVE Lessons", studContact: "💬 Contact", studJoin: "🔑 Join via DCA Code",
-                studSup: "🛟 Support", studAI: "🤖 Study-GPT", studTest: "📝 Pass BilimTest", studID: "🪪 My BilimID",
+                studSup: "🛟 Support", studAI: "🤖 Study-GPT", studTest: "📝 Pass BilimTest", studID: "🪪 My BilimID", studBPay: "💳 B-Pay Payments",
                 parentGrades: "👨‍👩‍👧 Child Grades", parentSched: "📅 Child Schedule", parentNews: "📰 News",
-                parentLive: "🔴 AutoLIVE Lessons", parentSupport: "🛟 Support", parentID: "🪪 Child BilimID", parentSub: "📜 BilimSubscription", sessionsTab: "💻 Active Sessions"
+                parentLive: "🔴 AutoLIVE Lessons", parentSupport: "🛟 Support", parentID: "🪪 Child BilimID", parentSub: "📜 BilimSubscription", parentBPay: "💳 B-Pay Payments", sessionsTab: "💻 Active Sessions"
             }
         };
 
@@ -452,7 +460,7 @@
         async function loadDataFromCloud() {
             if(useFirebase) {
                 try {
-                    const snap = await db.collection("bilimal").doc("enterprise_v16_autolive").get();
+                    const snap = await db.collection("bilimal").doc("enterprise_v17_bpay").get();
                     if(snap.exists) {
                         let data = snap.data();
                         users = data.users || [];
@@ -472,6 +480,7 @@
                         bilimCards = data.bilimCards || {};
                         bilimSubscriptions = data.bilimSubscriptions || {};
                         subscriptionSettings = data.subscriptionSettings || { startDate: '', endDate: '' };
+                        bpayData = data.bpayData || {};
                     }
                 } catch(e) { console.error(e); }
             }
@@ -480,9 +489,9 @@
         async function saveDataToCloud() {
             if(useFirebase) {
                 try {
-                    await db.collection("bilimal").doc("enterprise_v16_autolive").set({
+                    await db.collection("bilimal").doc("enterprise_v17_bpay").set({
                         users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeLives, activeSessionsStore, bilimLimitSettings,
-                        bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings
+                        bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings, bpayData
                     });
                 } catch(e) { console.error(e); }
             }
@@ -825,6 +834,7 @@
                     { id: 'admin_bilimid', label: t.adminBilimID },
                     { id: 'admin_limit', label: t.adminLimit },
                     { id: 'admin_sub', label: t.adminSub },
+                    { id: 'admin_bpay', label: t.adminBPay },
                     { id: 'admin_announcement', label: t.adminAnn },
                     { id: 'admin_news', label: t.adminNews },
                     { id: 'admin_live', label: t.adminLive },
@@ -856,6 +866,7 @@
                     { id: 'parent_live', label: t.parentLive },
                     { id: 'parent_id', label: t.parentID },
                     { id: 'parent_sub', label: t.parentSub },
+                    { id: 'parent_bpay', label: t.parentBPay },
                     { id: 'sessions_management', label: t.sessionsTab },
                     { id: 'parent_support', label: t.parentSupport }
                 ];
@@ -870,6 +881,7 @@
                     { id: 'student_homework', label: t.studHw },
                     { id: 'student_contact', label: t.studContact },
                     { id: 'student_join', label: t.studJoin },
+                    { id: 'student_bpay', label: t.studBPay },
                     { id: 'sessions_management', label: t.sessionsTab },
                     { id: 'student_support', label: t.studSup },
                     { id: 'student_ai', label: t.studAI }
@@ -902,6 +914,85 @@
                         <div class="text-[11px] font-bold text-slate-700 bg-white p-3 rounded border border-amber-200 inline-block">
                             Себебі: ${bilimLimitSettings.reason || 'Көрсетілмеген'} <br>Мерзімі: ${bilimLimitSettings.startDate} — ${bilimLimitSettings.endDate}
                         </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // ================= B-PAY MODULE (STUDENT / PARENT / ADMIN) =================
+            if (activeTab === 'student_bpay' || activeTab === 'parent_bpay') {
+                let targetUn = currentUser.role === 'parent' ? currentUser.parentOf : currentUser.username;
+                let targetUserObj = users.find(u => u.username === targetUn);
+                let targetName = targetUserObj ? targetUserObj.name : currentUser.name;
+
+                if (!bpayData[targetUn]) {
+                    bpayData[targetUn] = { balance: 4500, history: [ { id: 'bp_1', amount: 4500, desc: 'Бастапқы мектеп асханасы мен оқу қоры балансы', date: getCurrentDateDDMMYYYY(), type: 'topup' } ] };
+                }
+                let uBpay = bpayData[targetUn];
+                let historyRows = (uBpay.history || []).map(h => `
+                    <tr class="text-xs">
+                        <td>${h.date}</td>
+                        <td>${h.desc}</td>
+                        <td class="font-bold ${h.type === 'topup' ? 'text-emerald-600' : 'text-red-600'}">${h.type === 'topup' ? '+' : '-'}${h.amount} ₸</td>
+                        <td><span class="px-2 py-0.5 rounded font-bold bg-emerald-50 text-emerald-700 text-[10px]">Сәтті аяқталды</span></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="4" class="text-center text-slate-400 py-3">Төлемдер тарихы бос</td></tr>';
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 B-Pay — Мектеп төлемдері мен электронды әмиян (${targetName})</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="p-5 bg-gradient-to-br from-blue-900 to-indigo-900 text-white rounded-2xl shadow-lg space-y-2 flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] uppercase tracking-wider text-blue-200 font-bold">B-Pay Балансы</span>
+                                <span class="text-lg">💳</span>
+                            </div>
+                            <div class="text-2xl font-black">${uBpay.balance.toLocaleString()} ₸</div>
+                            <div class="text-[10px] text-slate-300">Асхана, оқулықтар және үйірмелер үшін</div>
+                        </div>
+                        <div class="md:col-span-2 p-4 bg-slate-50 border rounded-2xl space-y-3">
+                            <h4 class="text-xs font-bold text-slate-800 uppercase">Балансты толтыру (Kaspi / Bank Card арқылы)</h4>
+                            <div class="flex gap-2">
+                                <input type="number" id="bpay-topup-amount" placeholder="Сома (мысалы: 2000)" class="flex-1 border rounded p-2 text-xs bg-white font-bold">
+                                <button onclick="topupBPayBalance('${targetUn}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs shadow">💳 Толықтыру</button>
+                            </div>
+                            <div class="flex gap-2 pt-1">
+                                <button onclick="payBPayService('${targetUn}', 850, 'Мектеп асханасы (Кешенді түскі ас)')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold shadow-xs">🍔 Асханадан түскі ас төлеу (850 ₸)</button>
+                                <button onclick="payBPayService('${targetUn}', 1500, 'Робототехника үйірмесі (Айлық)')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-bold shadow-xs">🤖 Үйірме төлеу (1500 ₸)</button>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Транзакциялар мен төлемдер тарихы</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full gov-table">
+                            <thead><tr><th>Күні / Уақыты</th><th>Атауы / Қызметі</th><th>Сомасы</th><th>Мәртебесі</th></tr></thead>
+                            <tbody>${historyRows}</tbody>
+                        </table>
+                    </div>
+                `;
+                return;
+            }
+
+            if (activeTab === 'admin_bpay') {
+                let allBpayRows = Object.keys(bpayData).length > 0 ? Object.keys(bpayData).map(un => {
+                    let uObj = users.find(x => x.username === un);
+                    let name = uObj ? uObj.name : un;
+                    let dat = bpayData[un];
+                    return `
+                        <tr class="text-xs">
+                            <td class="font-bold">${name} (@${un})</td>
+                            <td class="font-extrabold text-blue-900">${dat.balance.toLocaleString()} ₸</td>
+                            <td>${(dat.history || []).length} транзакция</td>
+                        </tr>
+                    `;
+                }).join('') : '<tr><td colspan="3" class="text-center text-slate-400 py-4">B-Pay деректері жоқ</td></tr>';
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 B-Pay Мониторингі (Барлық оқушылар әмияны)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full gov-table">
+                            <thead><tr><th>Оқушы аты-жөні</th><th>Қалдық балансы</th><th>Транзакциялар саны</th></tr></thead>
+                            <tbody>${allBpayRows}</tbody>
+                        </table>
                     </div>
                 `;
                 return;
@@ -1541,7 +1632,6 @@
                         </div>
                     `;
                 } else if (activeTab === 'teacher_schedule') {
-                    // TEACHER SCHEDULE: Teacher edits Topic and Homework for their class / subjects
                     let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
                     let myClassName = myClass ? myClass.name : '';
                     let teacherSchedules = schedules.filter(s => s.className === myClassName || s.teacherName === currentUser.name);
@@ -1955,7 +2045,56 @@
             }
         }
 
-        // ================= NEW/UPDATED FUNCTIONS FOR SCHEDULE LOGIC =================
+        // B-Pay Functions
+        async function topupBPayBalance(username) {
+            let amountInput = document.getElementById('bpay-topup-amount').value;
+            let amount = parseFloat(amountInput);
+            if (!amount || amount <= 0) {
+                showIosToast(false, "Сәтсіз!", "Дұрыс соманы енгізіңіз!");
+                return;
+            }
+
+            showSpinner("B-Pay балансы толтырылуда...");
+            if (!bpayData[username]) {
+                bpayData[username] = { balance: 0, history: [] };
+            }
+            bpayData[username].balance += amount;
+            bpayData[username].history.unshift({
+                id: 'bp_' + Math.random().toString(36).substring(2, 7),
+                amount: amount,
+                desc: 'Kaspi / Bank Card арқылы балансты толтыру',
+                date: getCurrentDateDDMMYYYY(),
+                type: 'topup'
+            });
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `Баланс ${amount.toLocaleString()} ₸ сомасына сәтті толтырылды!`);
+            renderTabContent();
+        }
+
+        async function payBPayService(username, amount, serviceName) {
+            if (!bpayData[username] || bpayData[username].balance < amount) {
+                showIosToast(false, "Сәтсіз!", "Баланста қаражат жеткіліксіз! Алдымен балансты толтырыңыз.");
+                return;
+            }
+
+            showSpinner("Төлем жасалуда...");
+            bpayData[username].balance -= amount;
+            bpayData[username].history.unshift({
+                id: 'bp_' + Math.random().toString(36).substring(2, 7),
+                amount: amount,
+                desc: serviceName,
+                date: getCurrentDateDDMMYYYY(),
+                type: 'payment'
+            });
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `"${serviceName"}" үшін ${amount} ₸ төленді!`);
+            renderTabContent();
+        }
+
         async function saveScheduleByAdmin() {
             let className = document.getElementById('sched-class').value;
             let day = document.getElementById('sched-day').value;
@@ -2909,6 +3048,7 @@
                 users = users.filter(u => u.username !== username);
                 delete bilimCards[username];
                 delete bilimSubscriptions[username];
+                delete bpayData[username];
                 await saveDataToCloud();
                 hideSpinner();
                 showIosToast(true, "Сәтті!", "Қолданушы жойылды.");
@@ -2984,7 +3124,7 @@
                 showSpinner("Сынып пен деректер тазартылуда...");
                 let studentUsernames = targetClass.students || [];
                 studentUsernames.forEach(sUser => {
-                    delete grades[sUser]; delete attendance[sUser]; delete bilimCards[sUser]; delete bilimSubscriptions[sUser];
+                    delete grades[sUser]; delete attendance[sUser]; delete bilimCards[sUser]; delete bilimSubscriptions[sUser]; delete bpayData[sUser];
                 });
                 users = users.filter(u => {
                     if (studentUsernames.includes(u.username)) return false;
@@ -3016,3 +3156,4 @@
     </script>
 </body>
 </html>
+♡
