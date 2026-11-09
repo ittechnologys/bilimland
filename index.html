@@ -134,6 +134,12 @@
                     <button type="submit" id="btn-login" class="w-full py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded font-bold text-xs shadow transition-all">Кіру</button>
                     
                     <div class="pt-1">
+                        <button type="button" onclick="openBPayLoginModal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all">
+                            <span>💳</span> B-Pay арқылы кіру
+                        </button>
+                    </div>
+
+                    <div class="pt-1">
                         <button type="button" onclick="handleBiometricLoginClick()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs flex items-center justify-center gap-2 border border-slate-300 transition-all shadow-xs">
                             <span>🔒</span> Touch ID / Face ID арқылы кіру
                         </button>
@@ -203,6 +209,111 @@
 
                 <div id="active-content-panel" class="bg-white p-4 md:p-5 rounded-xl shadow-sm border border-slate-200 min-h-[550px] animate-fade"></div>
             </main>
+        </div>
+    </div>
+
+    <!-- B-Pay Login Modal -->
+    <div id="bpay-login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50 animate-fade">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full relative border border-slate-200 space-y-4">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-2">💳</div>
+                <h3 class="text-base font-extrabold text-slate-900">B-Pay арқылы кіру</h3>
+                <p class="text-xs text-slate-500 mt-1">BilimAL экожүйесінің қаржылық кілті</p>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Өзіңіздің B-Pay ID-ді жазыңыз:</label>
+                <input type="text" id="bpay-id-input" placeholder="Мысалы: BP-84920" class="w-full border rounded p-2 text-xs bg-slate-50 font-mono font-bold text-emerald-700 focus:outline-none focus:border-emerald-600">
+            </div>
+            <div id="bpay-login-error" class="hidden text-red-600 text-xs text-center font-bold bg-red-50 p-2 rounded"></div>
+            <button type="button" onclick="confirmBPayLogin()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs shadow transition-all">Растау және кіру</button>
+            <div class="text-center pt-2">
+                <button type="button" onclick="openBPayRegisterModal()" class="text-xs text-blue-600 font-bold hover:underline">B-Pay ID жоқ па? Қазір жасаңыз!</button>
+            </div>
+            <button type="button" onclick="closeBPayModals()" class="w-full py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs transition-all">Болдырмау</button>
+        </div>
+    </div>
+
+    <!-- B-Pay Register / Offer Modal -->
+    <div id="bpay-register-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50 animate-fade">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full relative border border-slate-200 space-y-4">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-2">📄</div>
+                <h3 class="text-base font-extrabold text-slate-900">B-Pay Тіркелу офертасы</h3>
+                <p class="text-xs text-slate-500 mt-1">BilimAL жүйесімен автоматты байланысу</p>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Аты-жөніңіз:</label>
+                    <input type="text" id="bpay-reg-name" placeholder="Толық аты-жөніңіз..." class="w-full border rounded p-2 text-xs bg-slate-50">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">BilimAL жүйеге тіркелгенсіз бе?</label>
+                    <select id="bpay-reg-exists" onchange="toggleBPayBilimMatch(this.value)" class="w-full border rounded p-2 text-xs font-bold bg-slate-50 text-blue-700">
+                        <option value="no">Жоқ (Жаңа аккаунт ашу)</option>
+                        <option value="yes">Иә (Бар журнал профилін байланыстыру)</option>
+                    </select>
+                </div>
+                <div id="bpay-bilim-match-box" class="hidden space-y-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <label class="block text-[10px] font-bold text-blue-900 uppercase">BilimAL Логині мен Паролі:</label>
+                    <input type="text" id="bpay-bilim-user" placeholder="BilimAL логиніңіз" class="w-full border rounded p-1.5 text-xs bg-white mb-1">
+                    <input type="password" id="bpay-bilim-pass" placeholder="BilimAL пароліңіз" class="w-full border rounded p-1.5 text-xs bg-white">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Логин ойлап табыңыз (B-Pay):</label>
+                    <input type="text" id="bpay-reg-username" placeholder="Бірегей логин..." class="w-full border rounded p-2 text-xs bg-slate-50">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Сенімді құпиясөз жасаңыз:</label>
+                    <input type="password" id="bpay-reg-pass" placeholder="••••••••" class="w-full border rounded p-2 text-xs bg-slate-50">
+                </div>
+            </div>
+            <button type="button" onclick="confirmBPayRegistration()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow transition-all">Тіркелу және B-ID алу</button>
+            <button type="button" onclick="closeBPayModals()" class="w-full py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs transition-all">Болдырмау</button>
+        </div>
+    </div>
+
+    <!-- Kaspi-Style Payment Modal -->
+    <div id="kaspi-payment-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50 animate-fade">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-200 animate-fade">
+            <div class="bg-red-600 text-white p-4 text-center relative">
+                <div class="text-lg font-black tracking-wider">Kaspi Pay</div>
+                <div class="text-[10px] text-red-100 font-medium">Қауіпсіз төлем жүйесі</div>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="p-3 bg-slate-50 rounded-xl border text-xs space-y-1.5">
+                    <div class="flex justify-between text-slate-500"><span>Компания / Холдинг:</span><b id="pay-modal-holding" class="text-slate-900">BilimAL Education & Tech</b></div>
+                    <div class="flex justify-between text-slate-500"><span>Төлем мақсаты:</span><b id="pay-modal-title" class="text-blue-700">Робототехника үйірмесі</b></div>
+                    <div class="flex justify-between text-slate-500"><span>Төлем сомасы:</span><b id="pay-modal-amount" class="text-slate-900 text-sm font-black">15 000 ₸</b></div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Қолданылатын карта / Баланс:</label>
+                    <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs font-bold text-amber-900">
+                        <span>💳 Kaspi Gold *4821</span>
+                        <span id="pay-modal-user-balance" class="text-emerald-700">Баланс: 45 000 ₸</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Төлеу тәсілі:</label>
+                    <select id="pay-modal-method" class="w-full border rounded-xl p-2.5 text-xs font-bold bg-slate-50 text-slate-800">
+                        <option value="one">Біржолғы төлем (Толық)</option>
+                        <option value="split2">Бөліп төлеу (2 ай)</option>
+                        <option value="split3">Бөліп төлеу (3 ай)</option>
+                    </select>
+                </div>
+
+                <div id="kaspi-success-animation" class="hidden text-center py-4 space-y-2 animate-fade">
+                    <div class="w-16 h-16 bg-emerald-500 text-white rounded-full mx-auto flex items-center justify-center text-3xl font-black shadow-lg animate-bounce">✓</div>
+                    <div class="text-sm font-extrabold text-emerald-700">Төлем сәтті өтті!</div>
+                    <p class="text-[10px] text-slate-400">Сұраныс BilimAL базасына тіркелді.</p>
+                </div>
+
+                <div id="kaspi-buttons-box" class="space-y-2 pt-1">
+                    <button type="button" onclick="executeKaspiPayment()" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-md transition-all">Төлеу</button>
+                    <button type="button" onclick="closeKaspiPaymentModal()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-xs transition-all">Бас тарту</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -315,6 +426,11 @@
         let bilimSubscriptions = {}; 
         let subscriptionSettings = { startDate: '', endDate: '' };
 
+        // B-Pay & Vouchers Stores
+        let bpayAccounts = {}; // b_pay_id -> { balance, dailyLimit, userUsername }
+        let vouchersList = []; // Array of vouchers created by admin
+        let teacherReports = []; // Array of reports submitted by teachers
+
         let tempQuestions = [];
         let html5QrScanner = null;
 
@@ -376,16 +492,18 @@
                 adminUsers: "👥 Логин/парольдер & Ата-ана", adminAnn: "📢 Хабарландыру", adminNews: "📰 Жаңалықтар",
                 adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Қолдау кірістері", adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Басқару", adminLimit: "⏳ BilimLimit (Шектеу)", adminSub: "📜 BilimSubscription (Табельдер)",
+                adminVouchers: "💳 B-Pay Ваучерлер", adminReports: "📑 Мұғалім есептері",
                 teachJorn: "📖 Бағалар журналы", teachAtt: "📋 Қатысу журналы", teachClass: "➕ Сынып ашу (DCA)",
                 teachSched: "📅 Сабақ кестесі", teachNews: "📰 Жаңалықтар", teachLive: "🔴 AutoLIVE Студия",
                 teachKtp: "📑 КТЖ (Күнтізбелік жоспар)", teachSup: "🛟 Қолдау қызметі", teachAI: "🤖 TeachGPT",
                 teachTest: "📝 BilimTest (Тест)", teachCheckID: "🔍 CheckID (Камера)", teachID: "🪪 Менің BilimID-ім",
+                teachReportSubmit: "📤 Тоқсандық есеп тапсыру",
                 studGrades: "📊 Менің бағаларым", studSched: "📅 Менің кестем", studHw: "📚 Үй тапсырмасы",
                 studNews: "📰 Жаңалықтар", studLive: "🔴 AutoLIVE Сабақтар", studContact: "💬 Мұғаліммен байланыс",
                 studJoin: "🔑 DCA кодпен қосылу", studSup: "🛟 Қолдау", studAI: "🤖 Study-GPT", studTest: "📝 BilimTest Тапсыру",
                 studID: "🪪 Менің BilimID-ім", parentGrades: "👨‍👩‍👧 Баланың бағалары", parentSched: "📅 Баланың кестесі",
                 parentNews: "📰 Жаңалықтар", parentLive: "🔴 AutoLIVE Сабақтар", parentSupport: "🛟 Қолдау қызметі",
-                parentID: "🪪 Баланың BilimID-і", parentSub: "📜 BilimSubscription (Табель қол қою)", sessionsTab: "💻 Белсенді сеанстар"
+                parentID: "🪪 Баланың BilimID-і", parentSub: "📜 BilimSubscription (Табель қол қою)", parentBPay: "💳 B-Pay & Оқу төлемі", sessionsTab: "💻 Белсенді сеанстар"
             },
             ru: {
                 subtitle: "Единая школьная система и платформа", loginTitle: "Вход в систему", loginSub: "Электронный журнал BilimAL",
@@ -395,15 +513,16 @@
                 adminUsers: "👥 Пользователи и Родители", adminAnn: "📢 Объявления", adminNews: "📰 Новости",
                 adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Входящие тикеты", adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 Управление BilimID", adminLimit: "⏳ BilimLimit (Лимиты)", adminSub: "📜 BilimSubscription (Табели)",
+                adminVouchers: "💳 Ваучеры B-Pay", adminReports: "📑 Отчеты учителей",
                 teachJorn: "📖 Журнал оценок", teachAtt: "📋 Посещаемость", teachClass: "➕ Создать класс (DCA)",
                 teachSched: "📅 Расписание", teachNews: "📰 Новости", teachLive: "🔴 AutoLIVE Студия",
                 teachKtp: "📑 КТП", teachSup: "🛟 Поддержка", teachAI: "🤖 TeachGPT", teachTest: "📝 BilimTest (Тесты)",
-                teachCheckID: "🔍 CheckID (Камера)", teachID: "🪪 Мой BilimID", studGrades: "📊 Мои оценки",
-                studSched: "📅 Мое расписание", studHw: "📚 Домашка", studNews: "📰 Новости", studLive: "🔴 AutoLIVE Уроки",
+                teachCheckID: "🔍 CheckID (Камера)", teachID: "🪪 Мой BilimID", teachReportSubmit: "📤 Сдать отчет",
+                studGrades: "📊 Мои оценки", studSched: "📅 Мое расписание", studHw: "📚 Домашка", studNews: "📰 Новости", studLive: "🔴 AutoLIVE Уроки",
                 studContact: "💬 Связь с учителем", studJoin: "🔑 Вступить по DCA коду", studSup: "🛟 Поддержка",
                 studAI: "🤖 Study-GPT", studTest: "📝 Пройти BilimTest", studID: "🪪 Мой BilimID", parentGrades: "👨‍👩‍👧 Оценки ребенка",
                 parentSched: "📅 Расписание ребенка", parentNews: "📰 Новости", parentLive: "🔴 AutoLIVE Уроки",
-                parentSupport: "🛟 Поддержка", parentID: "🪪 BilimID ребенка", parentSub: "📜 BilimSubscription (Подпись)", sessionsTab: "💻 Активные сеансы"
+                parentSupport: "🛟 Поддержка", parentID: "🪪 BilimID ребенка", parentSub: "📜 BilimSubscription (Подпись)", parentBPay: "💳 B-Pay и Оплата", sessionsTab: "💻 Активные сеансы"
             },
             en: {
                 subtitle: "Unified School System and Platform", loginTitle: "Sign In", loginSub: "BilimAL Electronic Journal",
@@ -413,14 +532,16 @@
                 adminUsers: "👥 Users & Parents", adminAnn: "📢 Announcements", adminNews: "📰 News",
                 adminLive: "🔴 AutoLIVE Monitoring", adminSupport: "🛟 Support Tickets", adminAI: "🤖 Admin-GPT",
                 adminBilimID: "🪪 BilimID Manage", adminLimit: "⏳ BilimLimit", adminSub: "📜 BilimSubscription",
+                adminVouchers: "💳 B-Pay Vouchers", adminReports: "📑 Teacher Reports",
                 teachJorn: "📖 Gradebook", teachAtt: "📋 Attendance", teachClass: "➕ Create Class (DCA)",
                 teachSched: "📅 Schedule", teachNews: "📰 News", teachLive: "🔴 AutoLIVE Studio", teachKtp: "📑 KTP",
                 teachSup: "🛟 Support", teachAI: "🤖 TeachGPT", teachTest: "📝 BilimTest", teachCheckID: "🔍 CheckID (Camera)",
-                teachID: "🪪 My BilimID", studGrades: "📊 My Grades", studSched: "📅 My Schedule", studHw: "📚 Homework",
+                teachID: "🪪 My BilimID", teachReportSubmit: "📤 Submit Report",
+                studGrades: "📊 My Grades", studSched: "📅 My Schedule", studHw: "📚 Homework",
                 studNews: "📰 News", studLive: "🔴 AutoLIVE Lessons", studContact: "💬 Contact", studJoin: "🔑 Join via DCA Code",
                 studSup: "🛟 Support", studAI: "🤖 Study-GPT", studTest: "📝 Pass BilimTest", studID: "🪪 My BilimID",
                 parentGrades: "👨‍👩‍👧 Child Grades", parentSched: "📅 Child Schedule", parentNews: "📰 News",
-                parentLive: "🔴 AutoLIVE Lessons", parentSupport: "🛟 Support", parentID: "🪪 Child BilimID", parentSub: "📜 BilimSubscription", sessionsTab: "💻 Active Sessions"
+                parentLive: "🔴 AutoLIVE Lessons", parentSupport: "🛟 Support", parentID: "🪪 Child BilimID", parentSub: "📜 BilimSubscription", parentBPay: "💳 B-Pay & Pay", sessionsTab: "💻 Active Sessions"
             }
         };
 
@@ -472,6 +593,9 @@
                         bilimCards = data.bilimCards || {};
                         bilimSubscriptions = data.bilimSubscriptions || {};
                         subscriptionSettings = data.subscriptionSettings || { startDate: '', endDate: '' };
+                        bpayAccounts = data.bpayAccounts || {};
+                        vouchersList = data.vouchersList || [];
+                        teacherReports = data.teacherReports || [];
                     }
                 } catch(e) { console.error(e); }
             }
@@ -482,7 +606,8 @@
                 try {
                     await db.collection("bilimal").doc("enterprise_v16_autolive").set({
                         users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeLives, activeSessionsStore, bilimLimitSettings,
-                        bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings
+                        bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings,
+                        bpayAccounts, vouchersList, teacherReports
                     });
                 } catch(e) { console.error(e); }
             }
@@ -501,6 +626,153 @@
             document.getElementById('menu-title').innerText = t.menuTitle;
             document.getElementById('footer-text').innerText = t.footer;
             if(currentUser) renderSidebar();
+        }
+
+        // ================= B-PAY MODAL & AUTH LOGIC =================
+        function openBPayLoginModal() {
+            document.getElementById('bpay-login-modal').classList.remove('hidden');
+        }
+
+        function closeBPayModals() {
+            document.getElementById('bpay-login-modal').classList.add('hidden');
+            document.getElementById('bpay-register-modal').classList.add('hidden');
+        }
+
+        function openBPayRegisterModal() {
+            document.getElementById('bpay-login-modal').classList.add('hidden');
+            document.getElementById('bpay-register-modal').classList.remove('hidden');
+        }
+
+        function toggleBPayBilimMatch(val) {
+            let box = document.getElementById('bpay-bilim-match-box');
+            if(val === 'yes') box.classList.remove('hidden');
+            else box.classList.add('hidden');
+        }
+
+        async function confirmBPayLogin() {
+            let bpId = document.getElementById('bpay-id-input').value.trim();
+            let errDiv = document.getElementById('bpay-login-error');
+
+            await loadDataFromCloud();
+            let acc = bpayAccounts[bpId];
+
+            if(!acc) {
+                errDiv.innerText = "Мұндай B-Pay ID табылмады!";
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            let targetUser = users.find(u => u.username === acc.userUsername);
+            if(!targetUser) {
+                errDiv.innerText = "Байланысқан қолданушы табылмады!";
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            closeBPayModals();
+            registerAndCheckSession(targetUser);
+        }
+
+        async function confirmBPayRegistration() {
+            let name = document.getElementById('bpay-reg-name').value.trim();
+            let hasBilim = document.getElementById('bpay-reg-exists').value;
+            let username = document.getElementById('bpay-reg-username').value.trim();
+            let password = document.getElementById('bpay-reg-pass').value.trim();
+
+            if(!name || !username || !password) {
+                showIosToast(false, "Сәтсіз!", "Барлық өрістерді толтырыңыз!");
+                return;
+            }
+
+            showSpinner("B-Pay ID генерациялануда...");
+            let assignedUsername = username;
+
+            if(hasBilim === 'yes') {
+                let bilimUser = document.getElementById('bpay-bilim-user').value.trim();
+                let bilimPass = document.getElementById('bpay-bilim-pass').value.trim();
+                let foundBilim = users.find(u => u.username === bilimUser && u.password === bilimPass);
+
+                if(!foundBilim) {
+                    hideSpinner();
+                    showIosToast(false, "Сәтсіз!", "BilimAL логин немесе пароль қате!");
+                    return;
+                }
+                assignedUsername = foundBilim.username;
+            } else {
+                if(users.some(u => u.username === username)) {
+                    hideSpinner();
+                    showIosToast(false, "Сәтсіз!", "Бұл логин бос емес!");
+                    return;
+                }
+                users.push({ name, username, password, role: 'parent', parentOf: '', warningReason: '', status: 'active' });
+            }
+
+            let newBpId = 'BP-' + Math.floor(10000 + Math.random() * 90000);
+            bpayAccounts[newBpId] = {
+                b_pay_id: newBpId,
+                balance: 50000, // Initial testing balance for Kaspi SuperApp
+                dailyLimit: 2000,
+                userUsername: assignedUsername
+            };
+
+            await saveDataToCloud();
+            hideSpinner();
+            closeBPayModals();
+            showIosToast(true, "Сәтті!", `B-Pay аккаунт құрылды! Сіздің B-Pay ID: ${newBpId}`);
+
+            let createdUser = users.find(u => u.username === assignedUsername);
+            if(createdUser) registerAndCheckSession(createdUser);
+        }
+
+        // ================= KASPI STYLE PAYMENT MODAL =================
+        let currentPayingVoucher = null;
+
+        function openKaspiPaymentModal(voucherId) {
+            let v = vouchersList.find(x => x.id === voucherId);
+            if(!v) return;
+            currentPayingVoucher = v;
+
+            document.getElementById('pay-modal-holding').innerText = v.holding || "BilimAL Education & Tech";
+            document.getElementById('pay-modal-title').innerText = v.title;
+            document.getElementById('pay-modal-amount').innerText = v.amount.toLocaleString() + " ₸";
+
+            let userBpAcc = Object.values(bpayAccounts).find(acc => acc.userUsername === currentUser.username);
+            let userBal = userBpAcc ? userBpAcc.balance : 50000;
+            document.getElementById('pay-modal-user-balance').innerText = "Баланс: " + userBal.toLocaleString() + " ₸";
+
+            document.getElementById('kaspi-success-animation').classList.add('hidden');
+            document.getElementById('kaspi-buttons-box').classList.remove('hidden');
+            document.getElementById('kaspi-payment-modal').classList.remove('hidden');
+        }
+
+        function closeKaspiPaymentModal() {
+            document.getElementById('kaspi-payment-modal').classList.add('hidden');
+        }
+
+        async function executeKaspiPayment() {
+            if(!currentPayingVoucher) return;
+            showSpinner("Kaspi Pay арқылы төлеу...");
+
+            let userBpAcc = Object.values(bpayAccounts).find(acc => acc.userUsername === currentUser.username);
+            if(userBpAcc) {
+                userBpAcc.balance -= currentPayingVoucher.amount;
+            }
+
+            currentPayingVoucher.paid = true;
+            currentPayingVoucher.paidBy = currentUser.name;
+            currentPayingVoucher.paidAt = getCurrentFormattedDateTime();
+
+            await saveDataToCloud();
+            hideSpinner();
+
+            document.getElementById('kaspi-buttons-box').classList.add('hidden');
+            document.getElementById('kaspi-success-animation').classList.remove('hidden');
+
+            setTimeout(() => {
+                closeKaspiPaymentModal();
+                showIosToast(true, "Төлем сәтті!", "Kaspi Pay арқылы төлем жасалды!");
+                renderTabContent();
+            }, 2000);
         }
 
         function openBilimWebQRModal() {
@@ -825,6 +1097,8 @@
                     { id: 'admin_bilimid', label: t.adminBilimID },
                     { id: 'admin_limit', label: t.adminLimit },
                     { id: 'admin_sub', label: t.adminSub },
+                    { id: 'admin_vouchers', label: t.adminVouchers },
+                    { id: 'admin_reports', label: t.adminReports },
                     { id: 'admin_announcement', label: t.adminAnn },
                     { id: 'admin_news', label: t.adminNews },
                     { id: 'admin_live', label: t.adminLive },
@@ -841,6 +1115,7 @@
                     { id: 'teacher_checkid', label: t.teachCheckID },
                     { id: 'teacher_id', label: t.teachID },
                     { id: 'teacher_schedule', label: t.teachSched },
+                    { id: 'teacher_report_submit', label: t.teachReportSubmit },
                     { id: 'teacher_news', label: t.teachNews },
                     { id: 'teacher_live', label: t.teachLive },
                     { id: 'teacher_ktp', label: t.teachKtp },
@@ -852,6 +1127,7 @@
                 links = [
                     { id: 'parent_grades', label: t.parentGrades },
                     { id: 'parent_schedule', label: t.parentSched },
+                    { id: 'parent_bpay', label: t.parentBPay },
                     { id: 'parent_news', label: t.parentNews },
                     { id: 'parent_live', label: t.parentLive },
                     { id: 'parent_id', label: t.parentID },
@@ -943,265 +1219,171 @@
                 return;
             }
 
-            // ================= AUTO-LIVE STUDIO (TEACHER) =================
-            if (activeTab === 'teacher_live') {
-                let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
-                let myLive = activeLives[currentUser.username];
+            // ================= ADMIN VOUCHERS TAB =================
+            if (activeTab === 'admin_vouchers') {
+                let totalRev = vouchersList.filter(v => v.paid).reduce((acc, v) => acc + v.amount, 0);
+                let pendingRev = vouchersList.filter(v => !v.paid).reduce((acc, v) => acc + v.amount, 0);
 
-                if (!myLive) {
-                    panel.innerHTML = `
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🔴 AutoLIVE Студия (Тікелей эфир бастау)</h3>
-                        <div class="p-4 bg-slate-50 border rounded-xl max-w-xl space-y-3">
-                            <div class="text-xs font-bold text-slate-700">Сыныбыңыз: <span class="text-blue-700">${myClass ? myClass.name : 'Сынып тіркелмеген'}</span></div>
+                let voucherRows = vouchersList.length > 0 ? vouchersList.map((v, idx) => `
+                    <tr class="text-xs">
+                        <td class="font-bold">${v.holding}</td>
+                        <td><b>${v.title}</b></td>
+                        <td>${v.manager}</td>
+                        <td class="font-extrabold text-blue-700">${v.amount.toLocaleString()} ₸</td>
+                        <td><span class="px-2 py-0.5 rounded font-bold ${v.paid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${v.paid ? 'Төленді ✅' : 'Күтілуде ⏳'}</span></td>
+                        <td><button onclick="deleteVoucher(${idx})" class="px-2 py-1 bg-red-600 text-white rounded font-bold text-[10px]">Жою</button></td>
+                    </tr>
+                `).join('') : '<tr><td colspan="6" class="text-center text-slate-400 py-4">Ваучерлер әлі жасалмаған</td></tr>';
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 B-Pay Ваучерлер мен Қаржылық Мониторинг (Админ)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                            <div class="text-[10px] font-bold uppercase text-emerald-800">Жалпы түскен қаржы (Total Revenue):</div>
+                            <div class="text-xl font-black text-emerald-900 mt-1">${totalRev.toLocaleString()} ₸</div>
+                        </div>
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                            <div class="text-[10px] font-bold uppercase text-amber-800">Әлі төленбеген қарыз (Pending Payments):</div>
+                            <div class="text-xl font-black text-amber-900 mt-1">${pendingRev.toLocaleString()} ₸</div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50 border rounded-xl space-y-3 max-w-xl mb-6">
+                        <h4 class="text-xs font-bold text-slate-800 uppercase">Жаңа ваучер (үйірме/оқу ақысы) жасау</h4>
+                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Холдинг / Мектеп атауы:</label><input type="text" id="v-holding" value="BilimAL Education & Tech / №45 мектеп" class="w-full border rounded p-2 text-xs bg-white"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Үйірме / Курс атауы:</label><input type="text" id="v-title" placeholder="Мысалы: Робототехника негіздері" class="w-full border rounded p-2 text-xs bg-white"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Басшысы / Мұғалімі:</label><input type="text" id="v-manager" placeholder="Асқар Нұрұлы" class="w-full border rounded p-2 text-xs bg-white"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Айлық төлем сомасы (₸):</label><input type="number" id="v-amount" placeholder="15000" class="w-full border rounded p-2 text-xs bg-white"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Сипаттамасы:</label><textarea id="v-desc" rows="2" class="w-full border rounded p-2 text-xs bg-white" placeholder="Қысқаша ақпарат..."></textarea></div>
+                        <button onclick="createVoucherByAdmin()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow">Ваучерді жасақтау және жариялау</button>
+                    </div>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Барлық ваучерлер тізімі</h4>
+                    <div class="overflow-x-auto"><table class="w-full gov-table"><thead><tr><th>Холдинг</th><th>Атауы</th><th>Басшысы</th><th>Сомасы</th><th>Статусы</th><th>Әрекет</th></tr></thead><tbody>${voucherRows}</tbody></table></div>
+                `;
+                return;
+            }
+
+            // ================= ADMIN TEACHER REPORTS TAB =================
+            if (activeTab === 'admin_reports') {
+                let reportRows = teacherReports.length > 0 ? teacherReports.map((r, idx) => `
+                    <tr class="text-xs">
+                        <td class="font-bold">${r.teacherName}</td>
+                        <td>${r.subjectOrClass}</td>
+                        <td>${r.timestamp}</td>
+                        <td><span class="px-2 py-0.5 rounded font-bold ${r.status === 'accepted' ? 'bg-emerald-100 text-emerald-800' : r.status === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}">${r.status === 'accepted' ? 'Қабылданды ✅' : r.status === 'rejected' ? 'Қабылданбады ❌' : 'Тексеруде ⏳'}</span></td>
+                        <td>
+                            <button onclick="viewTeacherReport(${idx})" class="px-2.5 py-1 bg-indigo-600 text-white rounded font-bold text-[10px] mr-1">Қарау</button>
+                            <button onclick="decideTeacherReport(${idx}, 'accepted')" class="px-2.5 py-1 bg-emerald-600 text-white rounded font-bold text-[10px] mr-1">Қабылдау ✅</button>
+                            <button onclick="decideTeacherReport(${idx}, 'rejected')" class="px-2.5 py-1 bg-red-600 text-white rounded font-bold text-[10px]">Қабылдамау ❌</button>
+                        </td>
+                    </tr>
+                `).join('') : '<tr><td colspan="5" class="text-center text-slate-400 py-4">Мұғалімдерден есептер түспеген</td></tr>';
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📑 Мұғалімдердің тоқсандық есептері (Админ панелі)</h3>
+                    <div class="overflow-x-auto mb-4">
+                        <table class="w-full gov-table">
+                            <thead><tr><th>Мұғалім аты-жөні</th><th>Пәні / Сыныбы</th><th>Жіберілген уақыты</th><th>Мәртебесі</th><th>Әрекеттер</th></tr></thead>
+                            <tbody>${reportRows}</tbody>
+                        </table>
+                    </div>
+                    <div id="admin-report-view-box" class="p-4 bg-slate-50 border rounded-xl hidden space-y-2">
+                        <h4 class="text-xs font-extrabold text-blue-900 uppercase">Есеп мазмұны:</h4>
+                        <p id="admin-report-content-text" class="text-xs text-slate-700 bg-white p-3 rounded border"></p>
+                    </div>
+                `;
+                return;
+            }
+
+            // ================= PARENT B-PAY & VOUCHERS TAB =================
+            if (activeTab === 'parent_bpay') {
+                let childUsername = currentUser.parentOf;
+                let childObj = users.find(u => u.username === childUsername);
+                let childName = childObj ? childObj.name : 'Бала';
+
+                let userBpAcc = Object.values(bpayAccounts).find(acc => acc.userUsername === currentUser.username) || { b_pay_id: 'BP-XXXXX', balance: 50000, dailyLimit: 2000 };
+
+                let vouchersHTML = vouchersList.length > 0 ? vouchersList.map(v => `
+                    <div class="p-4 bg-white border rounded-xl shadow-xs flex justify-between items-center">
+                        <div>
+                            <div class="text-xs font-extrabold text-blue-900">${v.title}</div>
+                            <div class="text-[10px] text-slate-500">Мұғалім/Жетекші: ${v.manager} | Сомасы: <b class="text-slate-900">${v.amount.toLocaleString()} ₸</b></div>
+                        </div>
+                        <div>
+                            ${v.paid ? `
+                                <span class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded font-bold text-xs">Төленді ✅</span>
+                            ` : `
+                                <button onclick="openKaspiPaymentModal('${v.id}')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow">💳 Kaspi Style Төлеу</button>
+                            `}
+                        </div>
+                    </div>
+                `).join('') : '<p class="text-xs text-slate-400">Әлі белсенді ваучерлер жоқ.</p>';
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 B-Pay & Оқу төлемдері (SuperApp)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="p-4 bg-emerald-600 text-white rounded-2xl shadow-lg space-y-1">
+                            <div class="text-[10px] font-bold text-emerald-200 uppercase">B-Pay Балансығыңыз:</div>
+                            <div class="text-2xl font-black">${userBpAcc.balance.toLocaleString()} ₸</div>
+                            <div class="text-[10px] text-emerald-100">Валюта: KZT (Теңге)</div>
+                        </div>
+                        <div class="p-4 bg-blue-900 text-white rounded-2xl shadow-lg space-y-1">
+                            <div class="text-[10px] font-bold text-blue-200 uppercase">Ваших B-Pay ID:</div>
+                            <div class="text-xl font-mono font-black">${userBpAcc.b_pay_id}</div>
+                            <div class="text-[10px] text-blue-200">Бала: ${childName}</div>
+                        </div>
+                        <div class="p-4 bg-white border rounded-2xl shadow-xs space-y-2">
+                            <h4 class="text-xs font-bold text-slate-800 uppercase">Баланың шотына ақша аудару</h4>
+                            <input type="number" id="transfer-amount" placeholder="Сома (₸)" class="w-full border rounded p-1.5 text-xs bg-slate-50">
+                            <button onclick="transferToChildBalance()" class="w-full py-1.5 bg-blue-600 text-white rounded font-bold text-xs">Ақша аудару</button>
+                        </div>
+                    </div>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-3">📖 «Оқу» бөлімі және Белсенді Ваучерлер</h4>
+                    <div class="space-y-3 max-w-2xl">${vouchersHTML}</div>
+                `;
+                return;
+            }
+
+            // ================= TEACHER REPORT SUBMIT TAB =================
+            if (activeTab === 'teacher_report_submit') {
+                let mySubmittedReports = teacherReports.filter(r => r.teacherUsername === currentUser.username).map(r => `
+                    <div class="p-3 bg-white border rounded-lg space-y-1 text-xs">
+                        <div class="flex justify-between font-bold">
+                            <span class="text-blue-900">${r.subjectOrClass}</span>
+                            <span class="${r.status === 'accepted' ? 'text-emerald-600' : r.status === 'rejected' ? 'text-red-600' : 'text-amber-600'}">${r.status === 'accepted' ? 'Қабылданды ✅' : r.status === 'rejected' ? 'Қабылданбады ❌' : 'Тексеруде ⏳'}</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400">${r.timestamp}</div>
+                        <p class="text-slate-700">${r.text}</p>
+                    </div>
+                `).join('') || '<p class="text-xs text-slate-400">Сіз әлі есеп жібермедіңіз.</p>';
+
+                panel.innerHTML = `
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📤 Тоқсандық есеп тапсыру (Мұғалім)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
+                            <h4 class="text-xs font-bold text-slate-800 uppercase">Есеп жіберу әдісі</h4>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Сабақ тақырыбы:</label>
-                                <input type="text" id="studio-live-title" placeholder="Мысалы: Квадрат теңдеулерді шешу жолдары" class="w-full border rounded p-2 text-xs bg-white">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Сыныпты таңдаңыз:</label>
-                                <select id="studio-live-class" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">
-                                    ${myClass ? `<option value="${myClass.name}">${myClass.name}</option>` : '<option value="">Сынып жоқ</option>'}
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Таңдаңыз:</label>
+                                <select id="report-type-select" onchange="toggleReportType(this.value)" class="w-full border rounded p-2 text-xs font-bold bg-white">
+                                    <option value="auto">⚡ Автоматты түрде (Журналдан генерациялау)</option>
+                                    <option value="manual">✍️ Қолмен енгізу (Толық есеп мәтіні)</option>
                                 </select>
                             </div>
-                            <button onclick="startAutoLiveStudio()" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow">🔴 Сайт ішілік AutoLIVE бастау</button>
-                        </div>
-                    `;
-                } else {
-                    let viewersCount = (myLive.viewers || []).length;
-                    let chatHTML = (myLive.chat || []).map(c => `
-                        <div class="p-2 border-b text-xs">
-                            <b class="${c.senderRole === 'admin' ? 'text-purple-700' : 'text-blue-800'}">${c.senderName}:</b> ${c.text}
-                        </div>
-                    `).join('') || '<div class="text-slate-400 text-center py-4">Чат бос...</div>';
-
-                    let guestsHTML = (myLive.guests || []).map(g => `
-                        <div class="p-2 bg-emerald-50 border border-emerald-200 rounded text-xs flex justify-between items-center">
-                            <span>🎙️ ${g.name} (Соучастник / Қонақ)</span>
-                            <button onclick="kickGuest('${g.username}')" class="px-2 py-0.5 bg-red-600 text-white rounded font-bold text-[10px]">Шығару</button>
-                        </div>
-                    `).join('') || '<div class="text-slate-400 text-xs">Қонақтар жоқ</div>';
-
-                    panel.innerHTML = `
-                        <div class="flex justify-between items-center border-b pb-2 mb-3">
-                            <div class="flex items-center gap-2">
-                                <span class="w-3 h-3 rounded-full bg-red-600 live-badge-pulse inline-block"></span>
-                                <h3 class="text-sm font-extrabold text-red-700">AutoLIVE Студия: "${myLive.title}" (${myLive.className})</h3>
+                            <div id="manual-report-box" class="hidden space-y-2">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Есеп мәтіні:</label>
+                                <textarea id="manual-report-text" rows="4" placeholder="Тоқсандық есеп нәтижелерін жазыңыз..." class="w-full border rounded p-2 text-xs bg-white"></textarea>
                             </div>
-                            <button onclick="stopAutoLiveStudio()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow">⏹ Эфирді тоқтату</button>
+                            <button onclick="submitTeacherReport()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow">Әкімшілікке жіберу</button>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="md:col-span-2 space-y-3">
-                                <div class="bg-slate-900 text-white rounded-xl aspect-video flex flex-col items-center justify-center p-6 text-center relative shadow-inner">
-                                    <div class="w-16 h-16 rounded-full bg-red-600/30 flex items-center justify-center text-2xl mb-2 animate-pulse">🎥</div>
-                                    <div class="text-sm font-extrabold">BilimAL WebRTC Studio (Live Broadcaster)</div>
-                                    <p class="text-[11px] text-slate-400 mt-1">Камера мен микрофон қосулы. Оқушылар мен ата-аналар сізді тікелей көріп жатыр.</p>
-                                    <div class="absolute top-3 left-3 bg-red-600 px-2.5 py-1 rounded text-[10px] font-extrabold uppercase">Эфирде</div>
-                                    <div class="absolute top-3 right-3 bg-black/60 px-3 py-1 rounded text-[11px] font-bold">👁️ Қосылғандар: ${viewersCount} адам</div>
-                                </div>
-                                <div class="p-3 bg-slate-50 border rounded-xl space-y-2">
-                                    <h4 class="text-xs font-bold text-slate-800 uppercase">🎙️ Қонақ ретінде қосылғандар (Соучастниктер):</h4>
-                                    <div class="space-y-1">${guestsHTML}</div>
-                                </div>
-                            </div>
-                            <div class="bg-slate-50 border rounded-xl flex flex-col h-[420px]">
-                                <div class="p-3 bg-slate-100 border-b text-xs font-bold uppercase text-slate-700">💬 Эфир чаты</div>
-                                <div id="live-chat-box" class="flex-1 p-3 overflow-y-auto space-y-2 bg-white">${chatHTML}</div>
-                                <div class="p-2 border-t flex gap-1 bg-white">
-                                    <input type="text" id="teacher-live-msg" placeholder="Хабарлама жазу..." class="flex-1 border rounded p-1.5 text-xs bg-slate-50" onkeydown="if(event.key==='Enter') sendLiveChatMsg('${currentUser.username}')">
-                                    <button onclick="sendLiveChatMsg('${currentUser.username}')" class="px-3 bg-blue-600 text-white rounded font-bold text-xs">Жіберу</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-                return;
-            }
-
-            // ================= AUTO-LIVE WATCH & CHAT & GUEST (STUDENT / PARENT) =================
-            if (activeTab === 'student_live' || activeTab === 'parent_live') {
-                let targetClassName = '';
-                if (currentUser.role === 'student') {
-                    let stClass = classesList.find(c => (c.students || []).includes(currentUser.username));
-                    targetClassName = stClass ? stClass.name : '';
-                } else if (currentUser.role === 'parent') {
-                    let childUn = currentUser.parentOf;
-                    let pClass = classesList.find(c => (c.students || []).includes(childUn));
-                    targetClassName = pClass ? pClass.name : '';
-                }
-
-                let activeLiveKeys = Object.keys(activeLives).filter(tKey => {
-                    if(currentUser.role === 'admin') return true;
-                    return activeLives[tKey].className === targetClassName;
-                });
-
-                if (activeLiveKeys.length === 0) {
-                    panel.innerHTML = `
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🔴 AutoLIVE Сабақтар</h3>
-                        <div class="p-8 text-center text-slate-400 bg-slate-50 border rounded-xl">
-                            <div class="text-2xl mb-1">📺</div>
-                            <div class="text-xs font-bold">Қазіргі уақытта сіздің сыныпқа арналған белсенді тікелей эфирлер жоқ.</div>
-                        </div>
-                    `;
-                    return;
-                }
-
-                let tKey = activeLiveKeys[0];
-                let l = activeLives[tKey];
-                
-                if(!l.viewers) l.viewers = [];
-                if(!l.viewers.includes(currentUser.username)) {
-                    l.viewers.push(currentUser.username);
-                    saveDataToCloud();
-                }
-
-                let isGuest = (l.guests || []).some(g => g.username === currentUser.username);
-                let chatHTML = (l.chat || []).map(c => `
-                    <div class="p-2 border-b text-xs">
-                        <b class="${c.senderRole === 'admin' ? 'text-purple-700' : 'text-blue-800'}">${c.senderName}:</b> ${c.text}
-                    </div>
-                `).join('') || '<div class="text-slate-400 text-center py-4">Чат бос...</div>';
-
-                panel.innerHTML = `
-                    <div class="flex justify-between items-center border-b pb-2 mb-3">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-red-600 live-badge-pulse inline-block"></span>
-                            <h3 class="text-sm font-extrabold text-red-700">LIVE: ${l.title} (Мұғалім: ${l.teacherName})</h3>
-                        </div>
-                        <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[11px] font-bold">Сынып: ${l.className} | Қосылғандар: ${(l.viewers||[]).length}</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="md:col-span-2 space-y-3">
-                            <div class="bg-slate-900 text-white rounded-xl aspect-video flex flex-col items-center justify-center p-6 text-center relative shadow-inner">
-                                <div class="w-16 h-16 rounded-full bg-red-600/30 flex items-center justify-center text-2xl mb-2 animate-pulse">📺</div>
-                                <div class="text-sm font-extrabold">${l.teacherName} мұғалімнің сабағы</div>
-                                <p class="text-[11px] text-slate-400 mt-1">${isGuest ? '🎙️ Сіз қазір эфирде соучастник (қонақ) ретінде қосылып тұрсыз!' : 'Эфир онлайн режимде көрсетілуде.'}</p>
-                                <div class="absolute top-3 left-3 bg-red-600 px-2.5 py-1 rounded text-[10px] font-extrabold uppercase">LIVE BROADCAST</div>
-                            </div>
-                            <div class="p-4 bg-slate-50 border rounded-xl flex items-center justify-between">
-                                <div>
-                                    <h4 class="text-xs font-bold text-slate-900">Эфирге қонақ / соучастник ретінде қосылу</h4>
-                                    <p class="text-[10px] text-slate-500">Мұғаліммен бірге сөйлесу үшін микрофон мен камераңызды қосып қонақ болыңыз.</p>
-                                </div>
-                                ${isGuest ? `
-                                    <button onclick="leaveLiveGuest('${tKey}')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow">Қонақ болудан шығу</button>
-                                ` : `
-                                    <button onclick="joinLiveGuest('${tKey}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs shadow">🎙️ Қонақ болуға сұрану</button>
-                                `}
-                            </div>
-                        </div>
-                        <div class="bg-slate-50 border rounded-xl flex flex-col h-[420px]">
-                            <div class="p-3 bg-slate-100 border-b text-xs font-bold uppercase text-slate-700">💬 Эфир чаты</div>
-                            <div id="live-chat-box" class="flex-1 p-3 overflow-y-auto space-y-2 bg-white">${chatHTML}</div>
-                            <div class="p-2 border-t flex gap-1 bg-white">
-                                <input type="text" id="student-live-msg" placeholder="Хабарлама жазу..." class="flex-1 border rounded p-1.5 text-xs bg-slate-50" onkeydown="if(event.key==='Enter') sendLiveChatMsg('${tKey}')">
-                                <button onclick="sendLiveChatMsg('${tKey}')" class="px-3 bg-blue-600 text-white rounded font-bold text-xs">Жіберу</button>
-                            </div>
+                        <div class="space-y-3">
+                            <h4 class="text-xs font-bold text-slate-800 uppercase">Жіберілген есептеріңіз</h4>
+                            <div class="space-y-2">${mySubmittedReports}</div>
                         </div>
                     </div>
                 `;
                 return;
             }
 
-            // ================= AUTO-LIVE MODERATION (ADMIN) =================
-            if (activeTab === 'admin_live') {
-                let liveCards = Object.keys(activeLives).length > 0 ? Object.keys(activeLives).map(tKey => {
-                    let l = activeLives[tKey];
-                    let chatPreview = (l.chat || []).slice(-3).map(c => `<div><b>${c.senderName}:</b> ${c.text}</div>`).join('') || '<span class="text-slate-400">Чат бос</span>';
-
-                    return `
-                        <div class="p-4 bg-white border border-red-200 rounded-xl shadow-md space-y-3">
-                            <div class="flex justify-between items-center border-b pb-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full bg-red-600 live-badge-pulse inline-block"></span>
-                                    <span class="text-xs font-extrabold text-red-700 uppercase tracking-wider">LIVE Сабақ мониторингі</span>
-                                </div>
-                                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">Сынып: ${l.className} | Көрермендер: ${(l.viewers||[]).length}</span>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-extrabold text-slate-900">${l.title}</h4>
-                                <p class="text-xs text-slate-500 mt-0.5">Мұғалім: <b class="text-blue-900">${l.teacherName}</b></p>
-                            </div>
-                            <div class="p-3 bg-slate-50 border rounded text-xs space-y-1">
-                                <div class="font-bold text-[10px] text-slate-400 uppercase">Соңғы чат хабарламалары (AutoLIVE Moderation):</div>
-                                ${chatPreview}
-                            </div>
-                            <div class="flex gap-2 pt-1">
-                                <button onclick="adminStopLive('${tKey}')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs shadow flex items-center gap-1.5">
-                                    <span>🛑</span> Эфирді тоқтату / Правонарушение үшін өшіру
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }).join('') : '';
-
-                panel.innerHTML = `
-                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">🔴 AutoLIVE Moderation & Admin Control</h3>
-                    <div class="space-y-3 max-w-2xl mx-auto">
-                        ${liveCards || '<div class="p-8 text-center text-slate-400 bg-slate-50 border rounded-xl"><div class="text-2xl mb-1">🛡️</div><div class="text-xs font-bold">Қазіргі уақытта белсенді тікелей эфирлер жоқ.</div></div>'}
-                    </div>
-                `;
-                return;
-            }
-
-            if (activeTab === 'admin_news') {
-                let autoDateTime = getCurrentDateDDMMYYYY();
-                let newsCards = newsList.length > 0 ? newsList.map((n, idx) => `
-                    <div class="p-4 bg-white border rounded-xl shadow-xs space-y-2 relative">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="text-xs font-extrabold text-blue-900">${n.title}</h4>
-                                <p class="text-[10px] text-slate-400 mt-0.5">📅 Жарияланған уақыты: ${n.datetime}</p>
-                            </div>
-                            <button onclick="deleteNewsItem(${idx})" class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-[10px]">🗑️ Өшіру</button>
-                        </div>
-                        <p class="text-xs text-slate-600 leading-relaxed pt-1 border-t">${n.text}</p>
-                    </div>
-                `).join('') : '<p class="text-xs text-slate-400">Әлі жаңалықтар жарияланған жоқ.</p>';
-
-                panel.innerHTML = `
-                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📰 Жаңалықтарды басқару (Админ панелі)</h3>
-                    <div class="p-4 bg-slate-50 border rounded-xl space-y-3 max-w-xl mb-6">
-                        <h4 class="text-xs font-bold text-slate-800 uppercase">Жаңа жаңалық жариялау</h4>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Автоматты дата / уақыт:</label>
-                            <input type="text" id="news-datetime" value="${autoDateTime}" readonly class="w-full border rounded p-2 text-xs bg-slate-100 font-bold text-blue-700">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Тақырыбы:</label>
-                            <input type="text" id="news-title" placeholder="Жаңалық тақырыбын енгізіңіз..." class="w-full border rounded p-2 text-xs bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Мәтіні:</label>
-                            <textarea id="news-text" rows="4" placeholder="Жаңалық мәтінін жазыңыз..." class="w-full border rounded p-2 text-xs bg-white"></textarea>
-                        </div>
-                        <button onclick="publishNews()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow">Жариялау</button>
-                    </div>
-
-                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-3">Барлық жарияланған жаңалықтар тізімі</h4>
-                    <div class="space-y-3 max-w-xl">${newsCards}</div>
-                `;
-                return;
-            }
-
-            if (activeTab === 'teacher_news' || activeTab === 'student_news' || activeTab === 'parent_news') {
-                let newsCards = newsList.length > 0 ? newsList.map(n => `
-                    <div class="p-4 bg-white border rounded-xl shadow-xs space-y-2">
-                        <div class="flex justify-between items-center border-b pb-1">
-                            <span class="text-xs font-extrabold text-blue-900">${n.title}</span>
-                            <span class="text-[10px] text-slate-400 font-medium">${n.datetime}</span>
-                        </div>
-                        <p class="text-xs text-slate-700 leading-relaxed pt-1">${n.text}</p>
-                    </div>
-                `).join('') : '<p class="text-xs text-slate-400 text-center py-6">Қазіргі уақытта жаңалықтар жоқ.</p>';
-
-                panel.innerHTML = `
-                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📰 Мектеп жаңалықтары</h3>
-                    <div class="space-y-3 max-w-2xl mx-auto">${newsCards}</div>
-                `;
-                return;
-            }
-
+            // ================= OTHER EXISTING TABS =================
             if (currentUser.role === 'admin') {
                 if (activeTab === 'admin_monitoring') {
                     let teachersList = users.filter(u => u.role === 'teacher');
@@ -1541,7 +1723,6 @@
                         </div>
                     `;
                 } else if (activeTab === 'teacher_schedule') {
-                    // TEACHER SCHEDULE: Teacher edits Topic and Homework for their class / subjects
                     let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
                     let myClassName = myClass ? myClass.name : '';
                     let teacherSchedules = schedules.filter(s => s.className === myClassName || s.teacherName === currentUser.name);
@@ -1955,7 +2136,112 @@
             }
         }
 
-        // ================= NEW/UPDATED FUNCTIONS FOR SCHEDULE LOGIC =================
+        // ================= NEW/UPDATED LOGIC FUNCTIONS =================
+        async function createVoucherByAdmin() {
+            let holding = document.getElementById('v-holding').value.trim();
+            let title = document.getElementById('v-title').value.trim();
+            let manager = document.getElementById('v-manager').value.trim();
+            let amount = parseFloat(document.getElementById('v-amount').value);
+            let desc = document.getElementById('v-desc').value.trim();
+
+            if(!title || isNaN(amount)) {
+                showIosToast(false, "Сәтсіз!", "Атауы мен сомасын толтырыңыз!");
+                return;
+            }
+
+            showSpinner("Ваучер жасақталуда...");
+            let newId = 'v_' + Math.random().toString(36).substring(2, 9);
+            vouchersList.push({ id: newId, holding, title, manager, amount, desc, paid: false, paidBy: '', paidAt: '' });
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Жаңа ваучер сәтті жарияланды!");
+            renderTabContent();
+        }
+
+        async function deleteVoucher(idx) {
+            if(confirm("Ваучерді өшіргіңіз келе ме?")) {
+                showSpinner("Өшірілуде...");
+                vouchersList.splice(idx, 1);
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Ваучер жойылды.");
+                renderTabContent();
+            }
+        }
+
+        async function transferToChildBalance() {
+            let amt = parseFloat(document.getElementById('transfer-amount').value);
+            if(isNaN(amt) || amt <= 0) {
+                showIosToast(false, "Сәтсіз!", "Дұрыс соманы енгізіңіз!");
+                return;
+            }
+
+            showSpinner("Ақша аударылуда...");
+            let userBpAcc = Object.values(bpayAccounts).find(acc => acc.userUsername === currentUser.username);
+            if(userBpAcc) {
+                userBpAcc.balance += amt;
+            }
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `${amt.toLocaleString()} ₸ балансқа сәтті қосылды!`);
+            renderTabContent();
+        }
+
+        function toggleReportType(val) {
+            let box = document.getElementById('manual-report-box');
+            if(val === 'manual') box.classList.remove('hidden');
+            else box.classList.add('hidden');
+        }
+
+        async function submitTeacherReport() {
+            let rType = document.getElementById('report-type-select').value;
+            let text = "";
+            let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
+
+            if(rType === 'auto') {
+                text = `[Автоматты тоқсандық есеп]: Сынып: ${myClass ? myClass.name : 'Сыныпсыз'}. Барлық оқушылардың бағалары мен қатысуы жүйеден толық жиналып, талданды. Статус: Дайын.`;
+            } else {
+                text = document.getElementById('manual-report-text').value.trim();
+                if(!text) {
+                    showIosToast(false, "Сәтсіз!", "Есеп мәтінін жазыңыз!");
+                    return;
+                }
+            }
+
+            showSpinner("Есеп жіберілуде...");
+            teacherReports.push({
+                teacherUsername: currentUser.username,
+                teacherName: currentUser.name,
+                subjectOrClass: myClass ? myClass.name : selectedTeacherSubject,
+                text: text,
+                timestamp: getCurrentFormattedDateTime(),
+                status: 'pending'
+            });
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Тоқсандық есеп әкімшілікке сәтті жолданды!");
+            renderTabContent();
+        }
+
+        function viewTeacherReport(idx) {
+            let r = teacherReports[idx];
+            let box = document.getElementById('admin-report-view-box');
+            let contentText = document.getElementById('admin-report-content-text');
+            contentText.innerText = r.text;
+            box.classList.remove('hidden');
+        }
+
+        async function decideTeacherReport(idx, decision) {
+            showSpinner("Шешім сақталуда...");
+            teacherReports[idx].status = decision;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", decision === 'accepted' ? "Есеп қабылданды ✅" : "Есеп кері қайтарылды ❌");
+            renderTabContent();
+        }
+
         async function saveScheduleByAdmin() {
             let className = document.getElementById('sched-class').value;
             let day = document.getElementById('sched-day').value;
