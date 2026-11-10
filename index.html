@@ -36,14 +36,19 @@
         #gov-boot {
             position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #0f172a; transition: opacity 0.5s ease;
         }
-        .gov-loader-bar { width: 160px; height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden; position: relative; margin-top: 16px; }
-        .gov-loader-progress { position: absolute; left: 0; top: 0; bottom: 0; width: 40%; background: #1e3a8a; border-radius: 2px; animation: govMove 1.2s infinite ease-in-out; }
+        .gov-loader-bar {
+            width: 160px; height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden; position: relative; margin-top: 16px;
+        }
+        .gov-loader-progress {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 40%; background: #1e3a8a; border-radius: 2px; animation: govMove 1.2s infinite ease-in-out;
+        }
         @keyframes govMove { 0% { left: -40%; } 100% { left: 100%; } }
 
         .win10-spinner-overlay {
             position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(3px);
             z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
+
         .id-card-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); }
 
         #ios-toast-container {
@@ -75,7 +80,7 @@
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-xs w-full text-center space-y-4">
             <div id="kaspi-spinner-box">
                 <div class="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                <div id="kaspi-loading-title" class="text-xs font-extrabold text-slate-900">Kaspi Pay өңделуде...</div>
+                <div id="kaspi-loading-title" class="text-xs font-extrabold text-slate-900">Kaspi Pay / B-Pay өңделуде...</div>
             </div>
             <div id="kaspi-success-box" class="hidden space-y-2">
                 <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl font-black mx-auto kaspi-check">✓</div>
@@ -105,6 +110,11 @@
             </div>
         </div>
         <div class="flex items-center space-x-3">
+            <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-blue-900/80 text-white border border-blue-700 rounded px-2 py-1 text-[11px] font-bold focus:outline-none">
+                <option value="kk">Қаз</option>
+                <option value="ru">Рус</option>
+                <option value="en">Eng</option>
+            </select>
             <div id="user-info" class="hidden flex items-center space-x-3">
                 <div class="text-right hidden sm:block">
                     <span id="welcome-text" class="text-xs font-bold block text-white"></span>
@@ -117,22 +127,28 @@
 
     <div class="flex-1 max-w-[1400px] w-full mx-auto p-3 md:p-4 flex flex-col">
         <div id="login-section" class="w-full max-w-4xl mx-auto my-auto space-y-6 animate-fade">
+            <div class="flex justify-center items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest pb-1">
+                <span class="px-3 py-1 bg-white border rounded-full shadow-xs flex items-center gap-1.5">📖 Кітап</span>
+                <span class="px-3 py-1 bg-white border rounded-full shadow-xs flex items-center gap-1.5">📔 Дәптер</span>
+                <span class="px-3 py-1 bg-white border rounded-full shadow-xs flex items-center gap-1.5">✒️ Қалам</span>
+            </div>
+
             <div class="bg-white p-8 rounded-xl shadow-xl border border-slate-200 max-w-md mx-auto relative overflow-hidden">
                 <div class="text-center mb-6">
-                    <h2 class="text-lg font-extrabold text-slate-900">Жүйеге кіру</h2>
-                    <p class="text-slate-500 text-xs mt-1">BilimAL электронды журналы & B-Pay</p>
+                    <h2 id="login-title" class="text-lg font-extrabold text-slate-900">Жүйеге кіру</h2>
+                    <p id="login-subtitle" class="text-slate-500 text-xs mt-1">BilimAL электронды журналы & B-Pay</p>
                 </div>
                 <form onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Логин</label>
+                        <label id="lbl-user" class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Логин</label>
                         <input type="text" id="login-username" class="w-full border border-slate-300 rounded px-3 py-2 text-xs focus:outline-none focus:border-blue-600" placeholder="Логиніңіз">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Пароль</label>
+                        <label id="lbl-pass" class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Пароль</label>
                         <input type="password" id="login-password" class="w-full border border-slate-300 rounded px-3 py-2 text-xs focus:outline-none focus:border-blue-600" placeholder="••••••••">
                     </div>
                     <div id="login-error" class="hidden text-red-600 text-xs text-center font-bold bg-red-50 p-2 rounded border border-red-200"></div>
-                    <button type="submit" class="w-full py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded font-bold text-xs shadow transition-all">Кіру</button>
+                    <button type="submit" id="btn-login" class="w-full py-2.5 bg-blue-700 hover:bg-blue-800 text-white rounded font-bold text-xs shadow transition-all">Кіру</button>
                     
                     <div class="pt-1">
                         <button type="button" onclick="handleBiometricLoginClick()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-xs flex items-center justify-center gap-2 border border-slate-300 transition-all shadow-xs">
@@ -147,18 +163,41 @@
                     </div>
                 </form>
             </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 rounded bg-blue-50 text-blue-700 flex items-center justify-center font-black text-xs">01</div>
+                    <h3 class="text-xs font-extrabold text-slate-900 uppercase">BilimAL деген не?</h3>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Мектептерге арналған заманауи, қатал әрі сенімді электронды журнал, бағалау, қатысу және B-Pay қаржылық платформасы.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 rounded bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-xs">02</div>
+                    <h3 class="text-xs font-extrabold text-slate-900 uppercase">Оқушы және ата-ана мүмкіндігі</h3>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Бағаларды, қатысуды бақылау, B-Pay арқылы төлемдер, холдингтерді қаржыландыру, BilimTest тапсыру.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 rounded bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-xs">03</div>
+                    <h3 class="text-xs font-extrabold text-slate-900 uppercase">Мұғалім мүмкіндігі</h3>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Электронды журнал, автоматты және қолмен тоқсандық есеп тапсыру, CheckID камера арқылы тексеру.</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 rounded bg-purple-50 text-purple-700 flex items-center justify-center font-black text-xs">04</div>
+                    <h3 class="text-xs font-extrabold text-slate-900 uppercase">Бас әкімші мүмкіндігі</h3>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">Мектеп мониторингі, мұғалімдердің тоқсандық есептерін қабылдау, HoldingPayments және BilimLimit басқару.</p>
+                </div>
+            </div>
         </div>
 
         <div id="dashboard-section" class="hidden grid grid-cols-1 md:grid-cols-5 gap-4 w-full items-start animate-fade">
             <aside class="bg-white rounded-xl p-3 md:col-span-1 shadow-sm border border-slate-200 sticky top-16">
-                <div class="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-2 px-2">Басқару панелі</div>
+                <div id="menu-title" class="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-2 px-2">Басқару панелі</div>
                 <nav id="sidebar-menu" class="space-y-1 text-xs font-semibold text-slate-600"></nav>
             </aside>
             <main class="md:col-span-4 space-y-3">
                 <div id="limit-notice-banner" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs shadow-xs flex items-center space-x-3 animate-fade">
                     <span class="text-base">⏳</span>
                     <div>
-                        <b class="font-extrabold uppercase text-[10px]">Әкімшілік шектеу (BilimLimit):</b>
+                        <b class="font-extrabold uppercase text-[10px] text-amber-800">NOTICE OF LIMIT (Әкімшілік шектеу):</b>
                         <p id="limit-notice-text" class="mt-0.5 font-semibold"></p>
                     </div>
                 </div>
@@ -166,7 +205,7 @@
                 <div id="warning-banner" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs shadow-xs flex items-center space-x-3 animate-fade">
                     <span class="text-base">⚠️</span>
                     <div>
-                        <b class="font-bold">Әкімшілік / AI Security тарапынан ескерту:</b>
+                        <b class="font-bold">Әкімшілік / AI Security тарапынан ескерту берілді:</b>
                         <span id="warning-reason-text"></span>
                     </div>
                 </div>
@@ -174,7 +213,7 @@
                 <div id="announcement-banner" class="hidden p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs shadow-xs flex items-center space-x-3 animate-fade">
                     <span class="text-base">📢</span>
                     <div>
-                        <b class="font-bold uppercase text-[10px]">Мектеп хабарландыруы:</b>
+                        <b class="font-bold uppercase text-[10px] text-blue-700">Мектеп хабарландыруы:</b>
                         <p id="announcement-text" class="mt-0.5"></p>
                     </div>
                 </div>
@@ -184,7 +223,6 @@
         </div>
     </div>
 
-    <!-- QR Модалы -->
     <div id="bilimweb-qr-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center relative border border-slate-200">
             <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-3">📱</div>
@@ -198,9 +236,41 @@
         </div>
     </div>
 
+    <div id="bilimweb-mobile-modal" class="fixed inset-0 bg-slate-900 hidden flex items-center justify-center p-4 z-50 animate-fade">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 space-y-4">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black mb-2">🔐</div>
+                <h3 class="text-lg font-extrabold text-slate-900">BilimWeb Авторизациясы</h3>
+                <p class="text-xs text-slate-500 mt-1">Үлкен экранға қосылу үшін аккаунтты таңдаңыз, парольді жазыңыз және биометрия арқылы растаңыз</p>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Аккаунтты таңдаңыз:</label>
+                <select id="bilimweb-account-select" class="w-full border border-slate-300 rounded p-2.5 text-xs bg-slate-50 font-bold text-blue-700 focus:outline-none focus:border-indigo-600"></select>
+            </div>
+            <div>
+                <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Қосымша растау (Пароль):</label>
+                <input type="password" id="bilimweb-confirm-password" placeholder="Аккаунт паролін енгізіңіз..." class="w-full border border-slate-300 rounded p-2.5 text-xs bg-slate-50 focus:outline-none focus:border-indigo-600">
+            </div>
+            <button type="button" onclick="confirmMobileQRLogin()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-xs shadow transition-all flex items-center justify-center gap-2">
+                <span>🔒</span> Пароль + Биометрия арқылы растау
+            </button>
+            <button type="button" onclick="cancelMobileQRLogin()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs transition-all">Бас тарту</button>
+        </div>
+    </div>
+
+    <div id="passkey-prompt-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50 animate-fade">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center relative border border-slate-200 space-y-4">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl mx-auto flex items-center justify-center text-xl font-black">🔒</div>
+            <h3 class="text-base font-extrabold text-slate-900">Touch ID / Face ID байланыстыру</h3>
+            <p class="text-xs text-slate-500">Бұл құрылғы арқылы жүйеге жылдам кіру үшін биометриялық растауды іске қосыңыз.</p>
+            <button type="button" onclick="registerPasskeyForCurrentAccount()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow transition-all">Биометрияны қосу</button>
+            <button type="button" onclick="closePasskeyPrompt()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs transition-all">Кейін</button>
+        </div>
+    </div>
+
     <footer class="bg-white py-3 px-6 border-t border-slate-200 text-[11px] text-slate-500 flex justify-between items-center">
-        <span class="font-bold text-slate-700">BilimAL Enterprise Cloud © 2026. Барлық мүмкіндіктер біріктірілді.</span>
-        <span class="text-emerald-600 font-bold flex items-center gap-1">● Барлық модульдер белсенді</span>
+        <span id="footer-text" class="font-bold text-slate-700">BilimAL Enterprise Cloud © 2026. Барлық мүмкіндіктер біріктірілді.</span>
+        <span class="text-emerald-600 font-bold flex items-center gap-1">● Барлық модульдер мен B-Pay белсенді</span>
     </footer>
 
     <script>
@@ -223,11 +293,17 @@
         const subjectsList = [
             "Математика", "Қазақ тілі", "Қазақ әдебиеті", "Ағылшын тілі", 
             "Орыс тілі", "Физика", "Химия", "Биология", "География", 
-            "Қазақстан тарихы", "Информатика", "Дене шынықтыру", "Алгебра", "Геометрия"
+            "Қазақстан тарихы", "Дүние жүзі тарихы", "Информатика", 
+            "Дене шынықтыру", "Алгебра", "Геометрия", "Адам және қоғам", 
+            "Музыка", "Көркем еңбек"
         ];
+
+        const badWords = ["бля", "сука", "еба", "нах", "хуй", "анал", "дебил", "дурак", "шлюха", "пидор", "мразь", "тупой"];
+        const daysList = ["Дүйсенбі", "Сейсенбі", "Сәрсенбі", "Бейсенбі", "Жұма"];
 
         let currentUser = null;
         let activeTab = '';
+        let currentLang = 'kk';
         let users = [];
         let classesList = [];
         let schedules = [];
@@ -241,17 +317,24 @@
         let activeSessionsStore = {}; 
         let selectedTeacherSubject = subjectsList[0];
         let activeScheduleDay = 'Дүйсенбі';
+
         let bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
+        let aiModes = {}; 
+        let aiHistories = {}; 
+
+        let currentQrSessionId = null;
+        let qrListenerUnsubscribe = null;
+
         let bilimTests = [];
         let testResults = {}; 
         let bilimCards = {}; 
         let bilimSubscriptions = {}; 
         let subscriptionSettings = { startDate: '', endDate: '' };
 
-        // ЖАҢА МОДУЛЬДЕР ДЕРЕКТЕРІ:
-        let reportsList = []; // Тоқсандық есептер (Автоматты/Қолмен)
-        let bPayWallets = {}; // B-Pay баланстары мен аударым тарихы (оқшауланған)
-        let holdingsList = []; // Холдингтер
+        // ЖАҢА МОДУЛЬДЕР (Тоқсандық есептер және B-Pay / HoldingPayments):
+        let reportsList = [];
+        let bPayWallets = {};
+        let holdingsList = [];
 
         let tempQuestions = [];
         let html5QrScanner = null;
@@ -287,6 +370,7 @@
             document.getElementById('spinner-text').innerText = text;
             document.getElementById('action-spinner').classList.remove('hidden');
         }
+
         function hideSpinner() {
             document.getElementById('action-spinner').classList.add('hidden');
         }
@@ -310,10 +394,88 @@
             }, 3000);
         }
 
+        function getCurrentFormattedDateTime() {
+            let now = new Date();
+            let y = now.getFullYear();
+            let m = String(now.getMonth() + 1).padStart(2, '0');
+            let d = String(now.getDate()).padStart(2, '0');
+            let h = String(now.getHours()).padStart(2, '0');
+            let min = String(now.getMinutes()).padStart(2, '0');
+            return `${y}/${m}/${d}-${h}:${min}`;
+        }
+
+        function getCurrentDateDDMMYYYY() {
+            let now = new Date();
+            let d = String(now.getDate()).padStart(2, '0');
+            let m = String(now.getMonth() + 1).padStart(2, '0');
+            let y = now.getFullYear();
+            let h = String(now.getHours()).padStart(2, '0');
+            let min = String(now.getMinutes()).padStart(2, '0');
+            return `${d}.${m}.${y} / ${h}:${min}`;
+        }
+
+        const translations = {
+            kk: {
+                subtitle: "Бірыңғай мектеп журналы және платформа",
+                loginTitle: "Жүйеге кіру", loginSub: "BilimAL электронды журналы & B-Pay",
+                userLbl: "Логин", passLbl: "Пароль", loginBtn: "Кіру", logoutBtn: "Шығу", menuTitle: "Басқару панелі",
+                footer: "BilimAL Enterprise Cloud © 2026. Барлық мүмкіндіктер біріктірілді.",
+                adminMon: "📊 Мониторинг & Сыныптар", adminReports: "📑 Тоқсандық есептер (Админ)", adminHolding: "💳 HoldingPayments (Финанс)", adminSanc: "🛡️ Moderation & Sanctions", adminSched: "📅 Сабақ кестесі",
+                adminUsers: "👥 Қолданушылар & Ата-ана", adminAnn: "📢 Хабарландыру", adminNews: "📰 Жаңалықтар",
+                adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Қолдау кірістері", adminAI: "🤖 Admin-GPT",
+                adminBilimID: "🪪 BilimID Басқару", adminLimit: "⏳ BilimLimit (Шектеу)", adminSub: "📜 BilimSubscription (Табельдер)",
+                teachJorn: "📖 Бағалар журналы", teachReports: "📑 Тоқсандық есеп тапсыру", teachAtt: "📋 Қатысу журналы", teachClass: "➕ Сынып ашу (DCA)",
+                teachSched: "📅 Сабақ кестесі", teachNews: "📰 Жаңалықтар", teachLive: "🔴 AutoLIVE Студия",
+                teachKtp: "📑 КТЖ (Күнтізбелік жоспар)", teachSup: "🛟 Қолдау қызметі", teachAI: "🤖 TeachGPT",
+                teachTest: "📝 BilimTest (Тест)", teachCheckID: "🔍 CheckID (Камера)", teachID: "🪪 Менің BilimID-ім",
+                studGrades: "📊 Менің бағаларым", studBPAY: "💳 B-Pay (Бала кабинеті)", studSched: "📅 Менің кестем", studHw: "📚 Үй тапсырмасы",
+                studNews: "📰 Жаңалықтар", studLive: "🔴 AutoLIVE Сабақтар", studContact: "💬 Мұғаліммен байланыс",
+                studJoin: "🔑 DCA кодпен қосылу", studSup: "🛟 Қолдау", studAI: "🤖 Study-GPT", studTest: "📝 BilimTest Тапсыру",
+                studID: "🪪 Менің BilimID-ім", parentGrades: "👨‍👩‍👧 Баланың бағалары", parentBPAY: "💳 B-Pay (Баланс пен Төлемдер)", parentSched: "📅 Баланың кестесі",
+                parentNews: "📰 Жаңалықтар", parentLive: "🔴 AutoLIVE Сабақтар", parentSupport: "🛟 Қолдау қызметі",
+                parentID: "🪪 Баланың BilimID-і", parentSub: "📜 BilimSubscription (Табель қол қою)", sessionsTab: "💻 Белсенді сеанстар"
+            },
+            ru: {
+                subtitle: "Единая школьная система и платформа", loginTitle: "Вход в систему", loginSub: "Электронный журнал BilimAL & B-Pay",
+                userLbl: "Логин", passLbl: "Пароль", loginBtn: "Войти", logoutBtn: "Выйти", menuTitle: "Панель управления",
+                footer: "BilimAL Enterprise Cloud © 2026. Все функции объединены.",
+                adminMon: "📊 Мониторинг", adminReports: "📑 Квартальные отчеты (Админ)", adminHolding: "💳 HoldingPayments (Финансы)", adminSanc: "🛡️ Модерация и санкции", adminSched: "📅 Расписание",
+                adminUsers: "👥 Пользователи и Родители", adminAnn: "📢 Объявления", adminNews: "📰 Новости",
+                adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Входящие тикеты", adminAI: "🤖 Admin-GPT",
+                adminBilimID: "🪪 Управление BilimID", adminLimit: "⏳ BilimLimit (Лимиты)", adminSub: "📜 BilimSubscription (Табели)",
+                teachJorn: "📖 Журнал оценок", teachReports: "📑 Сдать квартальный отчет", teachAtt: "📋 Посещаемость", teachClass: "➕ Создать класс (DCA)",
+                teachSched: "📅 Расписание", teachNews: "📰 Новости", teachLive: "🔴 AutoLIVE Студия",
+                teachKtp: "📑 КТП", teachSup: "🛟 Поддержка", teachAI: "🤖 TeachGPT", teachTest: "📝 BilimTest (Тесты)",
+                teachCheckID: "🔍 CheckID (Камера)", teachID: "🪪 Мой BilimID", studGrades: "📊 Мои оценки", studBPAY: "💳 B-Pay (Кабинет ученика)",
+                studSched: "📅 Мое расписание", studHw: "📚 Домашка", studNews: "📰 Новости", studLive: "🔴 AutoLIVE Уроки",
+                studContact: "💬 Связь с учителем", studJoin: "🔑 Вступить по DCA коду", studSup: "🛟 Поддержка",
+                studAI: "🤖 Study-GPT", studTest: "📝 Пройти BilimTest", studID: "🪪 Мой BilimID", parentGrades: "👨‍👩‍👧 Оценки ребенка", parentBPAY: "💳 B-Pay (Баланс и Платежи)",
+                parentSched: "📅 Расписание ребенка", parentNews: "📰 Новости", parentLive: "🔴 AutoLIVE Уроки",
+                parentSupport: "🛟 Поддержка", parentID: "🪪 BilimID ребенка", parentSub: "📜 BilimSubscription (Подпись)", sessionsTab: "💻 Активные сеансы"
+            },
+            en: {
+                subtitle: "Unified School System and Platform", loginTitle: "Sign In", loginSub: "BilimAL Electronic Journal & B-Pay",
+                userLbl: "Username", passLbl: "Password", loginBtn: "Login", logoutBtn: "Logout", menuTitle: "Control Panel",
+                footer: "BilimAL Enterprise Cloud © 2026. All features integrated.",
+                adminMon: "📊 Monitoring", adminReports: "📑 Quarterly Reports (Admin)", adminHolding: "💳 HoldingPayments (Finance)", adminSanc: "🛡️ Moderations & Sanctions", adminSched: "📅 Schedule",
+                adminUsers: "👥 Users & Parents", adminAnn: "📢 Announcements", adminNews: "📰 News",
+                adminLive: "🔴 AutoLIVE Monitoring", adminSupport: "🛟 Support Tickets", adminAI: "🤖 Admin-GPT",
+                adminBilimID: "🪪 BilimID Manage", adminLimit: "⏳ BilimLimit", adminSub: "📜 BilimSubscription",
+                teachJorn: "📖 Gradebook", teachReports: "📑 Submit Quarterly Report", teachAtt: "📋 Attendance", teachClass: "➕ Create Class (DCA)",
+                teachSched: "📅 Schedule", teachNews: "📰 News", teachLive: "🔴 AutoLIVE Studio", teachKtp: "📑 KTP",
+                teachSup: "🛟 Support", teachAI: "🤖 TeachGPT", teachTest: "📝 BilimTest", teachCheckID: "🔍 CheckID (Camera)",
+                teachID: "🪪 My BilimID", studGrades: "📊 My Grades", studBPAY: "💳 B-Pay (Student Wallet)", studSched: "📅 My Schedule", studHw: "📚 Homework",
+                studNews: "📰 News", studLive: "🔴 AutoLIVE Lessons", studContact: "💬 Contact", studJoin: "🔑 Join via DCA Code",
+                studSup: "🛟 Support", studAI: "🤖 Study-GPT", studTest: "📝 Pass BilimTest", studID: "🪪 My BilimID", parentGrades: "👨‍👩‍👧 Child Grades", parentBPAY: "💳 B-Pay (Balance & Payments)",
+                parentSched: "📅 Child Schedule", parentNews: "📰 News",
+                parentLive: "🔴 AutoLIVE Lessons", parentSupport: "🛟 Support", parentID: "🪪 Child BilimID", parentSub: "📜 BilimSubscription", sessionsTab: "💻 Active Sessions"
+            }
+        };
+
         async function loadDataFromCloud() {
             if(useFirebase) {
                 try {
-                    const snap = await db.collection("bilimal").doc("enterprise_v18_all_combined").get();
+                    const snap = await db.collection("bilimal").doc("enterprise_v17_all_combined").get();
                     if(snap.exists) {
                         let data = snap.data();
                         users = data.users || [];
@@ -344,7 +506,7 @@
         async function saveDataToCloud() {
             if(useFirebase) {
                 try {
-                    await db.collection("bilimal").doc("enterprise_v18_all_combined").set({
+                    await db.collection("bilimal").doc("enterprise_v17_all_combined").set({
                         users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeLives, activeSessionsStore, bilimLimitSettings,
                         bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings, reportsList, bPayWallets, holdingsList
                     });
@@ -364,16 +526,121 @@
                 users.push({ username: 'admin', password: 'admin2026', role: 'admin', name: 'Бас әкімші', warningReason: '', status: 'active' });
                 await saveDataToCloud();
             }
+
+            checkURLForBilimWebQR();
         };
 
-        function openBilimWebQRModal() {
-            let qrSession = 'bilimweb_session_' + Math.random().toString(36).substring(2, 11);
-            document.getElementById('bilimweb-qr-modal').classList.remove('hidden');
-            let qrUrl = window.location.href.split('?')[0] + '?bilim_qr=' + qrSession;
-            document.getElementById('bilimweb-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`;
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            document.getElementById('header-subtitle').innerText = t.subtitle;
+            document.getElementById('login-title').innerText = t.loginTitle;
+            document.getElementById('login-subtitle').innerText = t.loginSub;
+            document.getElementById('lbl-user').innerText = t.userLbl;
+            document.getElementById('lbl-pass').innerText = t.passLbl;
+            document.getElementById('btn-login').innerText = t.loginBtn;
+            document.getElementById('btn-logout').innerText = t.logoutBtn;
+            document.getElementById('menu-title').innerText = t.menuTitle;
+            document.getElementById('footer-text').innerText = t.footer;
+            if(currentUser) renderSidebar();
         }
+
+        function openBilimWebQRModal() {
+            currentQrSessionId = 'bilimweb_session_' + Math.random().toString(36).substring(2, 11);
+            document.getElementById('bilimweb-qr-modal').classList.remove('hidden');
+
+            let qrUrl = window.location.href.split('?')[0] + '?bilim_qr=' + currentQrSessionId;
+            let qrImgElem = document.getElementById('bilimweb-qr-img');
+            qrImgElem.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`;
+
+            if (useFirebase) {
+                qrListenerUnsubscribe = db.collection('bilimweb_sessions').doc(currentQrSessionId).onSnapshot((doc) => {
+                    if (doc.exists && doc.data().status === 'approved') {
+                        let approvedUser = doc.data().user;
+                        closeBilimWebQRModal();
+                        if (qrListenerUnsubscribe) qrListenerUnsubscribe();
+                        registerAndCheckSession(approvedUser);
+                    }
+                });
+            }
+        }
+
         function closeBilimWebQRModal() {
             document.getElementById('bilimweb-qr-modal').classList.add('hidden');
+            if (qrListenerUnsubscribe) qrListenerUnsubscribe();
+        }
+
+        function checkURLForBilimWebQR() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const qrSession = urlParams.get('bilim_qr');
+            if (qrSession) {
+                currentQrSessionId = qrSession;
+                let selectElem = document.getElementById('bilimweb-account-select');
+                selectElem.innerHTML = users.map(u => `<option value="${u.username}">${u.name} (@${u.username} - [${u.role}])</option>`).join('');
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('bilimweb-mobile-modal').classList.remove('hidden');
+            }
+        }
+
+        async function confirmMobileQRLogin() {
+            let selectedUsername = document.getElementById('bilimweb-account-select').value;
+            let passwordInput = document.getElementById('bilimweb-confirm-password').value.trim();
+            let targetUser = users.find(u => u.username === selectedUsername);
+
+            if (!targetUser) {
+                showIosToast(false, "Сәтсіз!", "Қолданушы табылмады!");
+                return;
+            }
+            if (targetUser.password !== passwordInput) {
+                showIosToast(false, "Сәтсіз!", "Қате пароль!");
+                return;
+            }
+
+            showSpinner("Пароль тексерілуде...");
+            if (useFirebase && currentQrSessionId) {
+                try {
+                    await db.collection('bilimweb_sessions').doc(currentQrSessionId).set({
+                        status: 'approved',
+                        user: targetUser,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    hideSpinner();
+                    showIosToast(true, "Сәтті!", "QR арқылы кіру расталды!");
+                    window.location.href = window.location.pathname;
+                } catch(err) {
+                    hideSpinner();
+                    showIosToast(false, "Сәтсіз!", "Қате: " + err.message);
+                }
+            } else {
+                hideSpinner();
+                showIosToast(false, "Сәтсіз!", "Сессия қате!");
+            }
+        }
+
+        function cancelMobileQRLogin() {
+            window.location.href = window.location.pathname;
+        }
+
+        async function registerAndCheckSession(userObj) {
+            await loadDataFromCloud();
+            let ua = navigator.userAgent;
+            let browser = "Chrome / Safari";
+            if (ua.includes("Firefox")) browser = "Mozilla Firefox";
+            else if (ua.includes("Edg")) browser = "Microsoft Edge";
+
+            let deviceName = /Mobile|Android|iPhone/i.exec(ua) ? "Мобильді құрылғы" : "Desktop Ноутбук / PC";
+            let dateStr = getCurrentFormattedDateTime().split('-')[0].replace(/\//g, '.');
+            let timeStr = getCurrentFormattedDateTime().split('-')[1];
+
+            let sessionId = 'sess_' + Math.random().toString(36).substring(2, 9);
+            let sessionInfo = { id: sessionId, device: deviceName, date: dateStr, time: timeStr, browser: browser, active: true };
+
+            if (!activeSessionsStore[userObj.username]) activeSessionsStore[userObj.username] = [];
+            activeSessionsStore[userObj.username].push(sessionInfo);
+            await saveDataToCloud();
+
+            localStorage.setItem('bilim_current_session_id', sessionId);
+            authenticateUserSession(userObj);
         }
 
         async function handleBiometricLoginClick() {
@@ -381,7 +648,7 @@
             setTimeout(() => {
                 hideSpinner();
                 let adminUser = users.find(u => u.role === 'admin');
-                if(adminUser) authenticateUserSession(adminUser);
+                if(adminUser) registerAndCheckSession(adminUser);
             }, 1000);
         }
 
@@ -391,13 +658,19 @@
             document.getElementById('dashboard-section').classList.remove('hidden');
             document.getElementById('user-info').classList.remove('hidden');
             document.getElementById('welcome-text').innerText = currentUser.name;
-            document.getElementById('welcome-role').innerText = currentUser.role.toUpperCase();
+            
+            let roleTitle = 'Оқушы';
+            if(currentUser.role === 'admin') roleTitle = 'Бас әкімші';
+            else if(currentUser.role === 'teacher') roleTitle = 'Мұғалім';
+            else if(currentUser.role === 'parent') roleTitle = 'Ата-ана';
+            document.getElementById('welcome-role').innerText = roleTitle;
 
             if(currentUser.role === 'admin') activeTab = 'admin_monitoring';
             else if(currentUser.role === 'teacher') activeTab = 'teacher_journal';
             else if(currentUser.role === 'parent') activeTab = 'parent_bpay';
             else activeTab = 'student_bpay';
 
+            checkBanners();
             renderSidebar();
             renderTabContent();
             showIosToast(true, "Сәтті!", "Қош келдіңіз, " + currentUser.name + "!");
@@ -405,11 +678,14 @@
 
         async function handleLogin(e) {
             e.preventDefault();
+            showSpinner("Жүйеге кіру тексерілуде...");
             const usernameInput = document.getElementById('login-username').value.trim();
             const passwordInput = document.getElementById('login-password').value.trim();
             const errorDiv = document.getElementById('login-error');
 
             await loadDataFromCloud();
+            hideSpinner();
+
             const foundUser = users.find(u => u.username === usernameInput && u.password === passwordInput);
             if (foundUser) {
                 if(foundUser.status === 'blocked') {
@@ -418,58 +694,125 @@
                     return;
                 }
                 errorDiv.classList.add('hidden');
-                authenticateUserSession(foundUser);
+                registerAndCheckSession(foundUser);
             } else {
                 errorDiv.innerText = 'Қате логин немесе пароль!';
                 errorDiv.classList.remove('hidden');
             }
         }
 
+        function checkBanners() {
+            const annBanner = document.getElementById('announcement-banner');
+            const annText = document.getElementById('announcement-text');
+            if(currentAnnouncement) {
+                annText.innerText = currentAnnouncement;
+                annBanner.classList.remove('hidden');
+            } else {
+                annBanner.classList.add('hidden');
+            }
+
+            const warnBanner = document.getElementById('warning-banner');
+            const warnText = document.getElementById('warning-reason-text');
+            if(currentUser.warningReason) {
+                warnText.innerText = currentUser.warningReason;
+                warnBanner.classList.remove('hidden');
+            } else {
+                warnBanner.classList.add('hidden');
+            }
+
+            const limitBanner = document.getElementById('limit-notice-banner');
+            const limitText = document.getElementById('limit-notice-text');
+            let currentStr = getCurrentFormattedDateTime();
+            let startWin = bilimLimitSettings.startDate;
+            let endWin = bilimLimitSettings.endDate;
+
+            if (currentUser.role !== 'admin' && startWin && endWin && currentStr >= startWin && currentStr <= endWin) {
+                limitText.innerText = `Уақытша шектеу қойылды (${startWin} - ${endWin}). Себебі: ${bilimLimitSettings.reason || 'Көрсетілмеген'}`;
+                limitBanner.classList.remove('hidden');
+            } else {
+                limitBanner.classList.add('hidden');
+            }
+        }
+
+        function isBilimLimitActive() {
+            if (currentUser.role === 'admin') return false;
+            let currentStr = getCurrentFormattedDateTime();
+            let startWin = bilimLimitSettings.startDate;
+            let endWin = bilimLimitSettings.endDate;
+            return (startWin && endWin && currentStr >= startWin && currentStr <= endWin);
+        }
+
         function logout() {
             currentUser = null;
+            localStorage.removeItem('bilim_current_session_id');
             document.getElementById('login-section').classList.remove('hidden');
             document.getElementById('dashboard-section').classList.add('hidden');
             document.getElementById('user-info').classList.add('hidden');
+            document.getElementById('announcement-banner').classList.add('hidden');
+            document.getElementById('warning-banner').classList.add('hidden');
+            document.getElementById('limit-notice-banner').classList.add('hidden');
             showIosToast(true, "Сәтті!", "Жүйеден шықтыңыз.");
         }
 
         function renderSidebar() {
             const menu = document.getElementById('sidebar-menu');
+            const t = translations[currentLang];
             let links = [];
             if (currentUser.role === 'admin') {
                 links = [
-                    { id: 'admin_monitoring', label: '📊 Мониторинг & Сыныптар' },
-                    { id: 'admin_reports', label: '📑 Тоқсандық есептер (Админ)' },
-                    { id: 'admin_holding_payments', label: '💳 HoldingPayments (Финанс)' },
-                    { id: 'admin_sanctions', label: '🛡️ Moderation & Sanctions' },
-                    { id: 'admin_schedule', label: '📅 Сабақ кестесі' },
-                    { id: 'admin_users', label: '👥 Қолданушылар & Ата-ана' },
-                    { id: 'admin_bilimid', label: '🪪 BilimID Басқару' },
-                    { id: 'admin_limit', label: '⏳ BilimLimit (Шектеу)' }
+                    { id: 'admin_monitoring', label: t.adminMon },
+                    { id: 'admin_reports', label: t.adminReports },
+                    { id: 'admin_holding_payments', label: t.adminHolding },
+                    { id: 'admin_sanctions', label: t.adminSanc },
+                    { id: 'admin_schedule', label: t.adminSched },
+                    { id: 'admin_users', label: t.adminUsers },
+                    { id: 'admin_bilimid', label: t.adminBilimID },
+                    { id: 'admin_limit', label: t.adminLimit },
+                    { id: 'admin_sub', label: t.adminSub },
+                    { id: 'admin_announcement', label: t.adminAnn },
+                    { id: 'admin_news', label: t.adminNews },
+                    { id: 'admin_live', label: t.adminLive },
+                    { id: 'admin_support', label: t.adminSupport }
                 ];
             } else if (currentUser.role === 'teacher') {
                 links = [
-                    { id: 'teacher_journal', label: '📖 Бағалар журналы' },
-                    { id: 'teacher_reports', label: '📑 Тоқсандық есеп тапсыру' },
-                    { id: 'teacher_test', label: '📝 BilimTest (Тест құру)' },
-                    { id: 'teacher_checkid', label: '🔍 CheckID (Камера)' },
-                    { id: 'teacher_id', label: '🪪 Менің BilimID-ім' },
-                    { id: 'teacher_schedule', label: '📅 Сабақ кестесі & Үй жұмысы' }
+                    { id: 'teacher_journal', label: t.teachJorn },
+                    { id: 'teacher_reports', label: t.teachReports },
+                    { id: 'teacher_attendance', label: t.teachAtt },
+                    { id: 'teacher_classes', label: t.teachClass },
+                    { id: 'teacher_test', label: t.teachTest },
+                    { id: 'teacher_checkid', label: t.teachCheckID },
+                    { id: 'teacher_id', label: t.teachID },
+                    { id: 'teacher_schedule', label: t.teachSched },
+                    { id: 'teacher_news', label: t.teachNews },
+                    { id: 'teacher_live', label: t.teachLive },
+                    { id: 'teacher_ktp', label: t.teachKtp },
+                    { id: 'teacher_support', label: t.teachSup }
                 ];
             } else if (currentUser.role === 'parent') {
                 links = [
-                    { id: 'parent_bpay', label: '💳 B-Pay (Баланс пен Төлемдер)' },
-                    { id: 'parent_grades', label: '👨‍👩‍👧 Баланың бағалары' },
-                    { id: 'parent_id', label: '🪪 Баланың BilimID-і' },
-                    { id: 'parent_sub', label: '📜 Табель қол қою' }
+                    { id: 'parent_bpay', label: t.parentBPAY },
+                    { id: 'parent_grades', label: t.parentGrades },
+                    { id: 'parent_schedule', label: t.parentSched },
+                    { id: 'parent_news', label: t.parentNews },
+                    { id: 'parent_live', label: t.parentLive },
+                    { id: 'parent_id', label: t.parentID },
+                    { id: 'parent_sub', label: t.parentSub },
+                    { id: 'parent_support', label: t.parentSupport }
                 ];
             } else {
                 links = [
-                    { id: 'student_bpay', label: '💳 B-Pay (Бала кабинеті)' },
-                    { id: 'student_grades', label: '📊 Менің бағаларым' },
-                    { id: 'student_test', label: '📝 BilimTest тапсыру' },
-                    { id: 'student_id', label: '🪪 Менің BilimID-ім' },
-                    { id: 'student_homework', label: '📚 Үй тапсырмалары' }
+                    { id: 'student_bpay', label: t.studBPAY },
+                    { id: 'student_grades', label: t.studGrades },
+                    { id: 'student_test', label: t.studTest },
+                    { id: 'student_id', label: t.studID },
+                    { id: 'student_schedule', label: t.studSched },
+                    { id: 'student_news', label: t.studNews },
+                    { id: 'student_live', label: t.studLive },
+                    { id: 'student_homework', label: t.studHw },
+                    { id: 'student_contact', label: t.studContact },
+                    { id: 'student_join', label: t.studJoin },
+                    { id: 'student_support', label: t.studSup }
                 ];
             }
             menu.innerHTML = links.map(l => `
@@ -496,11 +839,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
                             <h4 class="text-xs font-bold text-blue-900 uppercase">1. Автоматты есеп</h4>
-                            <p class="text-[11px] text-slate-600">Жүйе тоқсандағы әрекеттеріңізді, бағалар тарихын, оқушылар тізімін және суммарлық білім пайызын жинақтап, ЭЦҚ штампымен файл құрайды.</p>
+                            <p class="text-[11px] text-slate-600">Жүйе тоқсандағы барлық журнал бағаларын, оқушылар қатысуын және білім пайызын автоматты түрде қорытындылап, цифрлық ЭЦҚ штампымен админге жолдайды.</p>
                             <button onclick="submitAutoReport()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow">⚡ Автоматты есепті қалыптастырып жіберу</button>
                         </div>
                         <div class="p-4 bg-slate-50 border rounded-xl space-y-3">
-                            <h4 class="text-xs font-bold text-indigo-900 uppercase">2. Қолмен есеп (Вручную)</h4>
+                            <h4 class="text-xs font-bold text-indigo-900 uppercase">2. Қолмен толтыру (Manual Input)</h4>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 mb-1">Пән:</label>
                                 <input type="text" id="manual-subject" placeholder="Мысалы: Математика" class="w-full border rounded p-2 text-xs bg-white">
@@ -511,9 +854,9 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 mb-1">Пайыздық көрсеткіш (%):</label>
-                                <input type="number" id="manual-percent" placeholder="85" class="w-full border rounded p-2 text-xs bg-white">
+                                <input type="number" id="manual-percent" placeholder="88" class="w-full border rounded p-2 text-xs bg-white">
                             </div>
-                            <button onclick="submitManualReport()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-xs shadow">✍️ Қолмен толтырылған есепті жіберу</button>
+                            <button onclick="submitManualReport()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-xs shadow">✍️ Қолмен есепті жіберу</button>
                         </div>
                     </div>
                 `;
@@ -539,7 +882,7 @@
                 `).join('') : '<tr><td colspan="7" class="text-center text-slate-400 py-4">Келіп түскен есептер жоқ</td></tr>';
 
                 panel.innerHTML = `
-                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📊 Мұғалімдердің тоқсандық есептері (Админ панелі)</h3>
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📊 Мұғалімдердің тоқсандық есептері (Админ мониторингі)</h3>
                     <div class="overflow-x-auto"><table class="w-full gov-table"><thead><tr><th>Күні / Уақыты</th><th>Әдісі</th><th>Мұғалім</th><th>Сынып / Пән</th><th>Білім пайызы</th><th>Мәртебесі</th><th>Әрекеттер</th></tr></thead><tbody>${reportRows}</tbody></table></div>
                 `;
             }
@@ -558,9 +901,9 @@
                 `).join('') : '<tr><td colspan="7" class="text-center text-slate-400 py-4">Холдингтер тіркелмеген</td></tr>';
 
                 panel.innerHTML = `
-                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 HoldingPayments — Холдингтерді басқару</h3>
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 HoldingPayments — Холдингтерді қаржылық басқару</h3>
                     <div class="p-4 bg-slate-50 border rounded-xl space-y-3 max-w-xl mb-6">
-                        <h4 class="text-xs font-bold text-slate-800 uppercase">Жаңа холдинг ашу</h4>
+                        <h4 class="text-xs font-bold text-slate-800 uppercase">Жаңа холдинг немесе оқу жобасын ашу</h4>
                         <input type="text" id="h-name" placeholder="Холдинг атауы" class="w-full border rounded p-2 text-xs bg-white">
                         <select id="h-type" class="w-full border rounded p-2 text-xs bg-white font-bold"><option value="Оқу">Оқу</option><option value="Білім беру">Білім беру</option></select>
                         <input type="text" id="h-school" placeholder="Мектеп атауы" class="w-full border rounded p-2 text-xs bg-white">
@@ -578,8 +921,8 @@
             else if (activeTab === 'parent_bpay') {
                 let parentUser = currentUser.username;
                 let childUsername = currentUser.parentOf || 'student1';
-                if(!bPayWallets[parentUser]) bPayWallets[parentUser] = { balance: 25000, history: [] };
-                if(!bPayWallets[childUsername]) bPayWallets[childUsername] = { balance: 5000, history: [] };
+                if(!bPayWallets[parentUser]) bPayWallets[parentUser] = { balance: 35000, history: [] };
+                if(!bPayWallets[childUsername]) bPayWallets[childUsername] = { balance: 8000, history: [] };
 
                 let pBal = bPayWallets[parentUser].balance;
                 let cBal = bPayWallets[childUsername].balance;
@@ -597,7 +940,7 @@
                 `).join('') || '<p class="text-xs text-slate-400">Қолжетімді холдингтер жоқ.</p>';
 
                 panel.innerHTML = `
-                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 B-Pay (Ата-ана кабинеті)</h3>
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 B-Pay (Ата-ананың қаржылық кабинеті)</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="p-4 bg-gradient-to-br from-blue-900 to-indigo-900 text-white rounded-xl shadow-md space-y-2">
                             <div class="text-[10px] uppercase font-bold text-blue-200">Сіздің балансыңыз (Ата-ана):</div>
@@ -607,35 +950,35 @@
                         <div class="p-4 bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-xl shadow-md space-y-2">
                             <div class="text-[10px] uppercase font-bold text-slate-400">Баланың балансы (${childUsername}):</div>
                             <div class="text-2xl font-black">${cBal} ₸</div>
-                            <button onclick="openChildTopUpModal()" class="px-3 py-1.5 bg-blue-600 text-white rounded font-bold text-xs shadow mt-2">Балаға ақша аудару</button>
+                            <button onclick="openChildTopUpModal()" class="px-3 py-1.5 bg-blue-600 text-white rounded font-bold text-xs shadow mt-2">Балаға қаражат аудару</button>
                         </div>
                     </div>
-                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-3">Белсенді холдингтер мен төлемдер</h4>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-3">Белсенді холдингтер мен мектеп төлемдері</h4>
                     <div class="space-y-3 max-w-xl">${activeHoldingsHTML}</div>
                 `;
             }
             // --- 5. B-PAY (ОҚУШЫ) ---
             else if (activeTab === 'student_bpay') {
                 let stUser = currentUser.username;
-                if(!bPayWallets[stUser]) bPayWallets[stUser] = { balance: 5000, history: [] };
+                if(!bPayWallets[stUser]) bPayWallets[stUser] = { balance: 8000, history: [] };
                 let bal = bPayWallets[stUser].balance;
-                let histHTML = (bPayWallets[stUser].history || []).map(h => `<div class="p-2 border-b text-xs">💬 Сізге қаражат аударылды: <b>+${h.amount} ₸</b> (${h.date})</div>`).join('') || '<span class="text-slate-400 text-xs">Аударымдар тарихы бос</span>';
+                let histHTML = (bPayWallets[stUser].history || []).map(h => `<div class="p-2 border-b text-xs">💬 Ата-анадан қаражат түсті: <b>+${h.amount} ₸</b> (${h.date})</div>`).join('') || '<span class="text-slate-400 text-xs">Аударымдар тарихы бос</span>';
 
                 panel.innerHTML = `
-                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 B-Pay (Оқушы кабинеті)</h3>
+                    <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 B-Pay (Оқушының шот кабинеті)</h3>
                     <div class="p-6 bg-gradient-to-br from-blue-900 to-indigo-900 text-white rounded-xl shadow-md max-w-md space-y-2 mb-6">
-                        <div class="text-[10px] uppercase font-bold text-blue-200">Баланың шоты (Баланс):</div>
+                        <div class="text-[10px] uppercase font-bold text-blue-200">Сіздің шотыңыз (Баланс):</div>
                         <div class="text-3xl font-black">${bal} ₸</div>
                     </div>
-                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Аударымдар және қаражат тарихы</h4>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Аударымдар мен транзакциялар тарихы</h4>
                     <div class="bg-white border rounded-xl p-3 space-y-1 max-w-md">${histHTML}</div>
                 `;
             }
-            // --- 6. БАСҚА ЕКСКЛЮЗИВТІ ФУНКЦИЯЛАРДЫҢ ҚАЛҒАН БӨЛІГІ (Дәстүрлі журналдар, тесттер, т.б.) ---
             else {
+                // Дәстүрлі басқару вкладкаларына өткенде файлдағы барлық логика сақталады
                 panel.innerHTML = `
                     <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">BilimAL Enterprise — Қызмет көрсету бөлімі</h3>
-                    <p class="text-xs text-slate-600 mb-3">Бұл бөлімде барлық бұрынғы электронды журнал, сабақ кестелері, BilimID және басқа да мүмкіндіктер толық жұмыс істейді.</p>
+                    <p class="text-xs text-slate-600 mb-3">Бұл бөлімде барлық электронды журнал, сабақ кестелері, BilimID, BilimTest және басқа мүмкіндіктер толық жұмыс істейді.</p>
                     <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900">
                         Бөлім сәтті жүктелді. Сол жақ мәзірден қажетті қызметті таңдаңыз.
                     </div>
@@ -645,13 +988,13 @@
 
         // --- ТОҚСАНДЫҚ ЕСЕП ЛОГИКАСЫ ---
         async function submitAutoReport() {
-            showSpinner("ЭЦҚ генерацияланып, автоматты есеп түзілуде...");
+            showSpinner("ЭЦҚ штампы генерацияланып, автоматты есеп түзілуде...");
             let now = new Date();
             let dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} - ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
             let hashVal = 'EDQ-HASH-' + Math.random().toString(36).substring(2, 12).toUpperCase();
 
             reportsList.push({
-                date: dateStr, method: 'Автоматты', teacherName: currentUser.name, classOrSubject: 'Барлық пәндер / Сынып', percent: 92, status: 'Күтуде', edq: hashVal
+                date: dateStr, method: 'Автоматты', teacherName: currentUser.name, classOrSubject: 'Барлық пәндер / Сынып', percent: 93, status: 'Күтуде', edq: hashVal
             });
             await saveDataToCloud();
             hideSpinner();
@@ -673,7 +1016,7 @@
             let dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
 
             reportsList.push({
-                date: dateStr, method: 'Қолмен', teacherName: currentUser.name, classOrSubject: `${cls} - ${subj}`, percent: pct || 80, status: 'Күтуде', edq: 'MANUAL-INPUT'
+                date: dateStr, method: 'Қолмен', teacherName: currentUser.name, classOrSubject: `${cls} - ${subj}`, percent: pct || 85, status: 'Күтуде', edq: 'MANUAL-INPUT'
             });
             await saveDataToCloud();
             hideSpinner();
@@ -734,7 +1077,7 @@
             if(!cardNum) return;
             let expiry = prompt("Жарамдылық мерзімі (MM/YY):", "12/28");
             let cvv = prompt("CVV коды (3 таңбалы):", "123");
-            let sum = prompt("Толтыру сомасын енгізіңіз (₸):", "10000");
+            let sum = prompt("Толтыру сомасын енгізіңіз (₸):", "15000");
             if(!sum) return;
 
             let smsCode = Math.floor(1000 + Math.random() * 9000);
@@ -774,7 +1117,7 @@
                 bPayWallets[childUn].history.push({ amount: valSum, date: new Date().toLocaleDateString() });
 
                 await saveDataToCloud();
-                showIosToast(true, "Сәтті!", "Баланың шоты толықтырылды!");
+                showIosToast(true, "Сәтті!", "Баланың шоты сәтті толықтырылды!");
                 renderTabContent();
             });
         }
@@ -783,11 +1126,11 @@
             let h = holdingsList[idx];
             let pBal = bPayWallets[currentUser.username].balance;
 
-            let confirmPay = confirm(`Холдинг: ${h.name}\nАй сайынғы төлем: ${h.amount} ₸\nСіздің балансыңыз: ${pBal} ₸\nТөлемді растайсыз ба?`);
+            let confirmPay = confirm(`Холдинг: ${h.name}\nТөлем сомасы: ${h.amount} ₸\nСіздің балансыңыз: ${pBal} ₸\nТөлемді растайсыз ба?`);
             if(!confirmPay) return;
 
             if(pBal < h.amount) {
-                showIosToast(false, "Қате!", "Төлем мақұлданбады. Балансыңызда қаражат жеткіліксіз!");
+                showIosToast(false, "Қате!", "Балансыңызда қаражат жеткіліксіз!");
                 return;
             }
 
