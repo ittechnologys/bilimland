@@ -489,7 +489,6 @@
             return `${d}.${m}.${y} / ${h}:${min}`;
         }
 
-        // Қол қою тақтасын (Signature Canvas) баптау функциясы
         function initSignatureCanvas(canvasId) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
@@ -1193,13 +1192,12 @@
 
                 let activeHoldingsHtml = schoolHoldings.filter(h => subscribedIds.includes(h.id)).map(h => {
                     let payments = parentHoldingPayments[currentUser.username] || [];
-                    // Егер админ жаңа мерзім қойса, сол мерзім ішінде төленді ме тексереміз
                     let hasDeadline = h.payStart && h.payEnd;
                     let isWithinDeadline = hasDeadline ? (currentStr >= h.payStart && currentStr <= h.payEnd) : true;
                     let isExpired = hasDeadline && currentStr > h.payEnd;
                     let isNotStartedYet = hasDeadline && currentStr < h.payStart;
 
-                    let paidForCurrent = payments.some(p => {
+                    let existingPay = payments.find(p => {
                         if (p.holdingId !== h.id) return false;
                         if (hasDeadline) {
                             return p.periodKey === `${h.payStart}_${h.payEnd}`;
@@ -1208,13 +1206,19 @@
                     });
 
                     let actionBtnHtml = '';
-                    if (paidForCurrent) {
-                        actionBtnHtml = `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded">● Төленді</div>`;
+                    if (existingPay) {
+                        if (existingPay.refunded) {
+                            actionBtnHtml = `<div class="text-xs font-extrabold text-amber-700 bg-amber-50 px-2.5 py-1 rounded border border-amber-200">⚠️ Қаржы қайтарылды</div>`;
+                        } else {
+                            actionBtnHtml = `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded">● Төленді</div>`;
+                        }
                     } else if (isExpired) {
-                        actionBtnHtml = `<div class="text-[11px] font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded border border-red-200">🔒 Төлеу мерзімі аяқталды (${h.payEnd})</div>`;
+                        actionBtnHtml = `<div class="text-[11px] font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded border border-red-200">🔒 Төлем мерзімі аяқталды (${h.payEnd})</div>`;
                     } else if (isNotStartedYet) {
                         actionBtnHtml = `<div class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded border border-amber-200">⏳ Төлем ${h.payStart} басталады</div>`;
                     } else if (isWithinDeadline) {
+                        actionBtnHtml = `<button onclick="openPayHoldingModal('${h.id}')" class="px-4 py-2 kaspi-btn rounded-xl font-bold text-xs shadow">Pay (${h.amount} ₸)</button>`;
+                    } else {
                         actionBtnHtml = `<button onclick="openPayHoldingModal('${h.id}')" class="px-4 py-2 kaspi-btn rounded-xl font-bold text-xs shadow">Pay (${h.amount} ₸)</button>`;
                     }
 
@@ -1268,7 +1272,7 @@
                 let totalCollected = 0;
                 Object.keys(parentHoldingPayments).forEach(pUn => {
                     (parentHoldingPayments[pUn] || []).forEach(pay => {
-                        totalCollected += pay.amount || 0;
+                        if (!pay.refunded) totalCollected += pay.amount || 0;
                     });
                 });
 
@@ -2152,7 +2156,6 @@
             }
         }
 
-        // ====== АДМИН: ХОЛДИНГ БАПТАУЛАРЫ (⚙️) ======
         function openHoldingSettingsModal(holdingId) {
             let h = schoolHoldings.find(x => x.id === holdingId);
             if (!h) return;
@@ -2160,7 +2163,6 @@
             let startUI = h.payStart ? h.payStart.replace(/\//g, '-').replace('-', 'T') : '';
             let endUI = h.payEnd ? h.payEnd.replace(/\//g, '-').replace('-', 'T') : '';
 
-            // Төлеген адамдар тарихы
             let payersList = [];
             Object.keys(parentHoldingPayments).forEach(pUn => {
                 let userObj = users.find(u => u.username === pUn);
@@ -2179,7 +2181,7 @@
             let payersRows = payersList.length > 0 ? payersList.map(p => `
                 <tr class="text-[11px]">
                     <td class="font-bold">${p.parentName} (@${p.parentUsername})</td>
-                    <td class="font-extrabold text-emerald-700">${p.amount} ₸</td>
+                    <td class="font-extrabold text-emerald-700">${p.originalAmount || p.amount} ₸</td>
                     <td>${p.date}</td>
                     <td>
                         ${p.signature ? `<img src="${p.signature}" class="h-8 bg-slate-50 border rounded px-1" alt="Қол">` : '<span class="text-slate-400">—</span>'}
@@ -2315,13 +2317,12 @@
             if (!targetPay || targetPay.refunded) return;
 
             showSpinner("Қаржы кері қайтарылуда...");
-            let refundAmount = targetPay.amount || 0;
+            let refundAmount = targetPay.originalAmount || targetPay.amount || 0;
 
             if (!bPayWallets[parentUsername]) bPayWallets[parentUsername] = 0;
             bPayWallets[parentUsername] += refundAmount;
 
             targetPay.refunded = true;
-            // Қайтарылған сома жалпы жиналған қаражаттан алынуы үшін amount нөлденеді немесе бөлек есептеледі
             targetPay.originalAmount = refundAmount;
             targetPay.amount = 0;
 
@@ -2341,7 +2342,6 @@
             renderTabContent();
         }
 
-        // ====== АТА-АНА: ТОЛТЫРУ ЖӘНЕ АУДАРУ ======
         function openTopUpModal() {
             let modalHtml = `
                 <div class="ios-modal-backdrop" id="topup-modal">
@@ -2491,7 +2491,6 @@
             }, 2000);
         }
 
-        // ====== АТА-АНА: ХОЛДИНГКЕ ЖАЗЫЛУ (ТАНЫСУ + ҚОЛ ҚОЮ) ======
         function openHoldingModal(holdingId) {
             let h = schoolHoldings.find(x => x.id === holdingId);
             if (!h) return;
@@ -2551,7 +2550,6 @@
             }, 1500);
         }
 
-        // ====== АТА-АНА: ХОЛДИНГТЕН ШЫҒУ (DELETE -> ЕСКЕРТУ -> ЭҚ) ======
         function openUnsubscribeConfirmModal(holdingId) {
             let h = schoolHoldings.find(x => x.id === holdingId);
             if (!h) return;
@@ -2630,7 +2628,6 @@
             }, 1500);
         }
 
-        // ====== АТА-АНА: ХОЛДИНГ ТӨЛЕМІ ======
         function openPayHoldingModal(holdingId) {
             let h = schoolHoldings.find(x => x.id === holdingId);
             if (!h) return;
@@ -2682,9 +2679,11 @@
                 parentHoldingPayments[currentUser.username].push({
                     holdingId: holdingId,
                     amount: amount,
+                    originalAmount: amount,
                     date: getCurrentDateDDMMYYYY(),
                     periodKey: (h && h.payStart && h.payEnd) ? `${h.payStart}_${h.payEnd}` : 'default',
-                    signature: window.lastSubscriptionSignature || ''
+                    signature: window.lastSubscriptionSignature || '',
+                    refunded: false
                 });
 
                 bPayTransactions.unshift({
@@ -3088,7 +3087,7 @@
                         <span class="text-xs font-bold text-slate-500">Барлық сұрақ: ${test.questions.length}</span>
                     </div>
                     ${questionsHTML}
-                    <button onclick="submitStudentTest('${t.id}')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded shadow transition-all">✅ Тестті аяқтау және жіберу</button>
+                    <button onclick="submitStudentTest('${test.id}')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded shadow transition-all">✅ Тестті аяқтау және жіберу</button>
                 </div>
             `;
         }
