@@ -50,7 +50,7 @@
         #ios-toast-container {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px);
             opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 999999; width: 90%; max-width: 400px;
+            z-index: 99999999; width: 90%; max-width: 400px;
         }
         #ios-toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; }
 
@@ -65,13 +65,21 @@
         }
 
         .ios-modal-backdrop {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(2px);
-            z-index: 9999999; display: flex; align-items: center; justify-content: center;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(2px);
+            z-index: 9999999; display: flex; align-items: center; justify-content: center; padding: 12px;
         }
         .ios-alert-box {
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);
             width: 280px; border-radius: 14px; text-align: center; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             animation: fadeIn 0.25s ease;
+        }
+
+        .sig-canvas {
+            border: 2px dashed #94a3b8;
+            border-radius: 10px;
+            background-color: #f8fafc;
+            cursor: crosshair;
+            touch-action: none;
         }
     </style>
 </head>
@@ -429,7 +437,7 @@
         function getWeatherDescAndIcon(code) {
             if (code === 0) return { desc: "Ашық аспан", icon: "☀️" };
             if (code >= 1 && code <= 3) return { desc: "Бұлтты", icon: "⛅" };
-            if (code >= 51 && code >= 67) return { desc: "Жаңбыр", icon: "🌧️" };
+            if (code >= 51 && code <= 67) return { desc: "Жаңбыр", icon: "🌧️" };
             if (code >= 71) return { desc: "Қар", icon: "❄️" };
             return { desc: "Қолайлы ауа райы", icon: "🌤️" };
         }
@@ -479,6 +487,64 @@
             let h = String(now.getHours()).padStart(2, '0');
             let min = String(now.getMinutes()).padStart(2, '0');
             return `${d}.${m}.${y} / ${h}:${min}`;
+        }
+
+        // Қол қою тақтасын (Signature Canvas) баптау функциясы
+        function initSignatureCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#1e3a8a';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            let drawing = false;
+            canvas.dataset.hasSigned = "false";
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: (clientX - rect.left) * (canvas.width / rect.width),
+                    y: (clientY - rect.top) * (canvas.height / rect.height)
+                };
+            }
+
+            const startDraw = (e) => {
+                e.preventDefault();
+                drawing = true;
+                canvas.dataset.hasSigned = "true";
+                const pos = getPos(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            };
+
+            const moveDraw = (e) => {
+                if (!drawing) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            };
+
+            const endDraw = () => { drawing = false; };
+
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', moveDraw);
+            window.addEventListener('mouseup', endDraw);
+
+            canvas.addEventListener('touchstart', startDraw, { passive: false });
+            canvas.addEventListener('touchmove', moveDraw, { passive: false });
+            window.addEventListener('touchend', endDraw);
+        }
+
+        function clearSignatureCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.dataset.hasSigned = "false";
         }
 
         const translations = {
@@ -1104,6 +1170,7 @@
                 let parentBal = bPayWallets[currentUser.username] || 0;
                 let childBal = childUsername ? (bPayWallets[childUsername] || 0) : 0;
                 let subscribedIds = parentHoldingsSubscribed[currentUser.username] || [];
+                let currentStr = getCurrentFormattedDateTime();
 
                 let holdingsListHtml = schoolHoldings.map(h => {
                     let isSubscribed = subscribedIds.includes(h.id);
@@ -1116,9 +1183,9 @@
                             <div class="text-[11px] text-slate-600">${h.desc}</div>
                             <div class="text-[11px] font-bold text-amber-700">Ай сайынғы төлем: ${h.amount} ₸</div>
                             ${!isSubscribed ? `
-                                <button onclick="openHoldingModal('${h.id}')" class="px-3 py-1.5 bg-blue-600 text-white rounded font-bold text-xs">Қызметке жазылым рәсімдеу</button>
+                                <button onclick="openHoldingModal('${h.id}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs">Танысу және жазылым рәсімдеу</button>
                             ` : `
-                                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded">✅ Жазылым жасалған</span>
+                                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded inline-block">✅ Жазылым жасалған</span>
                             `}
                         </div>
                     `;
@@ -1126,7 +1193,31 @@
 
                 let activeHoldingsHtml = schoolHoldings.filter(h => subscribedIds.includes(h.id)).map(h => {
                     let payments = parentHoldingPayments[currentUser.username] || [];
-                    let paidForCurrent = payments.some(p => p.holdingId === h.id);
+                    // Егер админ жаңа мерзім қойса, сол мерзім ішінде төленді ме тексереміз
+                    let hasDeadline = h.payStart && h.payEnd;
+                    let isWithinDeadline = hasDeadline ? (currentStr >= h.payStart && currentStr <= h.payEnd) : true;
+                    let isExpired = hasDeadline && currentStr > h.payEnd;
+                    let isNotStartedYet = hasDeadline && currentStr < h.payStart;
+
+                    let paidForCurrent = payments.some(p => {
+                        if (p.holdingId !== h.id) return false;
+                        if (hasDeadline) {
+                            return p.periodKey === `${h.payStart}_${h.payEnd}`;
+                        }
+                        return true;
+                    });
+
+                    let actionBtnHtml = '';
+                    if (paidForCurrent) {
+                        actionBtnHtml = `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded">● Төленді</div>`;
+                    } else if (isExpired) {
+                        actionBtnHtml = `<div class="text-[11px] font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded border border-red-200">🔒 Төлеу мерзімі аяқталды (${h.payEnd})</div>`;
+                    } else if (isNotStartedYet) {
+                        actionBtnHtml = `<div class="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded border border-amber-200">⏳ Төлем ${h.payStart} басталады</div>`;
+                    } else if (isWithinDeadline) {
+                        actionBtnHtml = `<button onclick="openPayHoldingModal('${h.id}')" class="px-4 py-2 kaspi-btn rounded-xl font-bold text-xs shadow">Pay (${h.amount} ₸)</button>`;
+                    }
+
                     return `
                         <div class="p-3 bg-white border rounded-xl space-y-2 kaspi-card">
                             <div class="flex justify-between items-center">
@@ -1134,11 +1225,11 @@
                                 <span class="text-xs font-bold text-emerald-700">${h.amount} ₸ / ай</span>
                             </div>
                             <p class="text-[11px] text-slate-500">Басшысы: ${h.head} | Мектеп: ${h.school}</p>
-                            ${!paidForCurrent ? `
-                                <button onclick="openPayHoldingModal('${h.id}')" class="px-4 py-2 kaspi-btn rounded-xl font-bold text-xs shadow">Pay</button>
-                            ` : `
-                                <div class="text-xs font-bold text-emerald-700">● Төленді</div>
-                            `}
+                            ${hasDeadline ? `<div class="text-[10px] text-blue-700 font-bold bg-blue-50 px-2 py-1 rounded">🗓️ Төлеу мерзімі: ${h.payStart} — ${h.payEnd}</div>` : ''}
+                            <div class="flex items-center justify-between pt-2 border-t gap-2 flex-wrap">
+                                <div>${actionBtnHtml}</div>
+                                <button onclick="openUnsubscribeConfirmModal('${h.id}')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs shadow-xs">Delete</button>
+                            </div>
                         </div>
                     `;
                 }).join('') || '<div class="text-slate-400 text-xs">Белсенді холдингтер жоқ</div>';
@@ -1188,11 +1279,15 @@
                         <td>${h.school}</td>
                         <td>${h.head}</td>
                         <td class="font-extrabold text-amber-700">${h.amount} ₸</td>
+                        <td class="text-[10px] font-bold text-slate-600">${h.payStart && h.payEnd ? `${h.payStart} — ${h.payEnd}` : '<span class="text-slate-400">Шектеусіз</span>'}</td>
                         <td>
-                            <button onclick="deleteHolding(${idx})" class="px-2 py-1 bg-red-600 text-white rounded font-bold text-[10px]">Өшіру</button>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="openHoldingSettingsModal('${h.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded font-bold text-[11px]" title="Холдинг баптаулары">⚙️</button>
+                                <button onclick="deleteHolding(${idx})" class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-[10px]">Өшіру</button>
+                            </div>
                         </td>
                     </tr>
-                `).join('') : '<tr><td colspan="6" class="text-center text-slate-400 py-4">Холдингтер тіркелмеген</td></tr>';
+                `).join('') : '<tr><td colspan="7" class="text-center text-slate-400 py-4">Холдингтер тіркелмеген</td></tr>';
 
                 panel.innerHTML = `
                     <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 HoldingPayments — Холдингтерді басқару</h3>
@@ -1244,7 +1339,7 @@
                     <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Барлық холдингтер тізімі</h4>
                     <div class="overflow-x-auto">
                         <table class="w-full gov-table">
-                            <thead><tr><th>Атауы</th><th>Қызмет түрі</th><th>Мектеп</th><th>Басшысы</th><th>Ай сайынғы төлем</th><th>Әрекет</th></tr></thead>
+                            <thead><tr><th>Атауы</th><th>Қызмет түрі</th><th>Мектеп</th><th>Басшысы</th><th>Ай сайынғы төлем</th><th>Төлеу мерзімі</th><th>Әрекет</th></tr></thead>
                             <tbody>${holdingRows}</tbody>
                         </table>
                     </div>
@@ -2057,6 +2152,196 @@
             }
         }
 
+        // ====== АДМИН: ХОЛДИНГ БАПТАУЛАРЫ (⚙️) ======
+        function openHoldingSettingsModal(holdingId) {
+            let h = schoolHoldings.find(x => x.id === holdingId);
+            if (!h) return;
+
+            let startUI = h.payStart ? h.payStart.replace(/\//g, '-').replace('-', 'T') : '';
+            let endUI = h.payEnd ? h.payEnd.replace(/\//g, '-').replace('-', 'T') : '';
+
+            // Төлеген адамдар тарихы
+            let payersList = [];
+            Object.keys(parentHoldingPayments).forEach(pUn => {
+                let userObj = users.find(u => u.username === pUn);
+                (parentHoldingPayments[pUn] || []).forEach((pay, payIdx) => {
+                    if (pay.holdingId === holdingId) {
+                        payersList.push({
+                            parentUsername: pUn,
+                            parentName: userObj ? userObj.name : pUn,
+                            payIdx: payIdx,
+                            ...pay
+                        });
+                    }
+                });
+            });
+
+            let payersRows = payersList.length > 0 ? payersList.map(p => `
+                <tr class="text-[11px]">
+                    <td class="font-bold">${p.parentName} (@${p.parentUsername})</td>
+                    <td class="font-extrabold text-emerald-700">${p.amount} ₸</td>
+                    <td>${p.date}</td>
+                    <td>
+                        ${p.signature ? `<img src="${p.signature}" class="h-8 bg-slate-50 border rounded px-1" alt="Қол">` : '<span class="text-slate-400">—</span>'}
+                    </td>
+                    <td>
+                        ${p.refunded ? `<span class="text-amber-600 font-bold">Қайтарылды</span>` : `
+                            <button onclick="refundHoldingPayment('${p.parentUsername}', ${p.payIdx}, '${h.id}')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded font-bold text-[10px]">💸 Қаржыны қайтару</button>
+                        `}
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="text-center text-slate-400 py-3">Әлі ешкім төлем жасаған жоқ</td></tr>';
+
+            let existingModal = document.getElementById('admin-holding-settings-modal');
+            if (existingModal) existingModal.remove();
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="admin-holding-settings-modal">
+                    <div class="bg-white p-5 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4 border">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">⚙️ Холдинг баптаулары: <span class="text-blue-700">${h.name}</span></h3>
+                            <button onclick="document.getElementById('admin-holding-settings-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-3 bg-slate-50 border rounded-xl space-y-2.5">
+                                <h4 class="text-xs font-extrabold text-slate-800 uppercase">1. Төлеу мерзімін орнату</h4>
+                                <p class="text-[10px] text-slate-500">Мерзім аяқталған соң ата-аналарда Pay батырмасы автоматты жабылады. Жаңа мерзім қойылғанда қайта ашылады.</p>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Басталу уақыты:</label>
+                                    <input type="datetime-local" id="set-h-start" value="${startUI}" class="w-full border rounded p-1.5 text-xs bg-white font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Аяқталу уақыты:</label>
+                                    <input type="datetime-local" id="set-h-end" value="${endUI}" class="w-full border rounded p-1.5 text-xs bg-white font-bold">
+                                </div>
+                                <div class="flex gap-1.5">
+                                    <button onclick="saveHoldingDeadline('${h.id}')" class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs">Мерзімді бекіту</button>
+                                    <button onclick="clearHoldingDeadline('${h.id}')" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs">Тазалау</button>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-slate-50 border rounded-xl space-y-2.5">
+                                <h4 class="text-xs font-extrabold text-slate-800 uppercase">2. Қызмет бағасын және деректерін өзгерту</h4>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Ай сайынғы төлем бағасы (Тг):</label>
+                                    <input type="number" id="set-h-price" value="${h.amount}" class="w-full border rounded p-1.5 text-xs bg-white font-extrabold text-emerald-700">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Басшысы:</label>
+                                    <input type="text" id="set-h-head" value="${h.head}" class="w-full border rounded p-1.5 text-xs bg-white">
+                                </div>
+                                <button onclick="saveHoldingPriceAndInfo('${h.id}')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs">💾 Бағаны жаңарту</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-extrabold text-slate-800 uppercase">3. Төлеген адамдардың тарихы және Қаржыны қайтару</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full gov-table">
+                                    <thead>
+                                        <tr><th>Ата-ана</th><th>Төленген сома</th><th>Уақыты</th><th>ЭҚ (Қолы)</th><th>Қаржыны қайтару</th></tr>
+                                    </thead>
+                                    <tbody>${payersRows}</tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <button onclick="document.getElementById('admin-holding-settings-modal').remove()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded font-bold text-xs">Жабу</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        async function saveHoldingDeadline(holdingId) {
+            let sVal = document.getElementById('set-h-start').value;
+            let eVal = document.getElementById('set-h-end').value;
+            if (!sVal || !eVal) {
+                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу мерзімін толық таңдаңыз!");
+                return;
+            }
+            let h = schoolHoldings.find(x => x.id === holdingId);
+            if (!h) return;
+
+            showSpinner("Мерзім жаңартылуда...");
+            h.payStart = sVal.replace(/-/g, '/').replace('T', '-');
+            h.payEnd = eVal.replace(/-/g, '/').replace('T', '-');
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Төлеу мерзімі орнатылды! Pay батырмасы жаңартылды.");
+            openHoldingSettingsModal(holdingId);
+            renderTabContent();
+        }
+
+        async function clearHoldingDeadline(holdingId) {
+            let h = schoolHoldings.find(x => x.id === holdingId);
+            if (!h) return;
+            showSpinner("Мерзім алынуда...");
+            h.payStart = '';
+            h.payEnd = '';
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Мерзім шектеуі алынып тасталды.");
+            openHoldingSettingsModal(holdingId);
+            renderTabContent();
+        }
+
+        async function saveHoldingPriceAndInfo(holdingId) {
+            let newPrice = parseFloat(document.getElementById('set-h-price').value) || 0;
+            let newHead = document.getElementById('set-h-head').value.trim();
+            if (newPrice <= 0 || !newHead) {
+                showIosToast(false, "Сәтсіз!", "Дұрыс баға мен басшы атын енгізіңіз!");
+                return;
+            }
+            let h = schoolHoldings.find(x => x.id === holdingId);
+            if (!h) return;
+
+            showSpinner("Баға өзгертілуде...");
+            h.amount = newPrice;
+            h.head = newHead;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `Холдинг бағасы ${newPrice} ₸ болып жаңартылды!`);
+            openHoldingSettingsModal(holdingId);
+            renderTabContent();
+        }
+
+        async function refundHoldingPayment(parentUsername, payIdx, holdingId) {
+            if (!confirm("Бұл ата-анаға төленген қаражатты B-Pay балансына кері қайтарғыңыз келе ме?")) return;
+
+            let payments = parentHoldingPayments[parentUsername] || [];
+            let targetPay = payments[payIdx];
+            if (!targetPay || targetPay.refunded) return;
+
+            showSpinner("Қаржы кері қайтарылуда...");
+            let refundAmount = targetPay.amount || 0;
+
+            if (!bPayWallets[parentUsername]) bPayWallets[parentUsername] = 0;
+            bPayWallets[parentUsername] += refundAmount;
+
+            targetPay.refunded = true;
+            // Қайтарылған сома жалпы жиналған қаражаттан алынуы үшін amount нөлденеді немесе бөлек есептеледі
+            targetPay.originalAmount = refundAmount;
+            targetPay.amount = 0;
+
+            let hObj = schoolHoldings.find(x => x.id === holdingId);
+            bPayTransactions.unshift({
+                username: parentUsername,
+                serviceName: `Қаржыны кері қайтару (${hObj ? hObj.name : 'Холдинг'})`,
+                amount: refundAmount,
+                date: getCurrentDateDDMMYYYY(),
+                status: 'Қайтарылды'
+            });
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `${refundAmount} ₸ ата-ананың B-Pay шотына қайтарылды!`);
+            openHoldingSettingsModal(holdingId);
+            renderTabContent();
+        }
+
+        // ====== АТА-АНА: ТОЛТЫРУ ЖӘНЕ АУДАРУ ======
         function openTopUpModal() {
             let modalHtml = `
                 <div class="ios-modal-backdrop" id="topup-modal">
@@ -2206,35 +2491,54 @@
             }, 2000);
         }
 
+        // ====== АТА-АНА: ХОЛДИНГКЕ ЖАЗЫЛУ (ТАНЫСУ + ҚОЛ ҚОЮ) ======
         function openHoldingModal(holdingId) {
             let h = schoolHoldings.find(x => x.id === holdingId);
             if (!h) return;
 
             let modalHtml = `
                 <div class="ios-modal-backdrop" id="holding-modal">
-                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full space-y-3 relative border">
+                    <div class="bg-white p-5 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto space-y-3 relative border">
                         <h3 class="text-sm font-extrabold text-blue-900 border-b pb-2">${h.name} (${h.type})</h3>
                         <div class="text-xs text-slate-700 space-y-1">
                             <div><b>Мектеп:</b> ${h.school}</div>
                             <div><b>Басшысы:</b> ${h.head}</div>
-                            <div><b>Ай сайынғы төлем:</b> ${h.amount} ₸</div>
+                            <div><b>Ай сайынғы төлем:</b> <span class="text-emerald-700 font-extrabold">${h.amount} ₸</span></div>
                             <div class="pt-1"><b>Сипаттамасы:</b> ${h.desc}</div>
                         </div>
-                        <div class="p-3 bg-slate-50 border rounded-lg text-[11px] text-slate-600 max-h-32 overflow-y-auto space-y-2">
+                        <div class="p-3 bg-slate-50 border rounded-lg text-[11px] text-slate-600 max-h-28 overflow-y-auto space-y-2">
                             <div><b>Оферта шарттары:</b> ${h.oferta}</div>
                             <div><b>Условия политики:</b> ${h.policy}</div>
                         </div>
-                        <button onclick="subscribeHolding('${h.id}')" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow">Осы қызметке жазылым рәсімдеу</button>
+
+                        <div class="space-y-1.5 pt-1">
+                            <div class="flex justify-between items-center">
+                                <label class="text-[11px] font-extrabold text-slate-800">✍️ Шарттармен таныстым, қолтаңбаңызды салыңыз:</label>
+                                <button type="button" onclick="clearSignatureCanvas('sub-sig-canvas')" class="text-[10px] text-red-600 font-bold underline">Тазалау</button>
+                            </div>
+                            <canvas id="sub-sig-canvas" width="360" height="110" class="sig-canvas w-full h-[110px]"></canvas>
+                        </div>
+
+                        <button onclick="subscribeHolding('${h.id}')" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow">Жазылымды рәсімдеу</button>
                         <button onclick="document.getElementById('holding-modal').remove()" class="w-full py-2 bg-slate-200 text-slate-700 rounded font-bold text-xs">Жабу</button>
                     </div>
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
+            initSignatureCanvas('sub-sig-canvas');
         }
 
         async function subscribeHolding(holdingId) {
+            const canvas = document.getElementById('sub-sig-canvas');
+            if (!canvas || canvas.dataset.hasSigned !== "true") {
+                showIosToast(false, "Қолтаңба қажет!", "Жазылымды рәсімдеу үшін алдымен қолыңызды салыңыз!");
+                return;
+            }
+            const sigDataUrl = canvas.toDataURL('image/png');
+            window.lastSubscriptionSignature = sigDataUrl;
+
             document.getElementById('holding-modal').remove();
-            showSpinner("Жазылым рәсімделуде...");
+            showSpinner("Қолтаңба расталып, жазылым рәсімделуде...");
             setTimeout(async () => {
                 if (!parentHoldingsSubscribed[currentUser.username]) parentHoldingsSubscribed[currentUser.username] = [];
                 if (!parentHoldingsSubscribed[currentUser.username].includes(holdingId)) {
@@ -2242,14 +2546,101 @@
                 }
                 await saveDataToCloud();
                 hideSpinner();
-                showIosToast(true, "✓ Сәтті!", "Холдингке жазылым рәсімделді!");
+                showIosToast(true, "✓ Сәтті!", "Қолтаңба қабылданды, холдингке жазылым рәсімделді!");
                 renderTabContent();
-            }, 2000);
+            }, 1500);
         }
 
+        // ====== АТА-АНА: ХОЛДИНГТЕН ШЫҒУ (DELETE -> ЕСКЕРТУ -> ЭҚ) ======
+        function openUnsubscribeConfirmModal(holdingId) {
+            let h = schoolHoldings.find(x => x.id === holdingId);
+            if (!h) return;
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="unsub-confirm-modal">
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center space-y-4 border border-red-200">
+                        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full mx-auto flex items-center justify-center text-2xl font-black">⚠️</div>
+                        <h3 class="text-base font-extrabold text-red-700">Ескерту!</h3>
+                        <p class="text-xs text-slate-700 font-semibold leading-relaxed">
+                            Сіз <b>«${h.name}»</b> холдингінен бас тартасыз және барлық көрсетілген қызметтерден айырыласыз.<br><br>
+                            <span class="text-slate-900 font-extrabold">Сенімдісіз бе?</span>
+                        </p>
+                        <div class="flex gap-2 pt-2">
+                            <button onclick="openUnsubscribeSignatureModal('${h.id}')" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow">Ия</button>
+                            <button onclick="document.getElementById('unsub-confirm-modal').remove()" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold text-xs">Жоқ</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function openUnsubscribeSignatureModal(holdingId) {
+            let confirmModal = document.getElementById('unsub-confirm-modal');
+            if (confirmModal) confirmModal.remove();
+
+            let h = schoolHoldings.find(x => x.id === holdingId);
+            if (!h) return;
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="unsub-esign-modal">
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full space-y-4 border">
+                        <div class="text-center border-b pb-3">
+                            <div class="w-10 h-10 bg-blue-50 text-blue-700 rounded-xl mx-auto flex items-center justify-center text-lg font-black mb-1">✒️</div>
+                            <h3 class="text-sm font-extrabold text-slate-900">Электронды қол (ЭҚ) талап етіледі</h3>
+                            <p class="text-[11px] text-slate-500 mt-1">«${h.name}» холдингінен бас тартуды растау үшін төмендегі өріске қолыңызды салып беріңіз</p>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[11px] font-bold text-slate-700">Тұтынушы қолтаңбасы:</span>
+                                <button type="button" onclick="clearSignatureCanvas('unsub-sig-canvas')" class="text-[10px] text-red-600 font-bold underline">Қолды тазалау</button>
+                            </div>
+                            <canvas id="unsub-sig-canvas" width="360" height="130" class="sig-canvas w-full h-[130px]"></canvas>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button onclick="executeUnsubscribeHolding('${h.id}')" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow">Растау</button>
+                            <button onclick="document.getElementById('unsub-esign-modal').remove()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs">Болдырмау</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            initSignatureCanvas('unsub-sig-canvas');
+        }
+
+        async function executeUnsubscribeHolding(holdingId) {
+            const canvas = document.getElementById('unsub-sig-canvas');
+            if (!canvas || canvas.dataset.hasSigned !== "true") {
+                showIosToast(false, "ЭҚ салынбады!", "Холдингтен шығуды растау үшін қолтаңбаңызды салыңыз!");
+                return;
+            }
+
+            document.getElementById('unsub-esign-modal').remove();
+            showSpinner("ЭҚ тексеріліп, холдингтен шығарылуда...");
+            setTimeout(async () => {
+                if (parentHoldingsSubscribed[currentUser.username]) {
+                    parentHoldingsSubscribed[currentUser.username] = parentHoldingsSubscribed[currentUser.username].filter(id => id !== holdingId);
+                }
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "✓ Сәтті!", "Электронды қол расталды. Сіз холдингтен сәтті шықтыңыз.");
+                renderTabContent();
+            }, 1500);
+        }
+
+        // ====== АТА-АНА: ХОЛДИНГ ТӨЛЕМІ ======
         function openPayHoldingModal(holdingId) {
             let h = schoolHoldings.find(x => x.id === holdingId);
             if (!h) return;
+
+            let currentStr = getCurrentFormattedDateTime();
+            if (h.payStart && h.payEnd && (currentStr < h.payStart || currentStr > h.payEnd)) {
+                showIosToast(false, "Мерзім аяқталды!", "Бұл холдингті төлеу уақыты аяқталған немесе әлі басталмаған.");
+                renderTabContent();
+                return;
+            }
 
             let parentBal = bPayWallets[currentUser.username] || 0;
 
@@ -2274,6 +2665,7 @@
 
         async function executePayHolding(holdingId, amount) {
             document.getElementById('pay-holding-modal').remove();
+            let h = schoolHoldings.find(x => x.id === holdingId);
             let parentBal = bPayWallets[currentUser.username] || 0;
 
             if (parentBal < amount) {
@@ -2290,12 +2682,14 @@
                 parentHoldingPayments[currentUser.username].push({
                     holdingId: holdingId,
                     amount: amount,
-                    date: getCurrentDateDDMMYYYY()
+                    date: getCurrentDateDDMMYYYY(),
+                    periodKey: (h && h.payStart && h.payEnd) ? `${h.payStart}_${h.payEnd}` : 'default',
+                    signature: window.lastSubscriptionSignature || ''
                 });
 
                 bPayTransactions.unshift({
                     username: currentUser.username,
-                    serviceName: `Холдинг төлемі`,
+                    serviceName: `Холдинг төлемі (${h ? h.name : 'Холдинг'})`,
                     amount: amount,
                     date: getCurrentDateDDMMYYYY(),
                     status: 'Сәтті'
@@ -2325,7 +2719,8 @@
             showSpinner("Холдинг тіркелуде...");
             schoolHoldings.push({
                 id: 'hold_' + Math.random().toString(36).substring(2, 9),
-                name, type, school, head, oferta, policy, desc, amount
+                name, type, school, head, oferta, policy, desc, amount,
+                payStart: '', payEnd: ''
             });
 
             await saveDataToCloud();
@@ -2693,7 +3088,7 @@
                         <span class="text-xs font-bold text-slate-500">Барлық сұрақ: ${test.questions.length}</span>
                     </div>
                     ${questionsHTML}
-                    <button onclick="submitStudentTest('${test.id}')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded shadow transition-all">✅ Тестті аяқтау және жіберу</button>
+                    <button onclick="submitStudentTest('${t.id}')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded shadow transition-all">✅ Тестті аяқтау және жіберу</button>
                 </div>
             `;
         }
