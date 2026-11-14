@@ -16,107 +16,109 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif; 
             background: radial-gradient(circle at 15% 15%, #e0e7ff 0%, #f1f5f9 45%, #dbeafe 100%);
             background-attachment: fixed;
             overflow-x: hidden; 
+            text-rendering: optimizeSpeed;
         }
 
-        /* iPhone Liquid Glass Core Styling */
+        /* iPhone Liquid Glass Core Styling (GPU Optimized) */
         .liquid-glass {
-            background: rgba(255, 255, 255, 0.58) !important;
-            backdrop-filter: blur(24px) saturate(190%) !important;
-            -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-            border: 1px solid rgba(255, 255, 255, 0.75) !important;
-            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
+            background: rgba(255, 255, 255, 0.72) !important;
+            backdrop-filter: blur(16px) saturate(160%) !important;
+            -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+            box-shadow: 0 8px 28px rgba(15, 23, 42, 0.07), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
+            transform: translateZ(0);
         }
 
         .gov-header { 
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 58, 138, 0.85) 100%); 
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 58, 138, 0.9) 100%); 
+            backdrop-filter: blur(16px) saturate(160%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+            transform: translateZ(0);
         }
 
-        /* All Panels & Cards Liquid Glass */
+        /* All Panels & Cards Liquid Glass (Lightweight layer compositing) */
         .bg-white, .bg-slate-50 {
-            background: rgba(255, 255, 255, 0.62) !important;
-            backdrop-filter: blur(22px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
-            border-color: rgba(255, 255, 255, 0.7) !important;
-            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+            background: rgba(255, 255, 255, 0.78) !important;
+            border-color: rgba(255, 255, 255, 0.75) !important;
+            box-shadow: 0 6px 22px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
         }
 
-        /* All Inputs, Selects, Textareas Liquid Glass */
+        /* All Inputs, Selects, Textareas Liquid Glass (Zero-lag input rendering) */
         input, select, textarea {
-            background: rgba(255, 255, 255, 0.55) !important;
-            backdrop-filter: blur(18px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
-            border: 1px solid rgba(255, 255, 255, 0.8) !important;
-            box-shadow: inset 0 2px 5px rgba(15, 23, 42, 0.04), 0 2px 8px rgba(255, 255, 255, 0.4) !important;
+            background: rgba(255, 255, 255, 0.82) !important;
+            border: 1px solid rgba(203, 213, 225, 0.85) !important;
+            box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.04) !important;
             border-radius: 12px !important;
-            transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1) !important;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease !important;
         }
         input:focus, select:focus, textarea:focus {
-            background: rgba(255, 255, 255, 0.82) !important;
-            border-color: rgba(59, 130, 246, 0.7) !important;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18), inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            border-color: rgba(59, 130, 246, 0.75) !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18) !important;
             outline: none !important;
         }
 
-        /* All Buttons Liquid Glass */
+        /* All Buttons Liquid Glass (Hardware-accelerated transitions) */
         button {
-            backdrop-filter: blur(18px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
             border: 1px solid rgba(255, 255, 255, 0.45) !important;
-            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.07), inset 0 1px 1px rgba(255, 255, 255, 0.55) !important;
             border-radius: 12px !important;
-            transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, background 0.2s ease !important;
+            transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s ease, opacity 0.15s ease !important;
+            will-change: transform;
         }
         button:active {
-            transform: scale(0.96) !important;
+            transform: scale(0.97) !important;
         }
 
         .gov-table th { 
-            background: rgba(226, 232, 240, 0.65); 
-            backdrop-filter: blur(12px);
+            background: rgba(226, 232, 240, 0.82); 
             color: #334155; font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; 
-            border: 1px solid rgba(255, 255, 255, 0.7); padding: 6px; 
+            border: 1px solid rgba(255, 255, 255, 0.75); padding: 6px; 
         }
         .gov-table td { 
-            border: 1px solid rgba(255, 255, 255, 0.65); padding: 6px; 
-            background: rgba(255, 255, 255, 0.5); font-size: 11px; 
+            border: 1px solid rgba(226, 232, 240, 0.75); padding: 6px; 
+            background: rgba(255, 255, 255, 0.68); font-size: 11px; 
         }
-        .sidebar-btn { transition: all 0.25s ease; }
-        .sidebar-btn:hover { background: rgba(255, 255, 255, 0.8) !important; color: #2563eb; transform: translateX(2px); }
+        .sidebar-btn { transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease; }
+        .sidebar-btn:hover { background: rgba(255, 255, 255, 0.9) !important; color: #2563eb; transform: translateX(2px); }
         .sidebar-btn.active { 
-            background: rgba(239, 246, 255, 0.88) !important; 
+            background: rgba(239, 246, 255, 0.95) !important; 
             color: #1d4ed8; 
             border-left: 4px solid #1d4ed8 !important; 
             font-weight: 700; 
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.14) !important;
         }
         
         /* iPhone Long-Press & Drag Liquid Glass Overlay */
         #liquid-longpress-dock {
             position: fixed;
             z-index: 999999999;
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(32px) saturate(210%);
-            -webkit-backdrop-filter: blur(32px) saturate(210%);
-            border: 1.5px solid rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(22px) saturate(180%);
+            -webkit-backdrop-filter: blur(22px) saturate(180%);
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
             border-radius: 24px;
             padding: 8px;
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28), inset 0 2px 3px rgba(255, 255, 255, 0.95);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25), inset 0 2px 3px rgba(255, 255, 255, 0.95);
             width: 240px;
             transform-origin: top center;
-            animation: liquidPop 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: liquidPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             user-select: none;
             touch-action: none;
+            will-change: transform, opacity;
         }
         @keyframes liquidPop {
-            0% { opacity: 0; transform: scale(0.82) translateY(-10px); }
+            0% { opacity: 0; transform: scale(0.86) translateY(-8px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
         .liquid-dock-item {
@@ -128,87 +130,84 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.15s ease;
+            transition: transform 0.12s ease, background-color 0.12s ease, color 0.12s ease;
             margin-bottom: 4px;
-            background: rgba(255, 255, 255, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.65);
         }
         .liquid-dock-item:last-child { margin-bottom: 0; }
         .liquid-dock-item.drag-hover {
-            background: rgba(37, 99, 235, 0.85);
+            background: rgba(37, 99, 235, 0.92);
             color: #ffffff;
-            transform: scale(1.04);
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+            transform: scale(1.03);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.32);
         }
         #liquid-backdrop-dim {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.18);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            background: rgba(15, 23, 42, 0.22);
             z-index: 999999998;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.18s ease;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
         @keyframes pulseLive { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
         .live-badge-pulse { animation: pulseLive 1.5s infinite; }
 
         #gov-boot {
-            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #0f172a; transition: opacity 0.5s ease;
+            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.94); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #0f172a; transition: opacity 0.35s ease;
         }
         .gov-loader-bar {
             width: 160px; height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden; position: relative; margin-top: 16px;
         }
         .gov-loader-progress {
-            position: absolute; left: 0; top: 0; bottom: 0; width: 40%; background: #1e3a8a; border-radius: 2px; animation: govMove 1.2s infinite ease-in-out;
+            position: absolute; left: 0; top: 0; bottom: 0; width: 40%; background: #1e3a8a; border-radius: 2px; animation: govMove 1.1s infinite ease-in-out;
         }
         @keyframes govMove { 0% { left: -40%; } 100% { left: 100%; } }
 
         .win10-spinner-overlay {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px);
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px);
             z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
         }
 
-        .id-card-gradient { background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(15, 23, 42, 0.92) 100%); backdrop-filter: blur(20px); }
+        .id-card-gradient { background: linear-gradient(135deg, rgba(30, 58, 138, 0.94) 0%, rgba(15, 23, 42, 0.96) 100%); }
 
         #ios-toast-container {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-30px);
-            opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0; visibility: hidden; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
             z-index: 99999999; width: 90%; max-width: 400px;
+            will-change: transform, opacity;
         }
         #ios-toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; }
 
-        .kaspi-btn { background-color: rgba(241, 70, 44, 0.88) !important; color: white !important; font-weight: 700; transition: all 0.2s ease; }
-        .kaspi-btn:hover { background-color: rgba(217, 56, 30, 0.95) !important; }
+        .kaspi-btn { background-color: rgba(241, 70, 44, 0.92) !important; color: white !important; font-weight: 700; }
+        .kaspi-btn:hover { background-color: rgba(217, 56, 30, 0.98) !important; }
         .kaspi-card { border-top: 4px solid #f1462c; }
 
         .ios-weather-widget {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.82) 0%, rgba(2, 132, 199, 0.85) 100%);
-            backdrop-filter: blur(20px) saturate(180%);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.88) 0%, rgba(2, 132, 199, 0.92) 100%);
             border: 1px solid rgba(255, 255, 255, 0.55);
             color: white; border-radius: 18px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 8px 25px rgba(2, 132, 199, 0.22); margin-bottom: 12px;
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.2); margin-bottom: 12px;
         }
 
         .ios-modal-backdrop {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.32); backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.38); backdrop-filter: blur(8px);
             z-index: 9999999; display: flex; align-items: center; justify-content: center; padding: 12px;
         }
         .ios-alert-box {
-            background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(28px) saturate(190%);
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            width: 280px; border-radius: 20px; text-align: center; overflow: hidden; box-shadow: 0 18px 45px rgba(0,0,0,0.2);
-            animation: fadeIn 0.25s ease;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            width: 280px; border-radius: 20px; text-align: center; overflow: hidden; box-shadow: 0 18px 40px rgba(0,0,0,0.2);
+            animation: fadeIn 0.2s ease;
         }
 
         .sig-canvas {
-            border: 2px dashed rgba(148, 163, 184, 0.7);
+            border: 2px dashed rgba(148, 163, 184, 0.75);
             border-radius: 14px;
-            background-color: rgba(248, 250, 252, 0.65);
-            backdrop-filter: blur(10px);
+            background-color: rgba(248, 250, 252, 0.85);
             cursor: crosshair;
             touch-action: none;
         }
@@ -350,7 +349,7 @@
                 <nav id="sidebar-menu" class="space-y-1.5 text-xs font-semibold text-slate-700"></nav>
             </aside>
             <main class="md:col-span-4 space-y-3">
-                <div id="limit-notice-banner" class="hidden p-3 rounded-2xl bg-amber-50/80 backdrop-blur-md border border-amber-300 text-amber-900 text-xs shadow-xs flex items-center space-x-3 animate-fade">
+                <div id="limit-notice-banner" class="hidden p-3 rounded-2xl bg-amber-50/80 border border-amber-300 text-amber-900 text-xs shadow-xs flex items-center space-x-3 animate-fade">
                     <span class="text-base">⏳</span>
                     <div>
                         <b class="font-extrabold uppercase text-[10px] text-amber-800">NOTICE OF LIMIT (Әкімшілік шектеу):</b>
@@ -358,7 +357,7 @@
                     </div>
                 </div>
 
-                <div id="warning-banner" class="hidden p-3 rounded-2xl bg-red-50/80 backdrop-blur-md border border-red-200 text-red-800 text-xs shadow-xs flex items-center space-x-3 animate-fade">
+                <div id="warning-banner" class="hidden p-3 rounded-2xl bg-red-50/80 border border-red-200 text-red-800 text-xs shadow-xs flex items-center space-x-3 animate-fade">
                     <span class="text-base">⚠️</span>
                     <div>
                         <b class="font-bold">Әкімшілік / AI Security тарапынан ескерту берілді:</b>
@@ -366,7 +365,7 @@
                     </div>
                 </div>
 
-                <div id="announcement-banner" class="hidden p-3 rounded-2xl bg-blue-50/80 backdrop-blur-md border border-blue-200 text-blue-900 text-xs shadow-xs flex items-center space-x-3 animate-fade">
+                <div id="announcement-banner" class="hidden p-3 rounded-2xl bg-blue-50/80 border border-blue-200 text-blue-900 text-xs shadow-xs flex items-center space-x-3 animate-fade">
                     <span class="text-base">📢</span>
                     <div>
                         <b class="font-bold uppercase text-[10px] text-blue-700">Мектеп хабарландыруы:</b>
@@ -393,7 +392,7 @@
         </div>
     </div>
 
-    <div id="bilimweb-qr-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4 z-50 animate-fade">
+    <div id="bilimweb-qr-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="liquid-glass p-6 rounded-3xl max-w-sm w-full text-center relative">
             <div class="w-12 h-12 bg-indigo-500/15 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-xl font-black mb-3">📱</div>
             <h3 class="text-base font-extrabold text-slate-900">BilimWeb QR арқылы кіру</h3>
@@ -406,7 +405,7 @@
         </div>
     </div>
 
-    <div id="bilimweb-mobile-modal" class="fixed inset-0 bg-slate-900/85 backdrop-blur-md hidden flex items-center justify-center p-4 z-50 animate-fade">
+    <div id="bilimweb-mobile-modal" class="fixed inset-0 bg-slate-900/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="liquid-glass p-6 rounded-3xl max-w-md w-full space-y-4">
             <div class="text-center">
                 <div class="w-12 h-12 bg-indigo-500/15 text-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-xl font-black mb-2">🔐</div>
@@ -428,7 +427,7 @@
         </div>
     </div>
 
-    <div id="passkey-prompt-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4 z-50 animate-fade">
+    <div id="passkey-prompt-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 animate-fade">
         <div class="liquid-glass p-6 rounded-3xl max-w-sm w-full text-center relative space-y-4">
             <div class="w-12 h-12 bg-blue-500/15 text-blue-600 rounded-2xl mx-auto flex items-center justify-center text-xl font-black">🔒</div>
             <h3 class="text-base font-extrabold text-slate-900">Touch ID / Face ID байланыстыру</h3>
@@ -507,15 +506,18 @@
 
         let cookerOrders = [];
         let cookerMenu = [
-            { id: 'cook_1', name: 'Ыстық түскі ас (Комплекс)', price: 650, desc: 'Сорпа, екінші тағам, компот және нан' },
-            { id: 'cook_2', name: 'Самса + Шай', price: 350, desc: 'Пеште піскен етті самса және лимонды шай' },
-            { id: 'cook_3', name: 'Плов + Салат', price: 550, desc: 'Дәстүрлі палау және балғын көкөніс салаты' },
-            { id: 'cook_4', name: 'Сүтті ботқа + Какао', price: 400, desc: 'Таңғы асқа арналған пайдалы ботқа' }
+            { id: 'cook_1', name: 'Ыстық түскі ас (Комплекс)', price: 650, desc: 'Сорпа, екінші тағам, компот және нан', available: true },
+            { id: 'cook_2', name: 'Самса + Шай', price: 350, desc: 'Пеште піскен етті самса және лимонды шай', available: true },
+            { id: 'cook_3', name: 'Плов + Салат', price: 550, desc: 'Дәстүрлі палау және балғын көкөніс салаты', available: true },
+            { id: 'cook_4', name: 'Сүтті ботқа + Какао', price: 400, desc: 'Таңғы асқа арналған пайдалы ботқа', available: true }
         ];
 
         let tempQuestions = [];
         let html5QrScanner = null;
         let qrScannerCanteen = null;
+
+        let lastCloudSyncTime = 0;
+        let cloudSyncPromise = null;
 
         function initIOSWeatherGeolocation() {
             let savedPermission = localStorage.getItem('bilim_geo_permission');
@@ -593,12 +595,12 @@
             if (window.iosToastTimer) clearTimeout(window.iosToastTimer);
 
             if (success) {
-                box.className = "flex items-center gap-3 p-3.5 rounded-2xl shadow-2xl backdrop-blur-2xl border border-emerald-400/50 bg-emerald-950/85 text-white text-xs font-semibold";
+                box.className = "flex items-center gap-3 p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border border-emerald-400/50 bg-emerald-950/90 text-white text-xs font-semibold";
                 icon.className = "w-7 h-7 rounded-full bg-emerald-500/30 text-emerald-300 flex items-center justify-center font-bold text-sm shrink-0";
                 icon.innerHTML = "✓";
                 titleElem.innerText = title || "Сәтті!";
             } else {
-                box.className = "flex items-center gap-3 p-3.5 rounded-2xl shadow-2xl backdrop-blur-2xl border border-red-400/50 bg-red-950/85 text-white text-xs font-semibold";
+                box.className = "flex items-center gap-3 p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl border border-red-400/50 bg-red-950/90 text-white text-xs font-semibold";
                 icon.className = "w-7 h-7 rounded-full bg-red-500/30 text-red-300 flex items-center justify-center font-bold text-sm shrink-0";
                 icon.innerHTML = "✕";
                 titleElem.innerText = title || "Сәтсіз!";
@@ -754,6 +756,8 @@
         let longPressTimer = null;
         let isLiquidDockOpen = false;
         let activeHoveredTabId = null;
+        let activeDockMoveHandler = null;
+        let activeDockReleaseHandler = null;
 
         function getRoleLinksList() {
             const t = translations[currentLang];
@@ -859,6 +863,7 @@
 
             const backdrop = document.createElement('div');
             backdrop.id = 'liquid-backdrop-dim';
+            backdrop.onclick = closeLiquidGlassDock;
             document.body.appendChild(backdrop);
 
             const links = getRoleLinksList();
@@ -882,7 +887,7 @@
 
             document.body.appendChild(dock);
 
-            const handleDragMove = (ev) => {
+            activeDockMoveHandler = (ev) => {
                 if (!isLiquidDockOpen) return;
                 const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
                 const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
@@ -898,13 +903,9 @@
                 });
             };
 
-            const handleDragRelease = () => {
+            activeDockReleaseHandler = () => {
                 if (!isLiquidDockOpen) return;
                 const targetTab = activeHoveredTabId;
-                window.removeEventListener('mousemove', handleDragMove);
-                window.removeEventListener('touchmove', handleDragMove);
-                window.removeEventListener('mouseup', handleDragRelease);
-                window.removeEventListener('touchend', handleDragRelease);
                 closeLiquidGlassDock();
                 if (targetTab) {
                     switchTab(targetTab);
@@ -912,14 +913,24 @@
                 }
             };
 
-            window.addEventListener('mousemove', handleDragMove);
-            window.addEventListener('touchmove', handleDragMove, { passive: true });
-            window.addEventListener('mouseup', handleDragRelease);
-            window.addEventListener('touchend', handleDragRelease);
+            window.addEventListener('mousemove', activeDockMoveHandler);
+            window.addEventListener('touchmove', activeDockMoveHandler, { passive: true });
+            window.addEventListener('mouseup', activeDockReleaseHandler);
+            window.addEventListener('touchend', activeDockReleaseHandler);
         }
 
         function closeLiquidGlassDock() {
             isLiquidDockOpen = false;
+            if (activeDockMoveHandler) {
+                window.removeEventListener('mousemove', activeDockMoveHandler);
+                window.removeEventListener('touchmove', activeDockMoveHandler);
+                activeDockMoveHandler = null;
+            }
+            if (activeDockReleaseHandler) {
+                window.removeEventListener('mouseup', activeDockReleaseHandler);
+                window.removeEventListener('touchend', activeDockReleaseHandler);
+                activeDockReleaseHandler = null;
+            }
             const dock = document.getElementById('liquid-longpress-dock');
             const dim = document.getElementById('liquid-backdrop-dim');
             if (dock) dock.remove();
@@ -929,11 +940,13 @@
         window.onload = async function() {
             setTimeout(() => {
                 const boot = document.getElementById('gov-boot');
-                boot.style.opacity = '0';
-                setTimeout(() => boot.remove(), 500);
-            }, 900);
+                if (boot) {
+                    boot.style.opacity = '0';
+                    setTimeout(() => boot.remove(), 350);
+                }
+            }, 450);
 
-            await loadDataFromCloud();
+            await loadDataFromCloud(true);
             if(!users.some(u => u.username === 'admin')) {
                 users.push({ username: 'admin', password: 'admin2026', role: 'admin', name: 'Бас әкімші', warningReason: '', status: 'active' });
                 await saveDataToCloud();
@@ -952,8 +965,16 @@
             document.getElementById('action-spinner').classList.add('hidden');
         }
 
-        async function loadDataFromCloud() {
-            if(useFirebase) {
+        async function loadDataFromCloud(force = false) {
+            if (!useFirebase) return;
+            const now = Date.now();
+            if (!force && lastCloudSyncTime > 0 && (now - lastCloudSyncTime) < 2500) {
+                return;
+            }
+            if (cloudSyncPromise) {
+                return cloudSyncPromise;
+            }
+            cloudSyncPromise = (async () => {
                 try {
                     const snap = await db.collection("bilimal").doc("enterprise_v17_holding").get();
                     if(snap.exists) {
@@ -981,10 +1002,17 @@
                         parentHoldingsSubscribed = data.parentHoldingsSubscribed || {};
                         parentHoldingPayments = data.parentHoldingPayments || {};
                         cookerOrders = data.cookerOrders || [];
-                        if (data.cookerMenu && data.cookerMenu.length > 0) cookerMenu = data.cookerMenu;
+                        if (Array.isArray(data.cookerMenu)) {
+                            cookerMenu = data.cookerMenu;
+                        }
+                        lastCloudSyncTime = Date.now();
                     }
                 } catch(e) { console.error(e); }
-            }
+                finally {
+                    cloudSyncPromise = null;
+                }
+            })();
+            return cloudSyncPromise;
         }
 
         async function saveDataToCloud() {
@@ -996,6 +1024,7 @@
                         bPayWallets, bPayTransactions, schoolHoldings, parentHoldingsSubscribed, parentHoldingPayments,
                         cookerOrders, cookerMenu
                     });
+                    lastCloudSyncTime = Date.now();
                 } catch(e) { console.error(e); }
             }
         }
@@ -1098,7 +1127,7 @@
         }
 
         async function registerAndCheckSession(userObj) {
-            await loadDataFromCloud();
+            await loadDataFromCloud(true);
             let ua = navigator.userAgent;
             let browser = "Chrome / Safari";
             if (ua.includes("Firefox")) browser = "Mozilla Firefox";
@@ -1194,7 +1223,7 @@
 
                 if (assertion) {
                     let targetUsername = usernames[0];
-                    await loadDataFromCloud();
+                    await loadDataFromCloud(true);
                     let foundUser = users.find(u => u.username === targetUsername);
                     
                     if (foundUser) {
@@ -1248,7 +1277,7 @@
                 }
             } catch(err) {}
 
-            await loadDataFromCloud();
+            await loadDataFromCloud(true);
             hideSpinner();
 
             const foundUser = users.find(u => u.username === usernameInput && u.password === passwordInput);
@@ -1367,25 +1396,64 @@
             }
 
             if (activeTab === 'cooker_module') {
-                let targetUsername = currentUser.role === 'parent' ? (currentUser.parentOf || currentUser.username) : currentUser.username;
-                let userBal = bPayWallets[currentUser.username] || 0;
-                let myOrders = cookerOrders.filter(o => o.username === targetUsername || o.orderedBy === currentUser.username);
+                let userBal = Number(bPayWallets[currentUser.username] || 0);
+                let myOrders = cookerOrders.filter(o => {
+                    if (o.orderedBy === currentUser.username) return true;
+                    if (currentUser.role === 'student' && o.username === currentUser.username) return true;
+                    if (currentUser.role === 'parent' && currentUser.parentOf && o.username === currentUser.parentOf) return true;
+                    return false;
+                });
                 let allOrders = cookerOrders;
 
-                let menuCardsHtml = cookerMenu.map(item => `
-                    <div class="p-4 liquid-glass rounded-2xl space-y-2 flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start gap-2">
-                                <h4 class="text-xs font-extrabold text-slate-900">${item.name}</h4>
-                                <span class="px-2 py-0.5 bg-emerald-500/15 text-emerald-800 rounded-lg font-black text-xs shrink-0">${item.price} ₸</span>
-                            </div>
-                            <p class="text-[11px] text-slate-600 mt-1">${item.desc}</p>
+                let adminMenuBuilderSection = currentUser.role === 'admin' ? `
+                    <div class="mb-6 p-4 liquid-glass rounded-2xl space-y-4 border border-blue-200">
+                        <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+                            <h4 class="text-xs font-extrabold text-blue-900 uppercase">⚙️ Асхана мәзірін басқару (Жасау / Баптау / Өшіру)</h4>
+                            <span class="text-[10px] font-bold text-slate-500">Барлығы: ${cookerMenu.length} тағам</span>
                         </div>
-                        <button onclick="orderCookerMeal('${item.id}')" class="w-full py-2 kaspi-btn rounded-xl text-xs font-bold mt-2">
-                            🍽️ Тапсырыс беру & QR алу
-                        </button>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                            <input type="text" id="admin-cook-name" placeholder="Тағам атауы (мыс: Манты)" class="px-3 py-2 text-xs font-semibold">
+                            <input type="number" id="admin-cook-price" placeholder="Бағасы (Тг)" class="px-3 py-2 text-xs font-bold">
+                            <input type="text" id="admin-cook-desc" placeholder="Құрамы / Сипаттамасы" class="px-3 py-2 text-xs">
+                            <button onclick="adminAddCookerMenuItem()" class="py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow">+ Мәзірге қосу</button>
+                        </div>
                     </div>
-                `).join('');
+                ` : '';
+
+                let menuCardsHtml = cookerMenu.length > 0 ? cookerMenu.map(item => {
+                    let isAvail = item.available !== false;
+                    let adminControls = currentUser.role === 'admin' ? `
+                        <div class="flex gap-1.5 pt-2 border-t border-slate-200/70">
+                            <button onclick="openAdminEditCookerMenuModal('${item.id}')" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-[11px] font-bold">⚙️ Баптау</button>
+                            <button onclick="adminDeleteCookerMenuItem('${item.id}')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-[11px] font-bold">🗑️ Өшіру</button>
+                        </div>
+                    ` : '';
+
+                    return `
+                        <div class="p-4 liquid-glass rounded-2xl space-y-2 flex flex-col justify-between ${!isAvail ? 'opacity-65' : ''}">
+                            <div>
+                                <div class="flex justify-between items-start gap-2">
+                                    <h4 class="text-xs font-extrabold text-slate-900">${item.name}</h4>
+                                    <span class="px-2 py-0.5 bg-emerald-500/15 text-emerald-800 rounded-lg font-black text-xs shrink-0">${item.price} ₸</span>
+                                </div>
+                                <p class="text-[11px] text-slate-600 mt-1">${item.desc || ''}</p>
+                                ${!isAvail ? '<span class="inline-block mt-1 px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px] font-bold">Уақытша жоқ</span>' : ''}
+                            </div>
+                            <div class="space-y-2 mt-2">
+                                ${isAvail ? `
+                                    <button onclick="orderCookerMeal('${item.id}')" class="w-full py-2 kaspi-btn rounded-xl text-xs font-bold">
+                                        🍽️ Сатып алу & QR алу (${item.price} ₸)
+                                    </button>
+                                ` : `
+                                    <button disabled class="w-full py-2 bg-slate-300 text-slate-500 rounded-xl text-xs font-bold cursor-not-allowed">
+                                        Қолжетімсіз
+                                    </button>
+                                `}
+                                ${adminControls}
+                            </div>
+                        </div>
+                    `;
+                }).join('') : '<p class="text-xs text-slate-500 col-span-full py-4 text-center">Асхана мәзірінде тағамдар жоқ.</p>';
 
                 let myOrdersHtml = myOrders.length > 0 ? myOrders.map(ord => {
                     let qrData = JSON.stringify({ type: 'COOKER_TICKET', code: ord.qrCode, user: ord.username, meal: ord.mealName });
@@ -1407,7 +1475,7 @@
                             </div>
                         </div>
                     `;
-                }).join('') : '<p class="text-xs text-slate-500">Белсенді асхана QR талондары жоқ.</p>';
+                }).join('') : '<p class="text-xs text-slate-500">Сізде белсенді асхана QR талондары жоқ.</p>';
 
                 let adminScannerSection = (currentUser.role === 'admin' || currentUser.role === 'teacher') ? `
                     <div class="mt-6 pt-5 border-t border-slate-300/60 space-y-4">
@@ -1428,8 +1496,8 @@
                             </div>
                             <div class="p-4 liquid-glass rounded-2xl space-y-2 max-h-[340px] overflow-y-auto">
                                 <h5 class="text-xs font-extrabold text-slate-800 uppercase">Барлық асхана тапсырыстары (${allOrders.length})</h5>
-                                ${allOrders.slice(0, 15).map(o => `
-                                    <div class="p-2 bg-white/60 rounded-xl border border-white flex justify-between items-center text-[11px]">
+                                ${allOrders.slice(0, 20).map(o => `
+                                    <div class="p-2 bg-white/80 rounded-xl border border-white flex justify-between items-center text-[11px]">
                                         <div>
                                             <b>${o.userName}</b> — ${o.mealName} <br>
                                             <span class="font-mono text-[10px] text-slate-500">${o.qrCode} | ${o.date}</span>
@@ -1447,8 +1515,10 @@
                 panel.innerHTML = `
                     <div class="flex justify-between items-center border-b border-slate-300/60 pb-2 mb-4">
                         <h3 class="text-sm font-extrabold text-slate-900">🍽️ Cooker — Мектеп асханасы және QR-талон жүйесі</h3>
-                        <div class="text-xs font-bold px-3 py-1 liquid-glass rounded-xl">B-Pay Баланс: <b class="text-blue-700">${userBal} ₸</b></div>
+                        <div class="text-xs font-bold px-3 py-1 liquid-glass rounded-xl">B-Pay Баланс: <b id="cooker-user-balance" class="text-blue-700">${userBal} ₸</b></div>
                     </div>
+
+                    ${adminMenuBuilderSection}
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                         ${menuCardsHtml}
@@ -1503,7 +1573,7 @@
             }
 
             if (activeTab === 'student_bpay') {
-                let stBal = bPayWallets[currentUser.username] || 0;
+                let stBal = Number(bPayWallets[currentUser.username] || 0);
                 let userTx = bPayTransactions.filter(tx => tx.username === currentUser.username);
                 let txRows = userTx.length > 0 ? userTx.map(tx => `
                     <tr class="text-xs">
@@ -1517,10 +1587,10 @@
                 panel.innerHTML = `
                     <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">💳 B-Pay (BilimPay)</h3>
                     <div class="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl mb-4 max-w-md">
-                        <div class="text-[10px] font-bold text-emerald-800 uppercase">Сізге қаражат аударылды:</div>
+                        <div class="text-[10px] font-bold text-emerald-800 uppercase">Ағымдағы баланс:</div>
                         <div class="text-xl font-black text-emerald-950 mt-1">${stBal} ₸</div>
                     </div>
-                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Аударымдар және жалпы қаражат тарихы</h4>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase mb-2">Аударымдар және төлемдер тарихы</h4>
                     <div class="overflow-x-auto">
                         <table class="w-full gov-table">
                             <thead><tr><th>Күні / Уақыты</th><th>Атауы</th><th>Сомасы</th><th>Мәртебесі</th></tr></thead>
@@ -1535,8 +1605,8 @@
                 let childUsername = currentUser.parentOf;
                 let childObj = users.find(u => u.username === childUsername);
                 let childName = childObj ? childObj.name : 'Бала';
-                let parentBal = bPayWallets[currentUser.username] || 0;
-                let childBal = childUsername ? (bPayWallets[childUsername] || 0) : 0;
+                let parentBal = Number(bPayWallets[currentUser.username] || 0);
+                let childBal = childUsername ? Number(bPayWallets[childUsername] || 0) : 0;
                 let subscribedIds = parentHoldingsSubscribed[currentUser.username] || [];
                 let currentStr = getCurrentFormattedDateTime();
 
@@ -2525,32 +2595,152 @@
             }
         }
 
-        /* Cooker QR & Order Logic */
-        async function orderCookerMeal(mealId) {
-            let meal = cookerMenu.find(m => m.id === mealId);
-            if (!meal) return;
+        /* Admin Cooker Menu Management (Create, Configure/Edit, Delete) */
+        async function adminAddCookerMenuItem() {
+            let name = document.getElementById('admin-cook-name').value.trim();
+            let price = Number(document.getElementById('admin-cook-price').value);
+            let desc = document.getElementById('admin-cook-desc').value.trim();
 
-            let userBal = bPayWallets[currentUser.username] || 0;
-            if (userBal < meal.price) {
-                showIosToast(false, "Қаражат жеткіліксіз!", `Баланс: ${userBal} ₸. Тағам бағасы: ${meal.price} ₸`);
+            if (!name || isNaN(price) || price <= 0) {
+                showIosToast(false, "Сәтсіз!", "Тағам атауы мен дұрыс бағасын енгізіңіз!");
                 return;
             }
 
-            showSpinner("Cooker QR талоны жасалуда...");
-            bPayWallets[currentUser.username] -= meal.price;
+            showSpinner("Мәзірге қосылуда...");
+            await loadDataFromCloud(true);
+            cookerMenu.push({
+                id: 'cook_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+                name: name,
+                price: price,
+                desc: desc || 'Асхана тағамы',
+                available: true
+            });
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `«${name}» мәзірге қосылды!`);
+            renderTabContent();
+        }
 
-            let targetUsername = currentUser.role === 'parent' ? (currentUser.parentOf || currentUser.username) : currentUser.username;
+        function openAdminEditCookerMenuModal(mealId) {
+            let item = cookerMenu.find(m => m.id === mealId);
+            if (!item) return;
+
+            let existing = document.getElementById('admin-edit-cook-modal');
+            if (existing) existing.remove();
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="admin-edit-cook-modal">
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-3 border">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">⚙️ Тағамды баптау</h3>
+                            <button onclick="document.getElementById('admin-edit-cook-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Тағам атауы:</label>
+                            <input type="text" id="edit-cook-name" value="${item.name.replace(/"/g, '&quot;')}" class="w-full p-2 text-xs font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Бағасы (Тг):</label>
+                            <input type="number" id="edit-cook-price" value="${item.price}" class="w-full p-2 text-xs font-extrabold text-emerald-700">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Сипаттамасы:</label>
+                            <textarea id="edit-cook-desc" rows="2" class="w-full p-2 text-xs">${item.desc || ''}</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Қолжетімділік мәртебесі:</label>
+                            <select id="edit-cook-avail" class="w-full p-2 text-xs font-bold">
+                                <option value="true" ${item.available !== false ? 'selected' : ''}>✅ Сатылымда бар (Белсенді)</option>
+                                <option value="false" ${item.available === false ? 'selected' : ''}>⛔ Уақытша жоқ (Өшірулі)</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button onclick="adminSaveCookerMenuItem('${item.id}')" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs">💾 Сақтау</button>
+                            <button onclick="document.getElementById('admin-edit-cook-modal').remove()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">Жабу</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        async function adminSaveCookerMenuItem(mealId) {
+            let name = document.getElementById('edit-cook-name').value.trim();
+            let price = Number(document.getElementById('edit-cook-price').value);
+            let desc = document.getElementById('edit-cook-desc').value.trim();
+            let available = document.getElementById('edit-cook-avail').value === 'true';
+
+            if (!name || isNaN(price) || price <= 0) {
+                showIosToast(false, "Сәтсіз!", "Дұрыс атау мен баға енгізіңіз!");
+                return;
+            }
+
+            let modal = document.getElementById('admin-edit-cook-modal');
+            if (modal) modal.remove();
+
+            showSpinner("Өзгерістер сақталуда...");
+            await loadDataFromCloud(true);
+            let idx = cookerMenu.findIndex(m => m.id === mealId);
+            if (idx !== -1) {
+                cookerMenu[idx] = { ...cookerMenu[idx], name, price, desc, available };
+                await saveDataToCloud();
+            }
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Тағам баптаулары жаңартылды!");
+            renderTabContent();
+        }
+
+        async function adminDeleteCookerMenuItem(mealId) {
+            if (!confirm("Бұл тағамды асхана мәзірінен өшіргіңіз келе ме?")) return;
+            showSpinner("Өшірілуде...");
+            await loadDataFromCloud(true);
+            cookerMenu = cookerMenu.filter(m => m.id !== mealId);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Тағам мәзірден өшірілді.");
+            renderTabContent();
+        }
+
+        /* Cooker QR & Order Logic (Strictly deducts buyer balance & isolates per-user orders) */
+        async function orderCookerMeal(mealId) {
+            showSpinner("Баланс тексерілуде...");
+            await loadDataFromCloud(true);
+
+            let meal = cookerMenu.find(m => m.id === mealId);
+            if (!meal || meal.available === false) {
+                hideSpinner();
+                showIosToast(false, "Қолжетімсіз!", "Бұл тағам қазір мәзірде жоқ.");
+                return;
+            }
+
+            let currentBal = Number(bPayWallets[currentUser.username] || 0);
+            let mealPrice = Number(meal.price || 0);
+
+            if (currentBal < mealPrice) {
+                hideSpinner();
+                showIosToast(false, "Қаражат жеткіліксіз!", `Баланс: ${currentBal} ₸. Тағам бағасы: ${mealPrice} ₸`);
+                return;
+            }
+
+            let newBal = currentBal - mealPrice;
+            bPayWallets[currentUser.username] = newBal;
+
+            let balElem = document.getElementById('cooker-user-balance');
+            if (balElem) balElem.innerText = `${newBal} ₸`;
+
+            let targetUsername = (currentUser.role === 'parent' && currentUser.parentOf) ? currentUser.parentOf : currentUser.username;
             let targetUserObj = users.find(u => u.username === targetUsername) || currentUser;
             let qrCodeStr = 'CK-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
             cookerOrders.unshift({
-                id: 'ord_' + Date.now(),
+                id: 'ord_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
                 qrCode: qrCodeStr,
                 username: targetUsername,
                 userName: targetUserObj.name,
                 orderedBy: currentUser.username,
+                mealId: meal.id,
                 mealName: meal.name,
-                price: meal.price,
+                price: mealPrice,
                 date: getCurrentDateDDMMYYYY(),
                 used: false
             });
@@ -2558,14 +2748,14 @@
             bPayTransactions.unshift({
                 username: currentUser.username,
                 serviceName: `Cooker Асхана (${meal.name})`,
-                amount: meal.price,
+                amount: mealPrice,
                 date: getCurrentDateDDMMYYYY(),
                 status: 'Сәтті'
             });
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "✓ QR Талон дайын!", `${meal.name} үшін QR кодыңыз жасалды!`);
+            showIosToast(true, "✓ QR Талон дайын!", `Баланстан ${mealPrice} ₸ шешілді. Қалдық: ${newBal} ₸`);
             renderTabContent();
         }
 
@@ -2597,7 +2787,7 @@
         }
 
         async function processCookerTicketRedeem(code) {
-            await loadDataFromCloud();
+            await loadDataFromCloud(true);
             let ord = cookerOrders.find(o => o.qrCode === code);
             if (!ord) {
                 showIosToast(false, "Табылмады!", "Мұндай Cooker QR талон жүйеде жоқ!");
@@ -2703,7 +2893,7 @@
                             <div class="overflow-x-auto">
                                 <table class="w-full gov-table">
                                     <thead>
-                                        <tr><th>Ата-ана</th><th>Төленген сома</th><th>Уақыты</th><th>ЭҚ (Қолы)</th><th>Қаржыны қайтару</th></tr>
+                                        <tr><th>Ата-ана</th><th>Төленген сома</th><th>Уақыты</th><th>ЭҚ (Қол)</th><th>Қаржыны қайтару</th></tr>
                                     </thead>
                                     <tbody>${payersRows}</tbody>
                                 </table>
@@ -2778,10 +2968,9 @@
             if (!targetPay || targetPay.refunded) return;
 
             showSpinner("Қаржы кері қайтарылуда...");
-            let refundAmount = targetPay.originalAmount || targetPay.amount || 0;
+            let refundAmount = Number(targetPay.originalAmount || targetPay.amount || 0);
 
-            if (!bPayWallets[parentUsername]) bPayWallets[parentUsername] = 0;
-            bPayWallets[parentUsername] += refundAmount;
+            bPayWallets[parentUsername] = Number(bPayWallets[parentUsername] || 0) + refundAmount;
 
             targetPay.refunded = true;
             targetPay.originalAmount = refundAmount;
@@ -2896,60 +3085,59 @@
                 return;
             }
 
-            showSpinner("Төлем өңделуде (10 секунд)...");
-            setTimeout(async () => {
-                hideSpinner();
-                let sum = window.tempTopUpSum || 0;
-                if (!bPayWallets[currentUser.username]) bPayWallets[currentUser.username] = 0;
-                bPayWallets[currentUser.username] += sum;
+            showSpinner("Төлем өңделуде...");
+            await loadDataFromCloud(true);
+            let sum = Number(window.tempTopUpSum || 0);
+            bPayWallets[currentUser.username] = Number(bPayWallets[currentUser.username] || 0) + sum;
 
-                bPayTransactions.unshift({
-                    username: currentUser.username,
-                    serviceName: 'Картаны толтыру (B-Pay)',
-                    amount: sum,
-                    date: getCurrentDateDDMMYYYY(),
-                    status: 'Сәтті'
-                });
+            bPayTransactions.unshift({
+                username: currentUser.username,
+                serviceName: 'Картаны толтыру (B-Pay)',
+                amount: sum,
+                date: getCurrentDateDDMMYYYY(),
+                status: 'Сәтті'
+            });
 
-                await saveDataToCloud();
-                showIosToast(true, "✓ Сәтті!", `Баланс ${sum} ₸ толықтырылды!`);
-                renderTabContent();
-            }, 3000);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "✓ Сәтті!", `Баланс ${sum} ₸ толықтырылды!`);
+            renderTabContent();
         }
 
         async function transferToChild() {
             let sum = parseFloat(document.getElementById('child-transfer-amount').value) || 0;
             let childUsername = currentUser.parentOf;
-            let parentBal = bPayWallets[currentUser.username] || 0;
 
             if (!childUsername) {
                 showIosToast(false, "Сәтсіз!", "Бекітілген бала жоқ!");
                 return;
             }
+
+            showSpinner("Аударым орындалуда...");
+            await loadDataFromCloud(true);
+            let parentBal = Number(bPayWallets[currentUser.username] || 0);
+
             if (sum <= 0 || parentBal < sum) {
+                hideSpinner();
                 showIosToast(false, "Сәтсіз!", "Қаражат жеткіліксіз немесе сома қате!");
                 return;
             }
 
-            showSpinner("Аударым орындалуда (5 секунд)...");
-            setTimeout(async () => {
-                bPayWallets[currentUser.username] -= sum;
-                if (!bPayWallets[childUsername]) bPayWallets[childUsername] = 0;
-                bPayWallets[childUsername] += sum;
+            bPayWallets[currentUser.username] = parentBal - sum;
+            bPayWallets[childUsername] = Number(bPayWallets[childUsername] || 0) + sum;
 
-                bPayTransactions.unshift({
-                    username: childUsername,
-                    serviceName: `Ата-анадан аударым (${currentUser.name})`,
-                    amount: sum,
-                    date: getCurrentDateDDMMYYYY(),
-                    status: 'Сәтті'
-                });
+            bPayTransactions.unshift({
+                username: childUsername,
+                serviceName: `Ата-анадан аударым (${currentUser.name})`,
+                amount: sum,
+                date: getCurrentDateDDMMYYYY(),
+                status: 'Сәтті'
+            });
 
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "✓ Сәтті!", `Баланың шотына ${sum} ₸ аударылды!`);
-                renderTabContent();
-            }, 2000);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "✓ Сәтті!", `Баланың шотына ${sum} ₸ аударылды!`);
+            renderTabContent();
         }
 
         function openHoldingModal(holdingId) {
@@ -2999,16 +3187,15 @@
 
             document.getElementById('holding-modal').remove();
             showSpinner("Қолтаңба расталып, жазылым рәсімделуде...");
-            setTimeout(async () => {
-                if (!parentHoldingsSubscribed[currentUser.username]) parentHoldingsSubscribed[currentUser.username] = [];
-                if (!parentHoldingsSubscribed[currentUser.username].includes(holdingId)) {
-                    parentHoldingsSubscribed[currentUser.username].push(holdingId);
-                }
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "✓ Сәтті!", "Қолтаңба қабылданды, холдингке жазылым рәсімделді!");
-                renderTabContent();
-            }, 1500);
+            await loadDataFromCloud(true);
+            if (!parentHoldingsSubscribed[currentUser.username]) parentHoldingsSubscribed[currentUser.username] = [];
+            if (!parentHoldingsSubscribed[currentUser.username].includes(holdingId)) {
+                parentHoldingsSubscribed[currentUser.username].push(holdingId);
+            }
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "✓ Сәтті!", "Қолтаңба қабылданды, холдингке жазылым рәсімделді!");
+            renderTabContent();
         }
 
         function openUnsubscribeConfirmModal(holdingId) {
@@ -3078,15 +3265,14 @@
 
             document.getElementById('unsub-esign-modal').remove();
             showSpinner("ЭҚ тексеріліп, холдингтен шығарылуда...");
-            setTimeout(async () => {
-                if (parentHoldingsSubscribed[currentUser.username]) {
-                    parentHoldingsSubscribed[currentUser.username] = parentHoldingsSubscribed[currentUser.username].filter(id => id !== holdingId);
-                }
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "✓ Сәтті!", "Электронды қол расталды. Сіз холдингтен сәтті шықтыңыз.");
-                renderTabContent();
-            }, 1500);
+            await loadDataFromCloud(true);
+            if (parentHoldingsSubscribed[currentUser.username]) {
+                parentHoldingsSubscribed[currentUser.username] = parentHoldingsSubscribed[currentUser.username].filter(id => id !== holdingId);
+            }
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "✓ Сәтті!", "Электронды қол расталды. Сіз холдингтен сәтті шықтыңыз.");
+            renderTabContent();
         }
 
         function openPayHoldingModal(holdingId) {
@@ -3100,7 +3286,7 @@
                 return;
             }
 
-            let parentBal = bPayWallets[currentUser.username] || 0;
+            let parentBal = Number(bPayWallets[currentUser.username] || 0);
 
             let modalHtml = `
                 <div class="ios-modal-backdrop" id="pay-holding-modal">
@@ -3123,42 +3309,44 @@
 
         async function executePayHolding(holdingId, amount) {
             document.getElementById('pay-holding-modal').remove();
-            let h = schoolHoldings.find(x => x.id === holdingId);
-            let parentBal = bPayWallets[currentUser.username] || 0;
+            showSpinner("Төлем өңделуде...");
+            await loadDataFromCloud(true);
 
-            if (parentBal < amount) {
+            let h = schoolHoldings.find(x => x.id === holdingId);
+            let parentBal = Number(bPayWallets[currentUser.username] || 0);
+            let paySum = Number(amount);
+
+            if (parentBal < paySum) {
+                hideSpinner();
                 showIosToast(false, "Мақұлданбады", "Қаражат жеткіліксіз!");
                 return;
             }
 
-            showSpinner("Төлем өңделуде (5 секунд)...");
-            setTimeout(async () => {
-                hideSpinner();
-                bPayWallets[currentUser.username] -= amount;
+            bPayWallets[currentUser.username] = parentBal - paySum;
 
-                if (!parentHoldingPayments[currentUser.username]) parentHoldingPayments[currentUser.username] = [];
-                parentHoldingPayments[currentUser.username].push({
-                    holdingId: holdingId,
-                    amount: amount,
-                    originalAmount: amount,
-                    date: getCurrentDateDDMMYYYY(),
-                    periodKey: (h && h.payStart && h.payEnd) ? `${h.payStart}_${h.payEnd}` : 'default',
-                    signature: window.lastSubscriptionSignature || '',
-                    refunded: false
-                });
+            if (!parentHoldingPayments[currentUser.username]) parentHoldingPayments[currentUser.username] = [];
+            parentHoldingPayments[currentUser.username].push({
+                holdingId: holdingId,
+                amount: paySum,
+                originalAmount: paySum,
+                date: getCurrentDateDDMMYYYY(),
+                periodKey: (h && h.payStart && h.payEnd) ? `${h.payStart}_${h.payEnd}` : 'default',
+                signature: window.lastSubscriptionSignature || '',
+                refunded: false
+            });
 
-                bPayTransactions.unshift({
-                    username: currentUser.username,
-                    serviceName: `Холдинг төлемі (${h ? h.name : 'Холдинг'})`,
-                    amount: amount,
-                    date: getCurrentDateDDMMYYYY(),
-                    status: 'Сәтті'
-                });
+            bPayTransactions.unshift({
+                username: currentUser.username,
+                serviceName: `Холдинг төлемі (${h ? h.name : 'Холдинг'})`,
+                amount: paySum,
+                date: getCurrentDateDDMMYYYY(),
+                status: 'Сәтті'
+            });
 
-                await saveDataToCloud();
-                showIosToast(true, "✓ Сәтті!", "Төлем сәтті мақұлданды!");
-                renderTabContent();
-            }, 3000);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "✓ Сәтті!", "Төлем сәтті мақұлданды!");
+            renderTabContent();
         }
 
         async function createHoldingRecord() {
@@ -3263,15 +3451,13 @@
                     <td><span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold">${s.homework || 'Жоқ'}</span></td>
                     <td>${s.time}</td>
                 </tr>
-            `).join('') : '<tr><td colspan="5" class="text-center text-slate-400 py-4">Бұл күнге бекітілген сабақ кестесі жоқ</td></tr>';
+            `).join('') : `<tr><td colspan="5" class="text-center text-slate-400 py-6">Бұл күнге (${activeScheduleDay}) сабақ кестесі тіркелмеген</td></tr>`;
 
             return `
-                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${panelTitle} ${targetClassName ? `(Сыныбы: <span class="text-blue-700">${targetClassName}</span>)` : ''}</h3>
-                <div class="flex gap-2 mb-4 overflow-x-auto pb-1">
-                    ${dayButtonsHTML}
-                </div>
+                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${panelTitle} ${targetClassName ? `(${targetClassName} сыныбы)` : ''}</h3>
+                <div class="flex flex-wrap gap-2 mb-4 bg-slate-50 p-2 rounded-lg border">${dayButtonsHTML}</div>
                 <div class="overflow-x-auto">
-                    <table class="w-full gov-table min-w-[700px]">
+                    <table class="w-full gov-table">
                         <thead><tr><th>Сынып</th><th>Пән және Мұғалім</th><th>Сабақ тақырыбы</th><th>Үй тапсырмасы</th><th>Уақыты</th></tr></thead>
                         <tbody>${rows}</tbody>
                     </table>
@@ -3285,18 +3471,17 @@
         }
 
         async function publishNews() {
-            let datetime = document.getElementById('news-datetime').value.trim();
             let title = document.getElementById('news-title').value.trim();
             let text = document.getElementById('news-text').value.trim();
+            let datetime = getCurrentDateDDMMYYYY();
 
-            if(!title || !text) {
-                showIosToast(false, "Сәтсіз!", "Тақырып пен мәтінді толық жазыңыз!");
+            if (!title || !text) {
+                showIosToast(false, "Сәтсіз!", "Жаңалық тақырыбы мен мәтінін толық жазыңыз!");
                 return;
             }
 
             showSpinner("Жаңалық жариялануда...");
-            newsList.unshift({ datetime, title, text });
-
+            newsList.unshift({ title, text, datetime });
             await saveDataToCloud();
             hideSpinner();
             showIosToast(true, "Сәтті!", "Жаңалық сәтті жарияланды!");
@@ -3304,7 +3489,7 @@
         }
 
         async function deleteNewsItem(index) {
-            if(confirm("Бұл жаңалықты өшіргіңіз келе ме?")) {
+            if (confirm("Бұл жаңалықты өшіргіңіз келе ме?")) {
                 showSpinner("Өшірілуде...");
                 newsList.splice(index, 1);
                 await saveDataToCloud();
@@ -3314,55 +3499,77 @@
             }
         }
 
-        function renderSingleIDCardHTML(cardData, targetUserObj) {
-            if (!cardData) {
-                return `
-                    <div class="p-6 text-center text-slate-500 bg-slate-50 border rounded-xl space-y-2">
-                        <div class="text-2xl">⚠️</div>
-                        <div class="text-xs font-bold">Бұл қолданушыға әлі BilimID картасы рәсімделмеген!</div>
-                        <p class="text-[10px]">Мектеп әкімшілігіне хабарласып, ID картаңызды белсендіріңіз.</p>
-                    </div>
-                `;
+        function renderSingleIDCardHTML(cardData, userObj) {
+            if(!cardData) {
+                return `<div class="p-6 text-center bg-slate-50 border rounded-xl text-slate-500 text-xs">Сізге әлі BilimID картасы рәсімделмеген. Әкімшілікке хабарласыңыз.</div>`;
             }
 
-            let statusBg = cardData.status === 'ACTIVE' ? 'bg-emerald-600 text-white' : (cardData.status === 'INACTIVE' ? 'bg-amber-500 text-white' : 'bg-red-600 text-white');
-            let statusText = cardData.status === 'ACTIVE' ? '● ACTIVE' : (cardData.status === 'INACTIVE' ? '⚠️ INACTIVE' : '🚨 INVALID');
+            let statusColor = cardData.status === 'ACTIVE' ? 'bg-emerald-500 text-white' : (cardData.status === 'INACTIVE' ? 'bg-amber-500 text-white' : 'bg-red-600 text-white animate-pulse');
+            let roleLabel = cardData.role === 'teacher' ? 'Мұғалім' : 'Оқушы';
 
-            let qrContent = JSON.stringify({ un: cardData.username, id: cardData.idNumber, st: cardData.status });
-            let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrContent)}`;
+            let qrDataString = JSON.stringify({
+                app: 'BilimAL_ID',
+                username: cardData.username,
+                name: cardData.name,
+                role: roleLabel,
+                school: cardData.school,
+                className: cardData.className,
+                dob: cardData.dob,
+                idNumber: cardData.idNumber,
+                issueDate: cardData.issueDate,
+                approveDate: cardData.approveDate,
+                validUntil: cardData.validUntil,
+                status: cardData.status
+            });
+            let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(qrDataString)}`;
 
             return `
-                <div class="max-w-sm mx-auto id-card-gradient text-white p-5 rounded-2xl shadow-2xl relative border border-blue-400/30 space-y-4">
-                    <div class="flex justify-between items-center border-b border-blue-400/30 pb-3">
+                <div class="max-w-md mx-auto id-card-gradient text-white rounded-2xl p-6 shadow-xl border border-blue-400/30 relative overflow-hidden space-y-4">
+                    <div class="flex justify-between items-start border-b border-white/10 pb-3">
                         <div class="flex items-center space-x-2">
-                            <div class="w-7 h-7 rounded bg-white text-blue-900 font-black flex items-center justify-center text-xs">BA</div>
+                            <div class="w-8 h-8 rounded bg-white text-blue-950 font-black flex items-center justify-center text-xs">BA</div>
                             <div>
-                                <div class="text-[10px] font-extrabold uppercase tracking-wider text-blue-200">${cardData.school}</div>
-                                <div class="text-[8px] text-slate-300">БІРЫҢҒАЙ ЦИФРЛЫҚ ИДЕНТИФИКАТОР</div>
+                                <div class="text-xs font-extrabold tracking-widest">BilimID</div>
+                                <div class="text-[9px] text-blue-300 uppercase">Цифрлық жеке куәлік</div>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold ${statusBg}">${statusText}</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shadow ${statusColor}">
+                            ${cardData.status}
+                        </span>
                     </div>
 
                     <div class="flex gap-4 items-center">
-                        <div class="bg-white p-1 rounded-lg border shadow-inner">
-                            <img src="${qrUrl}" alt="QR" class="w-24 h-24 rounded" />
+                        <div class="bg-white p-2 rounded-xl shadow shrink-0">
+                            <img src="${qrUrl}" alt="BilimID QR" class="w-28 h-28 rounded" />
                         </div>
                         <div class="space-y-1 text-xs">
-                            <div class="text-[10px] text-blue-300 font-bold uppercase">${cardData.role === 'teacher' ? 'МҰҒАЛІМ' : 'ОҚУШЫ'}</div>
-                            <div class="text-sm font-black text-white leading-tight">${cardData.name}</div>
-                            <div class="text-[10px] text-slate-300">Сыныбы: <b class="text-white">${cardData.className}</b></div>
-                            <div class="text-[10px] text-slate-300">Туған күні: <b class="text-white">${cardData.dob}</b></div>
+                            <div class="text-[10px] text-blue-300 uppercase">Аты-жөні:</div>
+                            <div class="font-extrabold text-sm tracking-tight">${cardData.name}</div>
+                            
+                            <div class="text-[10px] text-blue-300 uppercase pt-1">Қызметі / Сыныбы:</div>
+                            <div class="font-bold text-slate-200">${roleLabel} ${cardData.className !== '—' ? `(${cardData.className})` : ''}</div>
+
+                            <div class="text-[10px] text-blue-300 uppercase pt-1">Мектеп:</div>
+                            <div class="font-semibold text-slate-200 text-[11px] leading-tight">${cardData.school}</div>
                         </div>
                     </div>
 
-                    <div class="border-t border-blue-400/30 pt-3 flex justify-between items-end text-[9px] text-slate-300">
+                    <div class="grid grid-cols-2 gap-2 pt-3 border-t border-white/10 text-[10px]">
                         <div>
-                            <div>Bilim ID: <code class="text-white font-bold font-mono text-[11px]">${cardData.idNumber}</code></div>
-                            <div>Берілді / Мақұлданды: ${cardData.issueDate} / ${cardData.approveDate}</div>
+                            <span class="text-blue-300 block">BilimID Нөмірі:</span>
+                            <span class="font-mono font-bold text-xs tracking-wider text-amber-300">${cardData.idNumber}</span>
                         </div>
-                        <div class="text-right">
-                            <div>Мерзімі: <b class="text-white">${cardData.validUntil}</b></div>
+                        <div>
+                            <span class="text-blue-300 block">Туған күні:</span>
+                            <span class="font-bold text-slate-100">${cardData.dob || 'Көрсетілмеген'}</span>
+                        </div>
+                        <div>
+                            <span class="text-blue-300 block">Берілген / Мақұлданған:</span>
+                            <span class="font-semibold text-slate-200">${cardData.issueDate} / ${cardData.approveDate}</span>
+                        </div>
+                        <div>
+                            <span class="text-blue-300 block">Жарамдылық мерзімі:</span>
+                            <span class="font-bold text-emerald-300">${cardData.validUntil}</span>
                         </div>
                     </div>
                 </div>
@@ -3378,147 +3585,160 @@
             let validUntil = document.getElementById('id-valid').value.trim();
 
             let targetUser = users.find(u => u.username === username);
-            if (!targetUser) {
-                showIosToast(false, "Сәтсіз!", "Қолданушы табылмады!");
+            if(!targetUser || !school) {
+                showIosToast(false, "Сәтсіз!", "Барлық өрістерді дұрыс толтырыңыз!");
                 return;
             }
 
-            showSpinner("BilimID жасалуда...");
-            let now = new Date();
-            let dateStr = `${now.getDate().toString().padStart(2, '0')}.${(now.getMonth()+1).toString().padStart(2, '0')}.${now.getFullYear()}`;
-            let randomId = Math.floor(10000 + Math.random() * 90000) + '-' + Math.floor(10000 + Math.random() * 90000);
+            showSpinner("BilimID генерациялануда...");
+            let todayDate = new Date().toLocaleDateString('kk-KZ');
+            let randomId = 'BL-' + Math.floor(10000000 + Math.random() * 90000000);
 
             bilimCards[username] = {
-                username: username, name: targetUser.name, role: targetUser.role,
-                school: school || "Ш.Уалиханов атындағы мектеп", className: className, dob: dob || "12.05.2012",
-                idNumber: (bilimCards[username]?.idNumber || randomId), issueDate: (bilimCards[username]?.issueDate || dateStr),
-                approveDate: dateStr, validUntil: validUntil || "31.05.2027", status: status
+                username: targetUser.username,
+                name: targetUser.name,
+                role: targetUser.role,
+                school: school,
+                className: className,
+                dob: dob || '01.01.2010',
+                idNumber: bilimCards[username]?.idNumber || randomId,
+                issueDate: bilimCards[username]?.issueDate || todayDate,
+                approveDate: todayDate,
+                validUntil: validUntil || '31.05.2027',
+                status: status
             };
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `${targetUser.name} үшін BilimID картасы жасалды.`);
+            showIosToast(true, "Сәтті!", "BilimID сәтті жасалды және сақталды!");
             renderTabContent();
         }
 
         async function extendBilimID(username) {
-            if (bilimCards[username]) {
-                showSpinner("Мерзімі ұзартылуда...");
-                bilimCards[username].validUntil = "31.05.2028";
-                bilimCards[username].status = "ACTIVE";
+            let newValid = prompt("Жаңа жарамдылық мерзімін енгізіңіз (мысалы: 31.05.2028):", bilimCards[username].validUntil);
+            if(newValid && newValid.trim()) {
+                showSpinner("Мерзім ұзартылуда...");
+                bilimCards[username].validUntil = newValid.trim();
+                bilimCards[username].status = 'ACTIVE';
                 await saveDataToCloud();
                 hideSpinner();
-                showIosToast(true, "Сәтті!", "BilimID мерзімі 2028 жылға дейін ұзартылды!");
+                showIosToast(true, "Сәтті!", "BilimID мерзімі ұзартылды!");
                 renderTabContent();
             }
         }
 
         async function deleteBilimID(username) {
-            if (confirm("Бұл BilimID картасын жойғыңыз келе ме?")) {
-                showSpinner("Жойылуда...");
+            if(confirm("Бұл BilimID картасын өшіруге сенімдісіз бе?")) {
+                showSpinner("Өшірілуде...");
                 delete bilimCards[username];
                 await saveDataToCloud();
                 hideSpinner();
-                showIosToast(true, "Сәтті!", "BilimID картасы жойылды.");
+                showIosToast(true, "Сәтті!", "BilimID картасы өшірілді.");
                 renderTabContent();
             }
         }
 
         async function saveBilimLimit() {
-            showSpinner("Шектеу сақталуда...");
-            let startVal = document.getElementById('limit-start-datetime').value;
-            let endVal = document.getElementById('limit-end-datetime').value;
+            let sVal = document.getElementById('limit-start-datetime').value;
+            let eVal = document.getElementById('limit-end-datetime').value;
             let reasonVal = document.getElementById('limit-reason-input').value.trim();
 
-            if(!startVal || !endVal) {
-                hideSpinner();
-                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын енгізіңіз!");
+            if (!sVal || !eVal) {
+                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын таңдаңыз!");
                 return;
             }
 
-            bilimLimitSettings.startDate = startVal.replace(/-/g, '/').replace('T', '-');
-            bilimLimitSettings.endDate = endVal.replace(/-/g, '/').replace('T', '-');
-            bilimLimitSettings.reason = reasonVal || 'Әкімшілік шектеу';
+            showSpinner("Шектеу бекітілуде...");
+            let formattedStart = sVal.replace(/-/g, '/').replace('T', '-');
+            let formattedEnd = eVal.replace(/-/g, '/').replace('T', '-');
 
+            bilimLimitSettings = { startDate: formattedStart, endDate: formattedEnd, reason: reasonVal || 'Әкімшілік шешім' };
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "BilimLimit сәтті бекітілді!");
+            showIosToast(true, "Сәтті!", "BilimLimit шектеуі сәтті орнатылды!");
             renderTabContent();
         }
 
         async function clearBilimLimit() {
-            showSpinner("Шектеу алынуда...");
+            showSpinner("Шектеу алынып тасталуда...");
             bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "BilimLimit алынып тасталды.");
+            showIosToast(true, "Сәтті!", "BilimLimit шектеуі алынып тасталды.");
             renderTabContent();
         }
 
         function startAddingQuestions() {
             let title = document.getElementById('test-title-input').value.trim();
-            if(!title) {
-                showIosToast(false, "Сәтсіз!", "Тест тақырыбын енгізіңіз!");
+            let className = document.getElementById('test-class-select').value;
+            if(!title || !className) {
+                showIosToast(false, "Сәтсіз!", "Сыныпты және тест тақырыбын жазыңыз!");
                 return;
             }
             tempQuestions = [];
-            document.getElementById('test-questions-builder').classList.remove('hidden');
             document.getElementById('current-q-num').innerText = '1';
-            showIosToast(true, "Сәтті!", "Тест басталды, сұрақтарды қосыңыз.");
+            document.getElementById('test-questions-builder').classList.remove('hidden');
         }
 
         function addQuestionCard() {
             let qText = document.getElementById('q-text').value.trim();
-            let opt0 = document.getElementById('opt_0').value.trim();
-            let opt1 = document.getElementById('opt_1').value.trim();
-            let opt2 = document.getElementById('opt_2').value.trim();
-            let opt3 = document.getElementById('opt_3').value.trim();
+            let o0 = document.getElementById('opt_0').value.trim();
+            let o1 = document.getElementById('opt_1').value.trim();
+            let o2 = document.getElementById('opt_2').value.trim();
+            let o3 = document.getElementById('opt_3').value.trim();
             let correctIdx = parseInt(document.querySelector('input[name="correct_opt"]:checked').value);
 
-            if(!qText || !opt0 || !opt1) {
-                showIosToast(false, "Сәтсіз!", "Сұрақ пен кемінде 2 нұсқаны толтырыңыз!");
+            if(!qText || !o0 || !o1 || !o2 || !o3) {
+                showIosToast(false, "Сәтсіз!", "Сұрақты және 4 жауап нұсқасын толық толтырыңыз!");
                 return;
             }
 
-            tempQuestions.push({ q: qText, options: [opt0, opt1, opt2, opt3], correct: correctIdx });
+            tempQuestions.push({ question: qText, options: [o0, o1, o2, o3], correctIndex: correctIdx });
             document.getElementById('q-text').value = '';
             document.getElementById('opt_0').value = '';
             document.getElementById('opt_1').value = '';
             document.getElementById('opt_2').value = '';
             document.getElementById('opt_3').value = '';
             document.getElementById('current-q-num').innerText = tempQuestions.length + 1;
-            showIosToast(true, "Сәтті!", `№${tempQuestions.length} сұрақ сақталды!`);
+            showIosToast(true, "Сәтті!", `Сұрақ №${tempQuestions.length} сақталды!`);
         }
 
         async function publishBilimTest() {
             let qText = document.getElementById('q-text').value.trim();
-            if(qText) addQuestionCard();
+            if(qText) {
+                let o0 = document.getElementById('opt_0').value.trim();
+                let o1 = document.getElementById('opt_1').value.trim();
+                let o2 = document.getElementById('opt_2').value.trim();
+                let o3 = document.getElementById('opt_3').value.trim();
+                let correctIdx = parseInt(document.querySelector('input[name="correct_opt"]:checked').value);
+                if(o0 && o1 && o2 && o3) tempQuestions.push({ question: qText, options: [o0, o1, o2, o3], correctIndex: correctIdx });
+            }
 
             if(tempQuestions.length === 0) {
-                showIosToast(false, "Сәтсіз!", "Кемінде 1 сұрақ қосылуы тиіс!");
+                showIosToast(false, "Сәтсіз!", "Кемінде 1 сұрақ қосыңыз!");
                 return;
             }
 
             showSpinner("Тест жариялануда...");
-            let testId = 'test_' + Math.random().toString(36).substring(2, 9);
-            let className = document.getElementById('test-class-select').value;
             let title = document.getElementById('test-title-input').value.trim();
+            let className = document.getElementById('test-class-select').value;
+            let testId = 'test_' + Math.random().toString(36).substring(2, 9);
 
-            bilimTests.push({ id: testId, className, title, author: currentUser.username, questions: tempQuestions });
+            bilimTests.push({ id: testId, title: title, className: className, author: currentUser.username, questions: tempQuestions });
             await saveDataToCloud();
             hideSpinner();
             showIosToast(true, "Сәтті!", "BilimTest сәтті жарияланды!");
+            tempQuestions = [];
             renderTabContent();
         }
 
         async function deleteBilimTest(testId) {
-            if(confirm('Тестті өшіргіңіз келе ме?')) {
+            if(confirm("Бұл тестті жоюға сенімдісіз бе?")) {
                 showSpinner("Өшірілуде...");
                 bilimTests = bilimTests.filter(t => t.id !== testId);
-                delete testResults[testId];
                 await saveDataToCloud();
                 hideSpinner();
-                showIosToast(true, "Сәтті!", "Тест сәтті өшірілді.");
+                showIosToast(true, "Сәтті!", "Тест өшірілді.");
                 renderTabContent();
             }
         }
@@ -3527,29 +3747,25 @@
             let test = bilimTests.find(t => t.id === testId);
             if(!test) return;
 
-            let questionsHTML = test.questions.map((q, idx) => `
-                <div class="p-4 bg-white border rounded-xl space-y-2">
-                    <div class="font-bold text-xs text-blue-900">Сұрақ ${idx + 1}: ${q.q}</div>
-                    <div class="space-y-1 text-xs">
-                        ${q.options.map((opt, oIdx) => opt ? `
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 border cursor-pointer">
-                                <input type="radio" name="ans_${idx}" value="${oIdx}">
+            let viewContainer = document.getElementById('student-test-view');
+            let cardsHTML = test.questions.map((q, idx) => `
+                <div class="p-4 bg-white border rounded-xl shadow-xs space-y-2 mb-3">
+                    <div class="font-bold text-xs text-slate-900">${idx + 1}. ${q.question}</div>
+                    <div class="space-y-1.5 text-xs">
+                        ${q.options.map((opt, oIdx) => `
+                            <label class="flex items-center gap-2 p-2 rounded border hover:bg-blue-50 cursor-pointer">
+                                <input type="radio" name="ans_q_${idx}" value="${oIdx}">
                                 <span>${opt}</span>
                             </label>
-                        ` : '').join('')}
+                        `).join('')}
                     </div>
                 </div>
             `).join('');
 
-            document.getElementById('student-test-view').innerHTML = `
-                <div class="space-y-4 max-w-2xl mx-auto">
-                    <div class="p-3 bg-blue-50 border rounded-lg flex justify-between items-center">
-                        <span class="font-extrabold text-xs text-blue-900">${test.title}</span>
-                        <span class="text-xs font-bold text-slate-500">Барлық сұрақ: ${test.questions.length}</span>
-                    </div>
-                    ${questionsHTML}
-                    <button onclick="submitStudentTest('${test.id}')" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded shadow transition-all">✅ Тестті аяқтау және жіберу</button>
-                </div>
+            viewContainer.innerHTML = `
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded mb-3 font-extrabold text-xs text-blue-900">${test.title}</div>
+                ${cardsHTML}
+                <button onclick="submitStudentTest('${testId}')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded shadow w-full">✅ Тестті аяқтау және тексеру</button>
             `;
         }
 
@@ -3559,273 +3775,265 @@
 
             let correctCount = 0;
             test.questions.forEach((q, idx) => {
-                let selected = document.querySelector(`input[name="ans_${idx}"]:checked`);
-                if(selected && parseInt(selected.value) === q.correct) correctCount++;
+                let checked = document.querySelector(`input[name="ans_q_${idx}"]:checked`);
+                if(checked && parseInt(checked.value) === q.correctIndex) correctCount++;
             });
 
-            let totalQ = test.questions.length;
-            let suggestedGrade = Math.round((correctCount / totalQ) * 10);
-            if (suggestedGrade < 1 && correctCount > 0) suggestedGrade = 1;
+            showSpinner("Нәтижелер есептелуде...");
+            let suggestedGrade = Math.round((correctCount / test.questions.length) * 10);
 
-            showSpinner("Тест нәтижесі есептелуде...");
             if(!testResults[testId]) testResults[testId] = {};
-            testResults[testId][currentUser.username] = { correctCount, suggestedGrade };
+            testResults[testId][currentUser.username] = { correctCount: correctCount, total: test.questions.length, suggestedGrade: suggestedGrade };
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `Тест аяқталды! Нәтиже: ${correctCount}/${totalQ} сұрақ. Ұсынылған баға: ${suggestedGrade} балл (Формативті)`);
+            showIosToast(true, "Сәтті!", `Тест аяқталды! Сіз ${correctCount}/${test.questions.length} сұраққа дұрыс жауап бердіңіз.`);
             renderTabContent();
         }
 
         function startQRScanner() {
-            if (html5QrScanner) { try { html5QrScanner.clear(); } catch(e){} }
+            if(html5QrScanner) { try { html5QrScanner.clear(); } catch(e){} }
             html5QrScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 200 });
             html5QrScanner.render(onScanSuccess, onScanFailure);
         }
 
         function onScanSuccess(decodedText) {
             try {
-                let data = JSON.parse(decodedText);
-                let card = bilimCards[data.un] || { name: 'Белгісіз', className: '—', school: '—', idNumber: data.id || '—', status: data.st || 'INVALID' };
+                let parsed = JSON.parse(decodedText);
+                if(parsed.app === 'BilimAL_ID') {
+                    let resCard = document.getElementById('scan-result-card');
+                    resCard.classList.remove('hidden');
 
-                let resultDiv = document.getElementById('scan-result-card');
-                resultDiv.classList.remove('hidden');
+                    let isInvalid = parsed.status === 'INVALID' || parsed.status === 'INACTIVE';
+                    resCard.className = `p-4 rounded-xl border text-xs space-y-2 animate-fade ${isInvalid ? 'bg-red-50 border-red-400 text-red-900' : 'bg-emerald-50 border-emerald-400 text-emerald-900'}`;
 
-                let statusBg = card.status === 'ACTIVE' ? 'bg-emerald-100 border-emerald-300 text-emerald-900' : (card.status === 'INACTIVE' ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-red-100 border-red-300 text-red-900');
-                let statusBadge = card.status === 'ACTIVE' ? '🟢 ACTIVE (Жарамды)' : (card.status === 'INACTIVE' ? '⚠️ INACTIVE (Белсенді емес)' : '🚨 INVALID (Жарамсыз)');
-
-                resultDiv.className = `p-4 rounded-xl border text-xs space-y-2 animate-fade ${statusBg}`;
-                resultDiv.innerHTML = `
-                    <div class="font-extrabold text-sm flex justify-between">
-                        <span>${card.name}</span><span>${statusBadge}</span>
-                    </div>
-                    <div>Мектеп: <b>${card.school}</b> | Сынып: <b>${card.className}</b></div>
-                    <div>Bilim ID: <code class="font-mono font-bold">${card.idNumber}</code></div>
-                `;
-
-                showIosToast(true, "Сәтті!", "BilimID сканерлеу сәтті аяқталды.");
-                if(html5QrScanner) html5QrScanner.clear();
+                    resCard.innerHTML = `
+                        <div class="flex justify-between items-center border-b pb-1 font-extrabold text-sm">
+                            <span>${isInvalid ? '🚨 НАЗАР АУДАРЫҢЫЗ: ЖАРАМСЫЗ!' : '✅ БІЛІМ ID РАСТАЛДЫ'}</span>
+                            <span>${parsed.status}</span>
+                        </div>
+                        <div><b>Аты-жөні:</b> ${parsed.name}</div>
+                        <div><b>Қызметі / Сыныбы:</b> ${parsed.role} (${parsed.className})</div>
+                        <div><b>BilimID №:</b> ${parsed.idNumber}</div>
+                        <div><b>Туған күні:</b> ${parsed.dob}</div>
+                        <div><b>Жарамдылық мерзімі:</b> ${parsed.validUntil}</div>
+                    `;
+                    if(html5QrScanner) html5QrScanner.clear();
+                    showIosToast(true, "Сәтті!", "QR-код сәтті оқылды!");
+                }
             } catch(e) {
-                showIosToast(false, "Сәтсіз!", "QR код BilimID форматына сәйкес келмейді!");
+                showIosToast(false, "Сәтсіз!", "Бұл BilimID QR-коды емес!");
             }
         }
-
-        function onScanFailure(error) {}
+        function onScanFailure(err) {}
 
         function renderAdminSubTable() {
-            let className = document.getElementById('admin-sub-class-select')?.value;
-            let targetClass = classesList.find(c => c.name === className);
-            let students = targetClass ? users.filter(u => u.role === 'student' && (targetClass.students || []).includes(u.username)) : [];
+            let classSelect = document.getElementById('admin-sub-class-select');
+            let container = document.getElementById('admin-sub-table-container');
+            if(!classSelect || !container) return;
 
-            let rows = students.length > 0 ? students.map(s => {
-                let parentObj = users.find(u => u.role === 'parent' && u.parentOf === s.username);
-                let subInfo = bilimSubscriptions[s.username] || { signed: false, status: 'normal' };
+            let selectedClassName = classSelect.value;
+            let targetClass = classesList.find(c => c.name === selectedClassName);
+            if(!targetClass) {
+                container.innerHTML = '<p class="text-xs text-slate-400">Сынып табылмады</p>';
+                return;
+            }
 
-                let statusStr = subInfo.signed ? `<span class="text-emerald-600 font-bold">✅ Қол қойылған (${subInfo.signedAt})</span>` : '<span class="text-amber-600 font-bold">⏳ Күтуде</span>';
-                if(subInfo.status === 'expelled') statusStr = '<span class="text-red-600 font-bold">🚨 Босатылған</span>';
+            let studentsInClass = users.filter(u => u.role === 'student' && (targetClass.students || []).includes(u.username));
+            let rows = studentsInClass.map(st => {
+                let parent = users.find(u => u.role === 'parent' && u.parentOf === st.username);
+                let subInfo = bilimSubscriptions[st.username] || { signed: false, signedAt: '—' };
 
                 return `
                     <tr class="text-xs">
-                        <td class="font-bold">${s.name} (@${s.username})</td>
-                        <td>${parentObj ? `${parentObj.name} (@${parentObj.username})` : '<span class="text-slate-400">Тіркелмеген</span>'}</td>
-                        <td>${statusStr}</td>
+                        <td class="font-bold">${st.name}</td>
+                        <td>${parent ? `${parent.name} (@${parent.username})` : '<span class="text-slate-400">Ата-ана тіркелмеген</span>'}</td>
+                        <td><span class="px-2 py-0.5 rounded font-bold ${subInfo.signed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${subInfo.signed ? '✅ Қол қойылған' : '❌ Қол қойылмаған'}</span></td>
+                        <td>${subInfo.signedAt || '—'}</td>
                         <td>
-                            <button onclick="setStudentSubStatus('${s.username}', 'expelled')" class="px-2 py-1 bg-red-600 text-white rounded font-bold text-[10px] mr-1">Сыныптан босату</button>
-                            <button onclick="setStudentSubStatus('${s.username}', 'normal')" class="px-2 py-1 bg-blue-600 text-white rounded font-bold text-[10px]">Сыныпта қалдыру</button>
+                            <button onclick="setStudentSubStatus('${st.username}', true)" class="px-2 py-1 bg-emerald-600 text-white rounded font-bold text-[10px]">Қойылды ету</button>
+                            <button onclick="setStudentSubStatus('${st.username}', false)" class="px-2 py-1 bg-red-600 text-white rounded font-bold text-[10px]">Бас тарту</button>
                         </td>
                     </tr>
                 `;
-            }).join('') : '<tr><td colspan="4" class="text-center text-slate-400 py-4">Бұл сыныпта оқушылар жоқ</td></tr>';
+            }).join('');
 
-            document.getElementById('admin-sub-table-container').innerHTML = `
-                <table class="w-full gov-table min-w-[650px]">
-                    <thead><tr><th>Оқушы аты-жөні</th><th>Ата-анасы</th><th>Табель мәртебесі</th><th>Әкімшілік шешім</th></tr></thead>
-                    <tbody>${rows}</tbody>
+            container.innerHTML = `
+                <table class="w-full gov-table">
+                    <thead><tr><th>Оқушы аты-жөні</th><th>Ата-анасы</th><th>Қол қою мәртебесі</th><th>Қойылған уақыты</th><th>Басқару</th></tr></thead>
+                    <tbody>${rows || '<tr><td colspan="5" class="text-center text-slate-400 py-4">Оқушылар жоқ</td></tr>'}</tbody>
                 </table>
             `;
         }
 
         async function saveSubscriptionSettings() {
-            showSpinner("Мерзім сақталуда...");
-            let startVal = document.getElementById('sub-start-datetime').value;
-            let endVal = document.getElementById('sub-end-datetime').value;
+            let sVal = document.getElementById('sub-start-datetime').value;
+            let eVal = document.getElementById('sub-end-datetime').value;
 
-            if(!startVal || !endVal) {
-                hideSpinner();
-                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын толық енгізіңіз!");
+            if (!sVal || !eVal) {
+                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу мерзімін таңдаңыз!");
                 return;
             }
 
-            subscriptionSettings.startDate = startVal.replace(/-/g, '/').replace('T', '-');
-            subscriptionSettings.endDate = endVal.replace(/-/g, '/').replace('T', '-');
+            showSpinner("Мерзім сақталуда...");
+            let formattedStart = sVal.replace(/-/g, '/').replace('T', '-');
+            let formattedEnd = eVal.replace(/-/g, '/').replace('T', '-');
 
+            subscriptionSettings = { startDate: formattedStart, endDate: formattedEnd };
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Табельге қол қою уақыт терезесі бекітілді!");
+            showIosToast(true, "Сәтті!", `Табельге қол қою мерзімі бекітілді!`);
             renderTabContent();
         }
 
         async function signParentSubscription() {
             let childUsername = currentUser.parentOf;
-            if(!childUsername) return;
+            if(!childUsername) {
+                showIosToast(false, "Сәтсіз!", "Бекітілген бала табылмады!");
+                return;
+            }
 
             showSpinner("Төлем өңделуде...");
             let currentStr = getCurrentFormattedDateTime();
+            let existingSub = bilimSubscriptions[childUsername] || { signed: false, history: [] };
+            if (!existingSub.history) existingSub.history = [];
 
-            if(!bilimSubscriptions[childUsername]) bilimSubscriptions[childUsername] = { signed: false, history: [] };
-            if(!bilimSubscriptions[childUsername].history) bilimSubscriptions[childUsername].history = [];
+            existingSub.history.unshift({ periodStart: subscriptionSettings.startDate, periodEnd: subscriptionSettings.endDate, signedAt: currentStr });
 
-            bilimSubscriptions[childUsername].signed = true;
-            bilimSubscriptions[childUsername].signedAt = currentStr;
-            bilimSubscriptions[childUsername].signedBy = currentUser.username;
-            bilimSubscriptions[childUsername].status = 'normal';
-
-            bilimSubscriptions[childUsername].history.push({
-                signedAt: currentStr, periodStart: subscriptionSettings.startDate, periodEnd: subscriptionSettings.endDate, signedBy: currentUser.username
-            });
+            bilimSubscriptions[childUsername] = { signed: true, signedAt: currentStr, history: existingSub.history };
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Төлем қабылданды және табель расталды!");
+            showIosToast(true, "Сәтті!", "Табель төлемі мен қолы сәтті расталды!");
             renderTabContent();
         }
 
-        async function setStudentSubStatus(username, status) {
-            showSpinner("Мәртебе өзгертілуде...");
-            if(!bilimSubscriptions[username]) bilimSubscriptions[username] = {};
-            bilimSubscriptions[username].status = status;
+        async function setStudentSubStatus(studentUsername, isSigned) {
+            showSpinner("Өзгеріс сақталуда...");
+            let existing = bilimSubscriptions[studentUsername] || { history: [] };
+            bilimSubscriptions[studentUsername] = { signed: isSigned, signedAt: isSigned ? getCurrentFormattedDateTime() : '—', history: existing.history || [] };
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Мәртебе өзгертілді.");
+            showIosToast(true, "Сәтті!", "Мәртебе жаңартылды!");
             renderAdminSubTable();
         }
 
         async function terminateSession(sessionId) {
-            if (confirm("Бұл сеансты жойғыңыз келе ме?")) {
-                showSpinner("Сеанс жойылуда...");
-                await loadDataFromCloud();
-                if (activeSessionsStore[currentUser.username]) {
-                    activeSessionsStore[currentUser.username] = activeSessionsStore[currentUser.username].filter(s => s.id !== sessionId);
-                    await saveDataToCloud();
-                }
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Сеанс тізімнен жойылды!");
+            if (!confirm("Бұл құрылғының сеансын жоюға сенімдісіз бе?")) return;
+
+            showSpinner("Сеанс тоқтатылуда...");
+            await loadDataFromCloud(true);
+            let mySessions = activeSessionsStore[currentUser.username] || [];
+            activeSessionsStore[currentUser.username] = mySessions.filter(s => s.id !== sessionId);
+            await saveDataToCloud();
+            hideSpinner();
+
+            let currentSessId = localStorage.getItem('bilim_current_session_id');
+            if (sessionId === currentSessId) {
+                logout();
+            } else {
+                showIosToast(true, "Сәтті!", "Таңдалған құрылғының сеансы жойылды.");
                 renderTabContent();
             }
         }
 
         function keepSession(sessionId) {
-            showIosToast(true, "Сәтті!", "Сеанс сақталды.");
+            showIosToast(true, "Сәтті!", "Бұл сеанс сақталды және белсенді күйде қалды.");
         }
 
-        function toggleParentStudentSelect(role) {
+        function toggleParentStudentSelect(roleValue) {
             const parentSelect = document.getElementById('reg-parent-of');
-            if(role === 'parent') parentSelect.classList.remove('hidden');
+            if(roleValue === 'parent') parentSelect.classList.remove('hidden');
             else parentSelect.classList.add('hidden');
         }
 
-        function updateSelectedSubject(selectElem) {
-            selectedTeacherSubject = selectElem.value;
+        function updateSelectedSubject(selectElem) { selectedTeacherSubject = selectElem.value; renderTabContent(); }
+
+        function getStandardGrade(p) {
+            if(p >= 85) return 5;
+            if(p >= 65) return 4;
+            if(p >= 40) return 3;
+            return 2;
         }
 
-        function getStandardGrade(percent) {
-            if (percent <= 39) return '2';
-            if (percent <= 64) return '3';
-            if (percent <= 84) return '4';
-            return '5';
-        }
+        async function calculateAndSaveGrade(studentUsername) {
+            let fStr = document.getElementById(`form_${studentUsername}`).value.trim();
+            let bStr = document.getElementById(`bzhb_${studentUsername}`).value.trim();
+            let tStr = document.getElementById(`tzhb_${studentUsername}`).value.trim();
 
-        async function calculateAndSaveGrade(username) {
-            showSpinner("Бағалар сақталуда...");
-            let formVal = document.getElementById(`form_${username}`).value.trim();
-            let bzhbVal = document.getElementById(`bzhb_${username}`).value.trim();
-            let tzhbVal = document.getElementById(`tzhb_${username}`).value.trim();
-            let finalVal = document.getElementById(`final_${username}`).value.trim();
-
-            let weightedScore = 0;
-            let totalWeight = 0;
-
-            if (formVal) {
-                let parts = formVal.split('/');
-                let obtained = parseFloat(parts[0]) || 0;
-                let max = parseFloat(parts[1]) || 10;
-                let formPercent = (obtained / max) * 100;
-                weightedScore += formPercent * 0.20;
-                totalWeight += 0.20;
+            if(fStr && !fStr.includes('/')) {
+                let fNum = parseFloat(fStr);
+                if(!isNaN(fNum)) {
+                    if(fNum > 10) fNum = 10;
+                    fStr = `${fNum}/10`;
+                    document.getElementById(`form_${studentUsername}`).value = fStr;
+                }
             }
 
-            if (bzhbVal) {
-                let parts = bzhbVal.split('/');
-                let obtained = parseFloat(parts[0]) || 0;
-                let max = parseFloat(parts[1]) || 20;
-                let bzhbPercent = (obtained / max) * 100;
-                weightedScore += bzhbPercent * 0.30;
-                totalWeight += 0.30;
+            let fPerc = 0, bPerc = 0, tPerc = 0;
+            let hasB = false, hasT = false;
+
+            if(fStr.includes('/')) {
+                let [got, max] = fStr.split('/').map(Number);
+                if(max > 0) { if(max > 10) max = 10; if(got > 10) got = 10; fPerc = (got / max) * 100; }
+            }
+            if(bStr.includes('/')) {
+                let [got, max] = bStr.split('/').map(Number);
+                if(max > 0) { bPerc = (got / max) * 100; hasB = true; }
+            }
+            if(tStr.includes('/')) {
+                let [got, max] = tStr.split('/').map(Number);
+                if(max > 0) { tPerc = (got / max) * 100; hasT = true; }
             }
 
-            if (tzhbVal) {
-                let parts = tzhbVal.split('/');
-                let obtained = parseFloat(parts[0]) || 0;
-                let max = parseFloat(parts[1]) || 30;
-                let tzhbPercent = (obtained / max) * 100;
-                weightedScore += tzhbPercent * 0.50;
-                totalWeight += 0.50;
-            }
+            let totalPercent = 0;
+            if(hasB && hasT) totalPercent = Math.round((fPerc * 0.25) + (bPerc * 0.25) + (tPerc * 0.50));
+            else if(hasB) totalPercent = Math.round((fPerc * 0.50) + (bPerc * 0.50));
+            else totalPercent = Math.round(fPerc);
 
-            let finalPercent = totalWeight > 0 ? Math.round(weightedScore / totalWeight) : 0;
-            let recommendedGrade = totalWeight > 0 ? getStandardGrade(finalPercent) : (finalVal || '-');
+            let computedGrade = getStandardGrade(totalPercent);
+            document.getElementById(`final_${studentUsername}`).value = computedGrade;
 
-            if(!grades[username]) grades[username] = {};
-            grades[username][selectedTeacherSubject] = { 
-                form: formVal, bzhb: bzhbVal, tzhb: tzhbVal, final: finalVal || recommendedGrade, percent: finalPercent 
-            };
-
+            showSpinner("Баға сақталуда...");
+            if(!grades[studentUsername]) grades[studentUsername] = {};
+            grades[studentUsername][selectedTeacherSubject] = { form: fStr, bzhb: bStr, tzhb: tStr, percent: totalPercent, final: computedGrade };
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `[${selectedTeacherSubject}] бағасы сақталды! Пайызы: ${finalPercent}%`);
+            showIosToast(true, "Сәтті!", `Баға есептеліп сақталды (${totalPercent}%).`);
             renderTabContent();
         }
 
-        async function deleteGradeRecord(username) {
-            if(grades[username] && grades[username][selectedTeacherSubject]) {
-                showSpinner("Жойылуда...");
-                delete grades[username][selectedTeacherSubject];
+        async function deleteGradeRecord(studentUsername) {
+            if(grades[studentUsername] && grades[studentUsername][selectedTeacherSubject]) {
+                showSpinner("Баға өшірілуде...");
+                delete grades[studentUsername][selectedTeacherSubject];
                 await saveDataToCloud();
                 hideSpinner();
-                showIosToast(true, "Сәтті!", `[${selectedTeacherSubject}] бағасы жойылды!`);
+                showIosToast(true, "Сәтті!", "Баға жазбасы өшірілді.");
                 renderTabContent();
             }
         }
 
-        async function saveAttendance(username) {
+        async function saveAttendance(studentUsername) {
+            let status = document.getElementById(`att_status_${studentUsername}`).value;
             showSpinner("Қатысу сақталуда...");
-            let status = document.getElementById(`att_status_${username}`).value;
-            if(!attendance[username]) attendance[username] = {};
-            attendance[username]['today'] = status;
+            if(!attendance[studentUsername]) attendance[studentUsername] = {};
+            attendance[studentUsername]['today'] = status;
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Қатысу мәртебесі сақталды!");
+            showIosToast(true, "Сәтті!", "Қатысу белгісі сақталды.");
             renderTabContent();
         }
 
         async function createNewClass() {
-            let className = document.getElementById('new-class-name').value.trim();
-            if(!className) {
-                showIosToast(false, "Сәтсіз!", "Сынып атауын енгізіңіз!");
-                return;
-            }
-            if(classesList.some(c => c.teacherUsername === currentUser.username)) {
-                showIosToast(false, "Сәтсіз!", "Сіз тек 1 сыныптың жетекшісі бола аласыз!");
-                return;
-            }
+            let name = document.getElementById('new-class-name').value.trim();
+            if(!name) return;
             showSpinner("Сынып тіркелуде...");
             let dcaCode = 'DCA-' + Math.floor(1000 + Math.random() * 9000);
-            classesList.push({ 
-                name: className, creator: currentUser.name, teacher: currentUser.name, teacherUsername: currentUser.username, dcaCode: dcaCode, students: [] 
-            });
+            classesList.push({ name: name, creator: currentUser.name, teacher: currentUser.name, teacherUsername: currentUser.username, dcaCode: dcaCode, students: [] });
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `Сынып тіркелді! Оқушылар қосылу коды: ${dcaCode}`);
+            showIosToast(true, "Сәтті!", "Жаңа сынып ашылды!");
             renderTabContent();
         }
 
@@ -3833,58 +4041,57 @@
             let selectElem = document.getElementById(`admin_teacher_select_${idx}`);
             let newTeacherUsername = selectElem.value;
             let teacherObj = users.find(u => u.username === newTeacherUsername);
-            if(!teacherObj) return;
-
-            showSpinner("Сынып жетекшісі өзгертілуде...");
-            classesList[idx].teacherUsername = teacherObj.username;
-            classesList[idx].teacher = teacherObj.name;
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", `Сынып жетекшісі "${teacherObj.name}" болып тағайындалды!`);
-            renderTabContent();
+            if(teacherObj && classesList[idx]) {
+                showSpinner("Жетекші ауыстырылуда...");
+                classesList[idx].teacherUsername = teacherObj.username;
+                classesList[idx].teacher = teacherObj.name;
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", `Сынып жетекшісі "${teacherObj.name}" болып тағайындалды!`);
+                renderTabContent();
+            }
         }
 
         async function deleteClassRecord(idx) {
-            if(confirm('Бұл сыныпты жүйеден біржола жойғыңыз келе ме?')) {
+            let targetClass = classesList[idx];
+            if(!targetClass) return;
+            if(confirm(`"${targetClass.name}" сыныбын толығымен жоюға сенімдісіз бе?`)) {
                 showSpinner("Сынып жойылуда...");
                 classesList.splice(idx, 1);
                 await saveDataToCloud();
                 hideSpinner();
-                showIosToast(true, "Сәтті!", "Сынып жүйеден сәтті жойылды!");
+                showIosToast(true, "Сәтті!", "Сынып өшірілді.");
                 renderTabContent();
             }
         }
 
         async function joinClassByDCA() {
             let code = document.getElementById('dca-code-input').value.trim().toUpperCase();
-            showSpinner("Код тексерілуде...");
-            await loadDataFromCloud();
+            showSpinner("DCA код тексерілуде...");
+            await loadDataFromCloud(true);
             let targetClass = classesList.find(c => c.dcaCode === code);
-            if(targetClass) {
-                if(!targetClass.students) targetClass.students = [];
-                if(!targetClass.students.includes(currentUser.username)) {
-                    targetClass.students.push(currentUser.username);
-                    await saveDataToCloud();
-                }
+            if(!targetClass) {
                 hideSpinner();
-                showIosToast(true, "Сәтті!", `Сіз [${targetClass.name}] сыныбына сәтті қосылдыңыз!`);
-                switchTab('student_grades');
-            } else {
-                hideSpinner();
-                showIosToast(false, "Сәтсіз!", "Қате DCA коды! Мұғалімнен дұрыс кодты сұраңыз.");
+                showIosToast(false, "Сәтсіз!", "Қате DCA код! Мұндай сынып табылмады.");
+                return;
             }
+            if(!targetClass.students) targetClass.students = [];
+            if(!targetClass.students.includes(currentUser.username)) targetClass.students.push(currentUser.username);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `Сіз ${targetClass.name} сыныбына қосылдыңыз!`);
+            switchTab('student_grades');
         }
 
         async function saveKtp() {
             let title = document.getElementById('ktp-title').value.trim();
-            if(title) { 
-                showSpinner("КТЖ сақталуда...");
-                ktpList.push(`${currentUser.name}: ${title}`); 
-                await saveDataToCloud(); 
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "КТЖ сақталды.");
-                renderTabContent(); 
-            }
+            if(!title) return;
+            showSpinner("КТЖ қосылуда...");
+            ktpList.push(title);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "КТЖ жоспарына қосылды.");
+            renderTabContent();
         }
 
         async function registerNewUser() {
@@ -3892,172 +4099,135 @@
             let username = document.getElementById('reg-user').value.trim();
             let password = document.getElementById('reg-pass').value.trim();
             let role = document.getElementById('reg-role').value;
-            let parentOf = role === 'parent' ? document.getElementById('reg-parent-of').value : '';
+            let parentOf = document.getElementById('reg-parent-of').value;
 
             if(!name || !username || !password) {
-                showIosToast(false, "Сәтсіз!", "Барлық өрісті толтырыңыз!");
+                showIosToast(false, "Сәтсіз!", "Барлық өрістерді толтырыңыз!");
                 return;
             }
             if(role === 'parent' && !parentOf) {
-                showIosToast(false, "Сәтсіз!", "Ата-ана үшін оның баласын таңдаңыз!");
+                showIosToast(false, "Сәтсіз!", "Ата-ана үшін баланы міндетті түрде таңдаңыз!");
+                return;
+            }
+            if(users.some(u => u.username === username)) {
+                showIosToast(false, "Сәтсіз!", "Бұл логин жүйеде бар!");
                 return;
             }
 
-            showSpinner("Тіркелуде...");
-            if(users.some(u => u.username === username)) { 
-                hideSpinner();
-                showIosToast(false, "Сәтсіз!", "Бұл логин бос емес!"); 
-                return; 
-            }
-            users.push({ username, password, role, name, parentOf, warningReason: '', status: 'active' });
+            showSpinner("Пайдаланушы тіркелуде...");
+            let newUserObj = { username, password, role, name, warningReason: '', status: 'active' };
+            if(role === 'parent') newUserObj.parentOf = parentOf;
+
+            users.push(newUserObj);
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Пайдаланушы тіркелді!");
+            showIosToast(true, "Сәтті!", "Жаңа пайдаланушы тіркелді!");
             renderTabContent();
         }
 
         async function deleteSystemUser(username) {
-            if(confirm('Жойғыңыз келе ме?')) { 
+            if(confirm("Бұл қолданушыны өшіргіңіз келе ме?")) {
                 showSpinner("Өшірілуде...");
-                users = users.filter(u => u.username !== username); 
-                await saveDataToCloud(); 
+                users = users.filter(u => u.username !== username);
+                await saveDataToCloud();
                 hideSpinner();
                 showIosToast(true, "Сәтті!", "Қолданушы өшірілді.");
-                renderTabContent(); 
+                renderTabContent();
             }
         }
 
-        async function deleteSchedule(index) { 
+        async function deleteSchedule(idx) {
             showSpinner("Өшірілуде...");
-            schedules.splice(index, 1); 
-            await saveDataToCloud(); 
+            schedules.splice(idx, 1);
+            await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Кесте өшірілді.");
-            renderTabContent(); 
+            showIosToast(true, "Сәтті!", "Сабақ кестесі өшірілді.");
+            renderTabContent();
         }
 
-        async function saveAnnouncement() { 
-            showSpinner("Жариялануда...");
-            currentAnnouncement = document.getElementById('announcement-input').value.trim(); 
-            await saveDataToCloud(); 
-            checkBanners(); 
+        async function saveAnnouncement() {
+            currentAnnouncement = document.getElementById('announcement-input').value.trim();
+            showSpinner("Хабарландыру жариялануда...");
+            await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Хабарландыру жарияланды!"); 
+            checkBanners();
+            showIosToast(true, "Сәтті!", "Хабарландыру жарияланды!");
         }
 
-        async function clearAnnouncement() { 
+        async function clearAnnouncement() {
+            currentAnnouncement = '';
             showSpinner("Өшірілуде...");
-            currentAnnouncement = ''; 
-            await saveDataToCloud(); 
-            checkBanners(); 
+            await saveDataToCloud();
             hideSpinner();
+            checkBanners();
+            renderTabContent();
             showIosToast(true, "Сәтті!", "Хабарландыру өшірілді.");
-            renderTabContent(); 
         }
 
         async function issueWarningPrompt(username) {
-            let reason = prompt(`@${username} үшін ескерту себебін жазыңыз:`);
-            if(reason !== null) {
+            let reason = prompt("Ескерту себебін жазыңыз:");
+            if(reason) {
                 showSpinner("Ескерту берілуде...");
-                let user = users.find(u => u.username === username);
-                if(user) { 
-                    user.warningReason = reason.trim(); 
-                    await saveDataToCloud(); 
-                    hideSpinner();
-                    showIosToast(true, "Сәтті!", "Ескерту сәтті жіберілді.");
-                    renderTabContent(); 
-                } else hideSpinner();
+                let target = users.find(u => u.username === username);
+                if(target) target.warningReason = reason;
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Ескерту берілді.");
+                renderTabContent();
             }
         }
 
         async function toggleBlockUser(username) {
             showSpinner("Мәртебе өзгертілуде...");
-            let user = users.find(u => u.username === username);
-            if(user) { 
-                user.status = user.status === 'blocked' ? 'active' : 'blocked'; 
-                await saveDataToCloud(); 
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Аккаунт мәртебесі өзгертілді.");
-                renderTabContent(); 
-            } else hideSpinner();
+            let target = users.find(u => u.username === username);
+            if(target) target.status = target.status === 'blocked' ? 'active' : 'blocked';
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Пайдаланушы мәртебесі өзгертілді.");
+            renderTabContent();
         }
 
         async function sendSupportMessage() {
-            let textElem = document.getElementById('support-msg') || document.getElementById('stud-support-msg');
-            let text = textElem ? textElem.value.trim() : '';
+            let input = document.getElementById('support-msg') || document.getElementById('stud-support-msg');
+            let text = input.value.trim();
             if(!text) return;
 
-            showSpinner("AI Security сүзгісі тексеруде...");
-            let isOffensive = badWords.some(w => text.toLowerCase().includes(w));
-            if(isOffensive) {
-                currentUser.warningReason = 'Автоматты AI Security ескертуі: Қолдау чатында әдепсіз сөз қолданылды.';
-                let dbUser = users.find(u => u.username === currentUser.username);
-                if(dbUser) dbUser.warningReason = currentUser.warningReason;
-                supportTickets.push({ from: currentUser.username, text, reply: '', flagged: true });
+            showSpinner("Хабарлама жіберілуде...");
+            let lowerText = text.toLowerCase();
+            let containsProfanity = badWords.some(word => lowerText.includes(word));
+
+            if(containsProfanity) {
+                let target = users.find(u => u.username === currentUser.username);
+                if(target) {
+                    target.warningReason = "AI Security System: Қолдау қызметіне былапыт сөздер жазғаны үшін автоматты ескерту!";
+                    currentUser.warningReason = target.warningReason;
+                }
+                supportTickets.push({ from: currentUser.username, text: text, reply: 'AI Security Violation: Ескерту берілді.', flagged: true });
                 await saveDataToCloud();
-                checkBanners();
                 hideSpinner();
-                showIosToast(false, "🚨 AI Security!", "Әдепсіз сөз анықталды! Сізге автоматты түрде ескерту берілді.");
-                renderTabContent();
-                return;
+                checkBanners();
+                showIosToast(false, "AI Security Ескерту!", "Бейәдеп сөздер үшін автоматты ескерту берілді!");
+            } else {
+                supportTickets.push({ from: currentUser.username, text: text, reply: '', flagged: false });
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Өтініш әкімшілікке жіберілді!");
             }
-            supportTickets.push({ from: currentUser.username, text, reply: '', flagged: false });
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Хабарламаңыз жіберілді!");
             renderTabContent();
         }
 
         async function replyTicket(idx) {
-            let rep = document.getElementById(`reply_${idx}`).value.trim();
-            if(rep) { 
-                showSpinner("Жауап жіберілуде...");
-                supportTickets[idx].reply = rep; 
-                await saveDataToCloud(); 
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Жауап жіберілді.");
-                renderTabContent(); 
-            }
+            let replyText = document.getElementById(`reply_${idx}`).value.trim();
+            if(!replyText) return;
+            showSpinner("Жауап жіберілуде...");
+            supportTickets[idx].reply = replyText;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Жауап жіберілді.");
+            renderTabContent();
         }
 
-        function downloadPDFReport() {
-            let myGrades = grades[currentUser.username] || {};
-            let rowsHtml = Object.keys(myGrades).map(sub => `
-                <tr>
-                    <td style="border: 1px solid #000; padding: 6px;">${sub}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align:center;">${myGrades[sub].form}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align:center;">${myGrades[sub].bzhb}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align:center;">${myGrades[sub].tzhb}</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align:center;">${myGrades[sub].percent}%</td>
-                    <td style="border: 1px solid #000; padding: 6px; text-align:center;"><b>${myGrades[sub].final}</b></td>
-                </tr>
-            `).join('');
-
-            let printWin = window.open('', '', 'width=800,height=600');
-            printWin.document.write(`
-                <html><head><title>BilimAL Табель — ${currentUser.name}</title></head>
-                <body style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2 style="text-align:center; color:#1e3a8a;">BilimAL Enterprise — Ресми үлгерім табелі</h2>
-                    <p><b>Оқушы аты-жөні:</b> ${currentUser.name} (@${currentUser.username})</p>
-                    <table style="width:100%; border-collapse: collapse; margin-top: 15px;">
-                        <thead>
-                            <tr style="background:#f1f5f9;">
-                                <th style="border:1px solid #000; padding:6px;">Пән</th>
-                                <th style="border:1px solid #000; padding:6px;">Формативті</th>
-                                <th style="border:1px solid #000; padding:6px;">БЖБ</th>
-                                <th style="border:1px solid #000; padding:6px;">ТЖБ</th>
-                                <th style="border:1px solid #000; padding:6px;">Пайыз (%)</th>
-                                <th style="border:1px solid #000; padding:6px;">Қорытынды</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rowsHtml || '<tr><td colspan="6" style="border:1px solid #000; padding:6px; text-align:center;">Бағалар жоқ</td></tr>'}</tbody>
-                    </table>
-                </body></html>
-            `);
-            printWin.document.close();
-            printWin.focus();
-            printWin.print();
-        }
+        function downloadPDFReport() { window.print(); }
     </script>
 </body>
 </html>
