@@ -89,6 +89,46 @@
             border: 1px solid rgba(226, 232, 240, 0.75); padding: 6px; 
             background: rgba(255, 255, 255, 0.68); font-size: 11px; 
         }
+
+        /* BilimClass Style Teacher Matrix Table (Adapted to BilimAL Glass) */
+        .bc-matrix-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+        .bc-matrix-table th, .bc-matrix-table td {
+            border-right: 1px solid rgba(203, 213, 225, 0.75);
+            border-bottom: 1px solid rgba(203, 213, 225, 0.75);
+            padding: 6px 8px;
+            font-size: 11px;
+        }
+        .bc-matrix-table th {
+            background: rgba(241, 245, 249, 0.92);
+            color: #1e293b;
+            font-weight: 800;
+            text-align: center;
+        }
+        .bc-sticky-col-1 {
+            position: sticky;
+            left: 0;
+            z-index: 20;
+            background: rgba(248, 250, 252, 0.96) !important;
+            min-width: 34px;
+            text-align: center;
+        }
+        .bc-sticky-col-2 {
+            position: sticky;
+            left: 34px;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.96) !important;
+            min-width: 170px;
+            box-shadow: 2px 0 6px rgba(15, 23, 42, 0.05);
+        }
+        .bc-cell-fb { background: rgba(255, 255, 255, 0.75); }
+        .bc-cell-bzhb { background: rgba(254, 243, 199, 0.68) !important; }
+        .bc-cell-tzhb { background: rgba(252, 231, 243, 0.72) !important; }
+        .bc-cell-calc { background: rgba(240, 253, 244, 0.78) !important; font-weight: 700; }
+
         .sidebar-btn { transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease; }
         .sidebar-btn:hover { background: rgba(255, 255, 255, 0.9) !important; color: #2563eb; transform: translateX(2px); }
         .sidebar-btn.active { 
@@ -210,6 +250,25 @@
             background-color: rgba(248, 250, 252, 0.85);
             cursor: crosshair;
             touch-action: none;
+        }
+
+        /* Student Grade Chip Styling (BilimClass Inspired + Liquid Glass) */
+        .grade-chip {
+            min-width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            position: relative;
+        }
+        .grade-chip:hover {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
         }
     </style>
 </head>
@@ -487,6 +546,15 @@
         let selectedTeacherSubject = subjectsList[0];
         let activeScheduleDay = 'Дүйсенбі';
 
+        // Summative Assessments (БЖБ / ТЖБ) Approved by Admin
+        let summativeAssessments = []; 
+        // Selected assignment in teacher journal
+        let selectedTeacherAssignmentKey = '';
+        let teacherJournalTerm = '1';
+        let teacherJournalOnlySummative = false;
+        let teacherJournalFullScreen = false;
+        let studentGradesSubTab = 'subjects';
+
         let bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
 
         let currentQrSessionId = null;
@@ -632,6 +700,33 @@
             return `${d}.${m}.${y} / ${h}:${min}`;
         }
 
+        function getShortKazakhDate(isoOrDateStr) {
+            const monthsShort = ["қаң.", "ақп.", "нау.", "сәу.", "мам.", "мау.", "шіл.", "там.", "қыр.", "қаз.", "қар.", "жел."];
+            const monthsFull = ["қаңтар", "ақпан", "наурыз", "сәуір", "мамыр", "маусым", "шілде", "тамыз", "қыркүйек", "қазан", "қараша", "желтоқсан"];
+            const daysShort = ["Жс", "Дс", "Сс", "Ср", "Бс", "Жм", "Сб"];
+            let dObj = new Date();
+            if (isoOrDateStr && isoOrDateStr.includes('-')) {
+                let parts = isoOrDateStr.split('T')[0].split('-');
+                if (parts.length === 3) {
+                    dObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                }
+            } else if (isoOrDateStr && isoOrDateStr.includes('.')) {
+                let parts = isoOrDateStr.split(' ')[0].split('.');
+                if (parts.length === 3) {
+                    dObj = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+                }
+            }
+            let dayNum = String(dObj.getDate()).padStart(2, '0');
+            let mIdx = dObj.getMonth();
+            let ddmm = `${dayNum}.${String(mIdx + 1).padStart(2, '0')}`;
+            return {
+                shortChip: `${dayNum} ${monthsShort[mIdx]}`,
+                fullTitle: `${daysShort[dObj.getDay()]}, ${dObj.getDate()} ${monthsFull[mIdx]}`,
+                ddmm: ddmm,
+                iso: `${dObj.getFullYear()}-${String(mIdx + 1).padStart(2, '0')}-${dayNum}`
+            };
+        }
+
         function initSignatureCanvas(canvasId) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
@@ -695,7 +790,7 @@
                 loginTitle: "Жүйеге кіру", loginSub: "BilimAL электронды журналы",
                 userLbl: "Логин", passLbl: "Пароль", loginBtn: "Кіру", logoutBtn: "Шығу", menuTitle: "Басқару панелі",
                 footer: "BilimAL Enterprise Cloud © 2026. Барлық құқықтар қорғалған.",
-                adminMon: "📊 Мониторинг", adminSanc: "🛡️ Moderations & Sanctions", adminSched: "📅 Сабақ кестесі",
+                adminMon: "📊 Мониторинг", adminSanc: "🛡️ Moderations & Sanctions", adminSched: "📅 Сабақ кестесі & БЖБ/ТЖБ",
                 adminUsers: "👥 Логин/парольдер & Ата-ана", adminAnn: "📢 Хабарландыру", adminNews: "📰 Жаңалықтар",
                 adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Қолдау кірістері",
                 adminBilimID: "🪪 BilimID Басқару", adminLimit: "⏳ BilimLimit (Шектеу)", adminSub: "📜 BilimSubscription (Табельдер)",
@@ -716,7 +811,7 @@
                 subtitle: "Единая школьная система и платформа", loginTitle: "Вход в систему", loginSub: "Электронный журнал BilimAL",
                 userLbl: "Логин", passLbl: "Пароль", loginBtn: "Войти", logoutBtn: "Выйти", menuTitle: "Панель управления",
                 footer: "BilimAL Enterprise Cloud © 2026. Все права защищены.",
-                adminMon: "📊 Мониторинг", adminSanc: "🛡️ Модерация и санкции", adminSched: "📅 Расписание",
+                adminMon: "📊 Мониторинг", adminSanc: "🛡️ Модерация и санкции", adminSched: "📅 Расписание и СОР/СОЧ",
                 adminUsers: "👥 Пользователи и Родители", adminAnn: "📢 Объявления", adminNews: "📰 Новости",
                 adminLive: "🔴 AutoLIVE Мониторинг", adminSupport: "🛟 Входящие тикеты",
                 adminBilimID: "🪪 Управление BilimID", adminLimit: "⏳ BilimLimit (Лимиты)", adminSub: "📜 BilimSubscription (Табели)",
@@ -735,7 +830,7 @@
                 subtitle: "Unified School System and Platform", loginTitle: "Sign In", loginSub: "BilimAL Electronic Journal",
                 userLbl: "Username", passLbl: "Password", loginBtn: "Login", logoutBtn: "Logout", menuTitle: "Control Panel",
                 footer: "BilimAL Enterprise Cloud © 2026. All rights reserved.",
-                adminMon: "📊 Monitoring", adminSanc: "🛡️ Moderations & Sanctions", adminSched: "📅 Schedule",
+                adminMon: "📊 Monitoring", adminSanc: "🛡️ Moderations & Sanctions", adminSched: "📅 Schedule & Summative",
                 adminUsers: "👥 Users & Parents", adminAnn: "📢 Announcements", adminNews: "📰 News",
                 adminLive: "🔴 AutoLIVE Monitoring", adminSupport: "🛟 Support Tickets",
                 adminBilimID: "🪪 BilimID Manage", adminLimit: "⏳ BilimLimit", adminSub: "📜 BilimSubscription",
@@ -1002,6 +1097,7 @@
                         parentHoldingsSubscribed = data.parentHoldingsSubscribed || {};
                         parentHoldingPayments = data.parentHoldingPayments || {};
                         cookerOrders = data.cookerOrders || [];
+                        summativeAssessments = data.summativeAssessments || [];
                         if (Array.isArray(data.cookerMenu)) {
                             cookerMenu = data.cookerMenu;
                         }
@@ -1022,7 +1118,7 @@
                         users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeLives, activeSessionsStore, bilimLimitSettings,
                         bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings,
                         bPayWallets, bPayTransactions, schoolHoldings, parentHoldingsSubscribed, parentHoldingPayments,
-                        cookerOrders, cookerMenu
+                        cookerOrders, cookerMenu, summativeAssessments
                     });
                     lastCloudSyncTime = Date.now();
                 } catch(e) { console.error(e); }
@@ -1375,6 +1471,460 @@
             activeTab = tabId;
             renderSidebar();
             renderTabContent();
+        }
+
+        /* Helper: Get Teacher's Assigned Class+Subject pairs from Schedules & Homeroom */
+        function getTeacherAssignments(teacherObj) {
+            let assignments = [];
+            let seen = new Set();
+
+            // 1. From Admin-approved schedules (matching teacherUsername or teacherName)
+            schedules.forEach(s => {
+                let isMatch = (s.teacherUsername && s.teacherUsername === teacherObj.username) ||
+                              (s.teacherName && s.teacherName === teacherObj.name);
+                if (isMatch && s.className && s.subject) {
+                    let key = `${s.className}|||${s.subject}`;
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        let classSchedules = schedules.filter(x => x.className === s.className && x.subject === s.subject && ((x.teacherUsername && x.teacherUsername === teacherObj.username) || (x.teacherName && x.teacherName === teacherObj.name)));
+                        let daysInfo = [...new Set(classSchedules.map(x => `${x.day || 'Дүйсенбі'} (${x.time || '—'})`))].join(', ');
+                        assignments.push({
+                            key,
+                            className: s.className,
+                            subject: s.subject,
+                            daysInfo: daysInfo || 'Кестеде бекітілген',
+                            source: 'schedule'
+                        });
+                    }
+                }
+            });
+
+            // 2. Fallback: If teacher created a homeroom class and has no schedule assignments yet, keep homeroom available
+            let myHomeroom = classesList.find(c => c.teacherUsername === teacherObj.username);
+            if (myHomeroom && assignments.length === 0) {
+                let key = `${myHomeroom.name}|||${selectedTeacherSubject}`;
+                assignments.push({
+                    key,
+                    className: myHomeroom.name,
+                    subject: selectedTeacherSubject,
+                    daysInfo: 'Сынып жетекшісі',
+                    source: 'homeroom'
+                });
+            }
+            return assignments;
+        }
+
+        /* Helper: Normalize grade record to support both legacy format and detailed multi-entry format */
+        function normalizeSubjectGrade(rawRecord) {
+            if (!rawRecord) {
+                return { formEntries: [], bzhbEntries: [], tzhbEntries: [], final: '', status: '', percent: 0 };
+            }
+            let formEntries = Array.isArray(rawRecord.formEntries) ? [...rawRecord.formEntries] : [];
+            let bzhbEntries = Array.isArray(rawRecord.bzhbEntries) ? [...rawRecord.bzhbEntries] : [];
+            let tzhbEntries = Array.isArray(rawRecord.tzhbEntries) ? [...rawRecord.tzhbEntries] : [];
+
+            // Backward compatibility with legacy single-string fields (form, bzhb, tzhb)
+            if (formEntries.length === 0 && rawRecord.form) {
+                let parts = String(rawRecord.form).split('/');
+                let score = parseFloat(parts[0]);
+                let max = parseFloat(parts[1]) || 10;
+                if (!isNaN(score)) {
+                    formEntries.push({
+                        id: 'leg_fb',
+                        score: score,
+                        max: max,
+                        date: rawRecord.formDate || rawRecord.updatedAt || '2026-11-17',
+                        topic: rawRecord.formTopic || 'Сабақ бағасы',
+                        comment: rawRecord.formComment || ''
+                    });
+                }
+            }
+            if (bzhbEntries.length === 0 && rawRecord.bzhb) {
+                let parts = String(rawRecord.bzhb).split('/');
+                let score = parseFloat(parts[0]);
+                let max = parseFloat(parts[1]) || 20;
+                if (!isNaN(score)) {
+                    bzhbEntries.push({
+                        id: 'leg_bzhb',
+                        assessmentId: 'leg_bzhb_1',
+                        title: 'БЖБ 1',
+                        score: score,
+                        max: max,
+                        date: rawRecord.bzhbDate || rawRecord.updatedAt || '2026-11-17',
+                        topic: 'Бөлім бойынша жиынтық бағалау',
+                        comment: ''
+                    });
+                }
+            }
+            if (tzhbEntries.length === 0 && rawRecord.tzhb) {
+                let parts = String(rawRecord.tzhb).split('/');
+                let score = parseFloat(parts[0]);
+                let max = parseFloat(parts[1]) || 30;
+                if (!isNaN(score)) {
+                    tzhbEntries.push({
+                        id: 'leg_tzhb',
+                        assessmentId: 'leg_tzhb_1',
+                        title: 'ТЖБ 1',
+                        score: score,
+                        max: max,
+                        date: rawRecord.tzhbDate || rawRecord.updatedAt || '2026-11-17',
+                        topic: 'Тоқсандық жиынтық бағалау',
+                        comment: ''
+                    });
+                }
+            }
+
+            let metrics = computeSubjectMetrics(formEntries, bzhbEntries, tzhbEntries);
+            return {
+                formEntries,
+                bzhbEntries,
+                tzhbEntries,
+                final: rawRecord.final !== undefined ? rawRecord.final : '',
+                status: rawRecord.status || '',
+                percent: metrics.totalPercent,
+                fbPercent: metrics.fbPercent,
+                bzhbPercent: metrics.bzhbPercent,
+                tzhbPercent: metrics.tzhbPercent,
+                suggestedGrade: metrics.suggestedGrade
+            };
+        }
+
+        function computeSubjectMetrics(formEntries, bzhbEntries, tzhbEntries) {
+            let fbGot = 0, fbMax = 0;
+            formEntries.forEach(e => { fbGot += Number(e.score || 0); fbMax += Number(e.max || 10); });
+            let fbPercent = fbMax > 0 ? (fbGot / fbMax) * 100 : 0;
+
+            let bGot = 0, bMax = 0;
+            bzhbEntries.forEach(e => { bGot += Number(e.score || 0); bMax += Number(e.max || 15); });
+            let bzhbPercent = bMax > 0 ? (bGot / bMax) * 100 : 0;
+
+            let tGot = 0, tMax = 0;
+            tzhbEntries.forEach(e => { tGot += Number(e.score || 0); tMax += Number(e.max || 25); });
+            let tzhbPercent = tMax > 0 ? (tGot / tMax) * 100 : 0;
+
+            let hasB = bMax > 0;
+            let hasT = tMax > 0;
+            let totalPercent = 0;
+
+            if (hasB && hasT) {
+                totalPercent = Math.round((fbPercent * 0.25) + (bzhbPercent * 0.25) + (tzhbPercent * 0.50));
+            } else if (hasB) {
+                totalPercent = Math.round((fbPercent * 0.50) + (bzhbPercent * 0.50));
+            } else if (hasT) {
+                totalPercent = Math.round((fbPercent * 0.50) + (tzhbPercent * 0.50));
+            } else {
+                totalPercent = Math.round(fbPercent);
+            }
+
+            return {
+                fbPercent: Math.round(fbPercent * 10) / 10,
+                bzhbPercent: Math.round(bzhbPercent * 10) / 10,
+                tzhbPercent: Math.round(tzhbPercent * 10) / 10,
+                totalPercent,
+                suggestedGrade: totalPercent > 0 ? getStandardGrade(totalPercent) : '—'
+            };
+        }
+
+        /* Student & Parent BilimClass-Style Grades Dashboard with Class Analytics Modal */
+        function renderBilimClassStudentGradesUI(targetStudentUsername, studentObj, studentClass, isParentView = false) {
+            let studentGrades = grades[targetStudentUsername] || {};
+            let myAtt = (attendance[targetStudentUsername] || {})['today'] || '-';
+            let classStudents = studentClass ? (studentClass.students || []) : [targetStudentUsername];
+
+            // Gather all subjects for this student (from grades + schedules for their class)
+            let subjectSet = new Set(Object.keys(studentGrades));
+            if (studentClass) {
+                schedules.filter(s => s.className === studentClass.name).forEach(s => subjectSet.add(s.subject));
+            }
+            let allSubjects = Array.from(subjectSet);
+
+            // Upcoming / Approved Summative Assessments (БЖБ / ТЖБ) for this class
+            let classSummatives = studentClass ? summativeAssessments.filter(sa => sa.className === studentClass.name) : [];
+            let summativeBannerHtml = classSummatives.length > 0 ? `
+                <div class="mb-4 p-3.5 liquid-glass rounded-2xl border border-amber-300/80 bg-amber-50/70 space-y-2">
+                    <div class="text-xs font-extrabold text-amber-900 flex items-center gap-1.5">
+                        <span>📌</span> Әкімшілік бекіткен БЖБ және ТЖБ кестесі (${studentClass.name})
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        ${classSummatives.map(sa => {
+                            let dt = getShortKazakhDate(sa.date);
+                            let badgeColor = sa.type === 'ТЖБ' ? 'bg-pink-600 text-white' : 'bg-amber-600 text-white';
+                            return `
+                                <div class="px-3 py-1.5 bg-white/90 rounded-xl border border-amber-200 text-[11px] flex items-center gap-2 shadow-2xs">
+                                    <span class="px-1.5 py-0.5 rounded font-black text-[9px] ${badgeColor}">${sa.type} бекітілген</span>
+                                    <b class="text-slate-900">${sa.subject}:</b>
+                                    <span class="text-slate-700 font-semibold">${sa.title}</span>
+                                    <span class="text-blue-700 font-bold">(${dt.shortChip})</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            let subjectsCardsHtml = allSubjects.length > 0 ? allSubjects.map(sub => {
+                let norm = normalizeSubjectGrade(studentGrades[sub]);
+                let schedForSub = studentClass ? schedules.find(s => s.className === studentClass.name && s.subject === sub) : null;
+                let teacherName = schedForSub?.teacherName || (studentClass ? studentClass.teacher : 'Пән мұғалімі');
+
+                // Combine all grade chips (Formative, БЖБ, ТЖБ) sorted newest first
+                let chips = [];
+                norm.formEntries.forEach(e => {
+                    chips.push({
+                        kind: 'ФБ',
+                        kindLabel: 'Формативті бағалау',
+                        score: e.score,
+                        max: e.max || 10,
+                        date: e.date,
+                        topic: e.topic || schedForSub?.topic || 'Сабақ тақырыбы',
+                        comment: e.comment || 'Пікір жоқ',
+                        entryId: e.id,
+                        assessmentId: ''
+                    });
+                });
+                norm.bzhbEntries.forEach(e => {
+                    chips.push({
+                        kind: 'БЖБ',
+                        kindLabel: e.title || 'БЖБ',
+                        score: e.score,
+                        max: e.max || 15,
+                        date: e.date,
+                        topic: e.topic || e.title || 'Бөлім бойынша жиынтық бағалау',
+                        comment: e.comment || 'БЖБ бекітілген',
+                        entryId: e.id,
+                        assessmentId: e.assessmentId || ''
+                    });
+                });
+                norm.tzhbEntries.forEach(e => {
+                    chips.push({
+                        kind: 'ТЖБ',
+                        kindLabel: e.title || 'ТЖБ',
+                        score: e.score,
+                        max: e.max || 25,
+                        date: e.date,
+                        topic: e.topic || e.title || 'Тоқсандық жиынтық бағалау',
+                        comment: e.comment || 'ТЖБ бекітілген',
+                        entryId: e.id,
+                        assessmentId: e.assessmentId || ''
+                    });
+                });
+
+                chips.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+
+                let chipsHtml = chips.length > 0 ? chips.map((ch, idx) => {
+                    let dt = getShortKazakhDate(ch.date);
+                    let chipBg = ch.kind === 'ТЖБ' ? 'bg-pink-600/90 text-white' : (ch.kind === 'БЖБ' ? 'bg-amber-600/90 text-white' : 'bg-emerald-700/90 text-white');
+                    let payload = encodeURIComponent(JSON.stringify({
+                        studentUsername: targetStudentUsername,
+                        className: studentClass ? studentClass.name : '',
+                        classStudents: classStudents,
+                        subject: sub,
+                        teacherName: teacherName,
+                        kind: ch.kind,
+                        kindLabel: ch.kindLabel,
+                        score: ch.score,
+                        max: ch.max,
+                        date: ch.date,
+                        topic: ch.topic,
+                        comment: ch.comment,
+                        assessmentId: ch.assessmentId
+                    }));
+
+                    return `
+                        <div onclick="openGradeDetailAnalyticsModal('${payload}')" class="flex flex-col items-center gap-1 cursor-pointer group">
+                            <div class="grade-chip ${chipBg} shadow-sm px-2">
+                                ${idx === 0 ? '<span class="w-2 h-2 rounded-full bg-emerald-300 absolute -top-0.5 -left-0.5 ring-2 ring-white"></span>' : ''}
+                                <span>${ch.kind === 'ФБ' ? ch.score : `${ch.score}/${ch.max}`}</span>
+                            </div>
+                            <span class="text-[9px] font-extrabold uppercase tracking-tight ${ch.kind === 'ТЖБ' ? 'text-pink-700' : (ch.kind === 'БЖБ' ? 'text-amber-700' : 'text-slate-500')}">${ch.kind}</span>
+                            <span class="text-[10px] font-bold text-slate-600">${dt.shortChip}</span>
+                        </div>
+                    `;
+                }).join('') : '<div class="text-xs text-slate-400 py-2">Бағалар әлі қойылмаған</div>';
+
+                return `
+                    <div class="p-4 liquid-glass rounded-2xl space-y-3 border border-white/80">
+                        <div class="flex justify-between items-center border-b border-slate-200/70 pb-2">
+                            <div>
+                                <h4 class="text-sm font-extrabold text-slate-900">${sub}</h4>
+                                <span class="text-[10px] text-slate-500 font-semibold">👨‍🏫 ${teacherName}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-lg font-black text-emerald-700">${norm.percent || 0}%</span>
+                                ${norm.final ? `<span class="block text-[10px] font-extrabold text-blue-700">Қорытынды: ${norm.final}</span>` : ''}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-[11px] font-bold text-slate-500 mb-2">Соңғы бағалар (толық ақпарат және сынып бойынша салыстыру үшін бағаны басыңыз):</div>
+                            <div class="flex flex-wrap gap-3 items-start">
+                                ${chipsHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('') : '<div class="p-6 text-center text-xs text-slate-400">Пәндер мен бағалар әлі тіркелмеген</div>';
+
+            let summaryRowsHtml = allSubjects.length > 0 ? allSubjects.map(sub => {
+                let norm = normalizeSubjectGrade(studentGrades[sub]);
+                return `
+                    <tr>
+                        <td class="font-bold text-left">${sub}</td>
+                        <td class="text-center font-semibold">${norm.fbPercent || 0}%</td>
+                        <td class="text-center font-semibold text-amber-700">${norm.bzhbPercent || 0}%</td>
+                        <td class="text-center font-semibold text-pink-700">${norm.tzhbPercent || 0}%</td>
+                        <td class="text-center font-extrabold text-emerald-700">${norm.percent || 0}%</td>
+                        <td class="text-center font-black text-blue-800">${norm.final || norm.status || '—'}</td>
+                    </tr>
+                `;
+            }).join('') : '<tr><td colspan="6" class="text-center text-slate-400 py-4">Деректер жоқ</td></tr>';
+
+            return `
+                <div class="flex flex-wrap justify-between items-center gap-2 mb-3 border-b border-slate-200/70 pb-2">
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900">${isParentView ? `👨‍👩‍👧 ${studentObj?.name || 'Бала'} — Бағалар журналы` : '📊 Бағалар'}</h3>
+                        <span class="text-[11px] text-slate-500 font-semibold">Сыныбы: <b class="text-blue-800">${studentClass ? studentClass.name : '—'}</b> | Қатысу: <b class="text-emerald-700">[ ${myAtt} ]</b></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex bg-slate-200/80 p-1 rounded-xl">
+                            <button onclick="switchStudentGradesSubTab('subjects')" class="px-3 py-1 rounded-lg text-xs font-extrabold transition ${studentGradesSubTab === 'subjects' ? 'bg-emerald-600 text-white shadow' : 'text-slate-700'}">Пән бойынша</button>
+                            <button onclick="switchStudentGradesSubTab('summary')" class="px-3 py-1 rounded-lg text-xs font-extrabold transition ${studentGradesSubTab === 'summary' ? 'bg-emerald-600 text-white shadow' : 'text-slate-700'}">Қорытынды</button>
+                        </div>
+                        ${!isParentView ? `<button onclick="downloadPDFReport()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs">📥 PDF</button>` : ''}
+                    </div>
+                </div>
+
+                ${summativeBannerHtml}
+
+                ${studentGradesSubTab === 'subjects' ? `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${subjectsCardsHtml}
+                    </div>
+                ` : `
+                    <div class="overflow-x-auto">
+                        <table class="w-full gov-table">
+                            <thead>
+                                <tr>
+                                    <th>Пән</th>
+                                    <th>% ФБ</th>
+                                    <th>% БЖБ</th>
+                                    <th>% ТЖБ</th>
+                                    <th>Жалпы %</th>
+                                    <th>Қорытынды баға</th>
+                                </tr>
+                            </thead>
+                            <tbody>${summaryRowsHtml}</tbody>
+                        </table>
+                    </div>
+                `}
+            `;
+        }
+
+        function switchStudentGradesSubTab(tab) {
+            studentGradesSubTab = tab;
+            renderTabContent();
+        }
+
+        /* Student/Parent Grade Detail + Class Comparison Modal (BilimClass Analytics Style) */
+        function openGradeDetailAnalyticsModal(encodedPayload) {
+            let info = JSON.parse(decodeURIComponent(encodedPayload));
+            let dt = getShortKazakhDate(info.date);
+
+            // Compute class distribution for this specific grade/assessment
+            let distribution = {}; // score -> count
+            let totalPeersWithGrade = 0;
+
+            (info.classStudents || []).forEach(stUn => {
+                let stSubRaw = (grades[stUn] || {})[info.subject];
+                if (!stSubRaw) return;
+                let stNorm = normalizeSubjectGrade(stSubRaw);
+
+                let matchedEntry = null;
+                if (info.kind === 'ФБ') {
+                    matchedEntry = stNorm.formEntries.find(e => e.date === info.date) || stNorm.formEntries[stNorm.formEntries.length - 1];
+                } else if (info.kind === 'БЖБ') {
+                    matchedEntry = stNorm.bzhbEntries.find(e => (info.assessmentId && e.assessmentId === info.assessmentId) || e.date === info.date) || stNorm.bzhbEntries[0];
+                } else if (info.kind === 'ТЖБ') {
+                    matchedEntry = stNorm.tzhbEntries.find(e => (info.assessmentId && e.assessmentId === info.assessmentId) || e.date === info.date) || stNorm.tzhbEntries[0];
+                }
+
+                if (matchedEntry && matchedEntry.score !== undefined && matchedEntry.score !== '') {
+                    let scKey = Number(matchedEntry.score);
+                    distribution[scKey] = (distribution[scKey] || 0) + 1;
+                    totalPeersWithGrade++;
+                }
+            });
+
+            // Ensure current student's own score is represented
+            let myScoreNum = Number(info.score);
+            if (!distribution[myScoreNum]) {
+                distribution[myScoreNum] = 1;
+                totalPeersWithGrade++;
+            }
+
+            let sortedScores = Object.keys(distribution).map(Number).sort((a, b) => b - a);
+            let distRowsHtml = sortedScores.map(sc => {
+                let count = distribution[sc];
+                let isMyScore = sc === myScoreNum;
+                let badgeBg = isMyScore ? 'bg-emerald-700 text-white ring-2 ring-emerald-300' : 'bg-emerald-600/80 text-white';
+                return `
+                    <div class="flex items-center gap-3 py-1">
+                        <span class="w-10 h-8 rounded-xl ${badgeBg} font-black text-xs flex items-center justify-center shadow-xs">${sc}</span>
+                        <span class="text-xs font-bold text-slate-800">${count} оқушы ${isMyScore ? '<span class="text-[10px] text-emerald-700 font-extrabold">(Сіздің бағаңыз)</span>' : ''}</span>
+                    </div>
+                `;
+            }).join('');
+
+            let existing = document.getElementById('grade-analytics-modal');
+            if (existing) existing.remove();
+
+            let headerGrad = info.kind === 'ТЖБ' ? 'from-pink-600 to-rose-700' : (info.kind === 'БЖБ' ? 'from-amber-500 to-orange-600' : 'from-emerald-600 to-teal-700');
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="grade-analytics-modal" onclick="if(event.target.id==='grade-analytics-modal') this.remove()">
+                    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-white animate-fade">
+                        <div class="bg-gradient-to-r ${headerGrad} p-5 text-white relative">
+                            <button onclick="document.getElementById('grade-analytics-modal').remove()" class="w-8 h-8 rounded-xl bg-white/20 hover:bg-white/30 text-white font-black text-xs flex items-center justify-center absolute top-4 right-4">✕</button>
+                            <div class="text-xs font-bold text-white/90">Сабақ. ${dt.fullTitle} (${info.date})</div>
+                            <h3 class="text-xl font-black mt-1">${info.subject}</h3>
+                            <p class="text-xs text-white/90 mt-1">${info.topic}</p>
+                        </div>
+
+                        <div class="p-5 space-y-4">
+                            <div class="p-3 bg-slate-100/80 rounded-2xl border border-slate-200/70">
+                                <div class="text-[10px] font-bold text-slate-500 uppercase">Мұғалім</div>
+                                <div class="text-xs font-extrabold text-slate-900 mt-0.5">${info.teacherName}</div>
+                            </div>
+
+                            <div>
+                                <div class="text-xs font-extrabold text-slate-800 mb-2">Сабақ үшін баға</div>
+                                <div class="p-3 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-emerald-700 text-white font-black text-base flex items-center justify-center shadow">
+                                        ${info.score}/${info.max}
+                                    </div>
+                                    <div>
+                                        <div class="text-xs font-extrabold text-slate-900">${info.kindLabel}</div>
+                                        <div class="text-[11px] text-slate-600">${info.comment}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-200">
+                                <h4 class="text-sm font-black text-slate-900 text-center mb-3">Бағаларды салыстыру (${info.className})</h4>
+                                <div class="flex items-center justify-around gap-4 bg-slate-50/90 p-4 rounded-2xl border border-slate-200/70">
+                                    <div class="w-24 h-24 rounded-full border-[7px] border-emerald-500 flex flex-col items-center justify-center bg-white shadow-inner shrink-0">
+                                        <div class="text-base font-black text-slate-900">${info.score}/${info.max}</div>
+                                        <div class="text-[9px] font-bold text-slate-500 text-center leading-tight">Сіздің бағаңыз</div>
+                                    </div>
+                                    <div class="flex-1 space-y-1 max-h-40 overflow-y-auto">
+                                        ${distRowsHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
         async function renderTabContent() {
@@ -1913,7 +2463,7 @@
                                 <div class="flex items-center gap-1">
                                     <select id="admin_sched_teacher_${sIdx}" class="border rounded p-1 text-[11px] bg-white font-bold text-blue-700">
                                         <option value="">-- Мұғалімсіз --</option>
-                                        ${teachersList.map(t => `<option value="${t.name}" ${t.name === s.teacherName ? 'selected' : ''}>${t.name}</option>`).join('')}
+                                        ${teachersList.map(t => `<option value="${t.username}" ${(t.username === s.teacherUsername || t.name === s.teacherName) ? 'selected' : ''}>${t.name}</option>`).join('')}
                                     </select>
                                     <button onclick="adminSaveTeacherToSchedule(${sIdx})" class="px-2 py-1 bg-emerald-600 text-white rounded font-bold text-[10px]">Бекіту</button>
                                 </div>
@@ -1925,25 +2475,100 @@
                         </tr>
                     `).join('') : '<tr><td colspan="8" class="text-center text-slate-400 py-4">Кестелер тіркелмеген</td></tr>';
 
+                    let summativeRows = summativeAssessments.length > 0 ? summativeAssessments.map((sa, idx) => `
+                        <tr>
+                            <td><b>${sa.className}</b></td>
+                            <td><b>${sa.subject}</b></td>
+                            <td><span class="px-2 py-0.5 rounded font-black text-[10px] ${sa.type === 'ТЖБ' ? 'bg-pink-100 text-pink-700' : 'bg-amber-100 text-amber-800'}">${sa.type} бекітілген</span></td>
+                            <td class="font-bold">${sa.title}</td>
+                            <td class="font-bold text-blue-700">${sa.date}</td>
+                            <td class="font-extrabold">${sa.maxScore} балл</td>
+                            <td><button onclick="adminDeleteSummative(${idx})" class="px-2 py-0.5 bg-red-600 text-white rounded font-bold text-[10px]">Өшіру</button></td>
+                        </tr>
+                    `).join('') : '<tr><td colspan="7" class="text-center text-slate-400 py-4">БЖБ / ТЖБ кестесі әлі бекітілмеген</td></tr>';
+
                     panel.innerHTML = `
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📅 Сыныптарға сабақ кестесін жасау және Мұғалім тағайындау (Админ)</h3>
-                        <p class="text-xs text-slate-500 mb-3">Админ пәнге мұғалімді бекітеді/өзгертеді (жарияланғаннан кейін де өзгертуге болады). Ал сабақ тақырыбы мен үй тапсырмасын мұғалім өз кабинетінен жазады.</p>
-                        <div class="p-4 bg-slate-50 rounded-lg border max-w-lg space-y-3 mb-4">
-                            <label class="block text-[11px] font-bold uppercase text-slate-600">Сыныпты таңдаңыз:</label>
-                            <select id="sched-class" class="w-full border rounded p-2 text-xs bg-white font-bold text-blue-700">${classSelectOptions}</select>
-                            <label class="block text-[11px] font-bold uppercase text-slate-600">Апта күні:</label>
-                            <select id="sched-day" class="w-full border rounded p-2 text-xs bg-white font-bold">${daysList.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
-                            <label class="block text-[11px] font-bold uppercase text-slate-600">Пән:</label>
-                            <select id="sched-subject" class="w-full border rounded p-2 text-xs bg-white font-bold">${subjectsList.map(sub => `<option value="${sub}">${sub}</option>`).join('')}</select>
-                            <label class="block text-[11px] font-bold uppercase text-slate-600">Пән мұғалімі:</label>
-                            <select id="sched-teacher-select" class="w-full border rounded p-2 text-xs bg-white font-bold text-indigo-700">
-                                <option value="">-- Мұғалім таңдау --</option>
-                                ${teachersList.map(t => `<option value="${t.name}">${t.name} (@${t.username})</option>`).join('')}
-                            </select>
-                            <label class="block text-[11px] font-bold uppercase text-slate-600">Уақыты / Сабақ реті:</label>
-                            <input type="text" id="sched-time" placeholder="Мысалы: 08:30 - 09:15 (1-ші сабақ)" class="w-full border rounded p-2 text-xs bg-white">
-                            <button onclick="saveScheduleByAdmin()" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Кестені жариялау</button>
+                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📅 Сабақ кестесіне мұғалім бекіту және БЖБ / ТЖБ рұқсатын беру (Админ)</h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                            <div class="p-4 bg-slate-50 rounded-2xl border space-y-3">
+                                <h4 class="text-xs font-extrabold text-blue-900 uppercase">1. Сабақ кестесіне мұғалім бекіту</h4>
+                                <p class="text-[11px] text-slate-500">Мұғалімді бекіткен соң, оның журналында сол сынып, пән және сабақ күні автоматты түрде ашылады.</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Сынып:</label>
+                                        <select id="sched-class" class="w-full p-2 text-xs font-bold text-blue-700">${classSelectOptions}</select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Апта күні:</label>
+                                        <select id="sched-day" class="w-full p-2 text-xs font-bold">${daysList.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Пән:</label>
+                                    <select id="sched-subject" class="w-full p-2 text-xs font-bold">${subjectsList.map(sub => `<option value="${sub}">${sub}</option>`).join('')}</select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Пән мұғалімі:</label>
+                                    <select id="sched-teacher-select" class="w-full p-2 text-xs font-bold text-indigo-700">
+                                        <option value="">-- Мұғалім таңдау --</option>
+                                        ${teachersList.map(t => `<option value="${t.username}">${t.name} (@${t.username})</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Уақыты / Сабақ реті:</label>
+                                    <input type="text" id="sched-time" placeholder="Мысалы: 08:30 - 09:15 (1-ші сабақ)" class="w-full p-2 text-xs">
+                                </div>
+                                <button onclick="saveScheduleByAdmin()" class="w-full py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow">Кестені жариялау және мұғалімді бекіту</button>
+                            </div>
+
+                            <div class="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-3">
+                                <h4 class="text-xs font-extrabold text-amber-900 uppercase">2. БЖБ және ТЖБ күндерін бекіту (Рұқсат ашу)</h4>
+                                <p class="text-[11px] text-amber-800">Админ бекіткеннен кейін мұғалім мен оқушыға «БЖБ/ТЖБ бекітілген» хабарламасы көрінеді және мұғалімге баға қою бағаны ашылады.</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Сынып:</label>
+                                        <select id="sum-class" class="w-full p-2 text-xs font-bold text-blue-700">${classSelectOptions}</select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Пән:</label>
+                                        <select id="sum-subject" class="w-full p-2 text-xs font-bold">${subjectsList.map(sub => `<option value="${sub}">${sub}</option>`).join('')}</select>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Бағалау түрі:</label>
+                                        <select id="sum-type" class="w-full p-2 text-xs font-extrabold text-pink-700">
+                                            <option value="БЖБ">БЖБ</option>
+                                            <option value="ТЖБ">ТЖБ</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Өткізілетін күні:</label>
+                                        <input type="date" id="sum-date" value="2026-11-17" class="w-full p-2 text-xs font-bold">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Макс. балл:</label>
+                                        <input type="number" id="sum-max" value="15" class="w-full p-2 text-xs font-extrabold">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Атауы (Мысалы: БЖБ 1 немесе ТЖБ 1):</label>
+                                    <input type="text" id="sum-title" placeholder="БЖБ 1" class="w-full p-2 text-xs font-bold">
+                                </div>
+                                <button onclick="adminApproveSummative()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow">✓ БЖБ / ТЖБ бекіту</button>
+                            </div>
                         </div>
+
+                        <h4 class="text-xs font-extrabold text-slate-900 uppercase mb-2">Бекітілген БЖБ және ТЖБ тізімі</h4>
+                        <div class="overflow-x-auto mb-6">
+                            <table class="w-full gov-table">
+                                <thead><tr><th>Сынып</th><th>Пән</th><th>Мәртебесі</th><th>Атауы</th><th>Датасы</th><th>Макс. балл</th><th>Әрекет</th></tr></thead>
+                                <tbody>${summativeRows}</tbody>
+                            </table>
+                        </div>
+
+                        <h4 class="text-xs font-extrabold text-slate-900 uppercase mb-2">Барлық сабақ кестесі және бекітілген мұғалімдер</h4>
                         <div class="overflow-x-auto"><table class="w-full gov-table min-w-[750px]"><thead><tr><th>Сынып</th><th>Күні</th><th>Пән</th><th>Мұғалім</th><th>Тақырыбы</th><th>Үй жұмысы</th><th>Уақыты</th><th>Әрекет</th></tr></thead><tbody>${schedRows}</tbody></table></div>
                     `;
                 } else if (activeTab === 'admin_users') {
@@ -2138,56 +2763,245 @@
             }
             else if (currentUser.role === 'teacher') {
                 if (activeTab === 'teacher_journal') {
-                    let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
-                    let students = myClass ? users.filter(u => u.role === 'student' && (myClass.students || []).includes(u.username)) : [];
+                    let assignments = getTeacherAssignments(currentUser);
+                    if (assignments.length === 0) {
+                        panel.innerHTML = `
+                            <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📖 Бағалар журналы</h3>
+                            <div class="p-6 text-center bg-amber-50/80 border border-amber-300 rounded-2xl space-y-2">
+                                <div class="text-2xl">📅</div>
+                                <div class="text-xs font-extrabold text-amber-900">Сізге әлі сабақ кестесінде пән мен сынып бекітілмеген!</div>
+                                <p class="text-[11px] text-amber-800">Әкімші (Админ) өз панелінен сабақ кестесінде сізді сабаққа бекіткеннен кейін, қай сынып, қай күн екені көрініп, бағалау журналы автоматты түрде ашылады.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    if (!selectedTeacherAssignmentKey || !assignments.some(a => a.key === selectedTeacherAssignmentKey)) {
+                        selectedTeacherAssignmentKey = assignments[0].key;
+                    }
+                    let currentAssign = assignments.find(a => a.key === selectedTeacherAssignmentKey);
+                    selectedTeacherSubject = currentAssign.subject;
+
+                    let targetClassObj = classesList.find(c => c.name === currentAssign.className);
+                    let students = targetClassObj ? users.filter(u => u.role === 'student' && (targetClassObj.students || []).includes(u.username)) : [];
+
+                    // Approved BZhB and TZhB for this class & subject
+                    let approvedSummatives = summativeAssessments.filter(sa => sa.className === currentAssign.className && sa.subject === currentAssign.subject);
+                    let approvedBzhbList = approvedSummatives.filter(sa => sa.type === 'БЖБ');
+                    let approvedTzhbList = approvedSummatives.filter(sa => sa.type === 'ТЖБ');
+
+                    // Collect all formative dates across students in this class+subject
+                    let fbDatesSet = new Set();
+                    students.forEach(s => {
+                        let norm = normalizeSubjectGrade((grades[s.username] || {})[currentAssign.subject]);
+                        norm.formEntries.forEach(e => { if (e.date) fbDatesSet.add(e.date); });
+                    });
+                    let fbDates = Array.from(fbDatesSet).sort();
+
+                    // Dynamic columns for BilimClass-style Matrix
+                    let fbHeadersHtml = (!teacherJournalOnlySummative) ? fbDates.map(dStr => {
+                        let dt = getShortKazakhDate(dStr);
+                        return `
+                            <th class="bc-cell-fb min-w-[66px]">
+                                <div class="text-[10px] text-slate-800">${dt.ddmm}</div>
+                                <div class="mt-1 py-0.5 px-1 bg-emerald-600 text-white rounded text-[9px] font-black">ФБ</div>
+                            </th>
+                        `;
+                    }).join('') : '';
+
+                    let bzhbHeadersHtml = approvedBzhbList.map(sa => {
+                        let dt = getShortKazakhDate(sa.date);
+                        return `
+                            <th class="bc-cell-bzhb min-w-[76px]">
+                                <div class="text-[10px] text-amber-900 font-black">${sa.title}</div>
+                                <div class="text-[9px] text-slate-600">${dt.ddmm}</div>
+                                <div class="mt-0.5 py-0.5 px-1 bg-amber-600 text-white rounded text-[8px] font-extrabold">БЖБ бекітілген</div>
+                            </th>
+                        `;
+                    }).join('');
+
+                    let tzhbHeadersHtml = approvedTzhbList.map(sa => {
+                        let dt = getShortKazakhDate(sa.date);
+                        return `
+                            <th class="bc-cell-tzhb min-w-[76px]">
+                                <div class="text-[10px] text-pink-900 font-black">${sa.title}</div>
+                                <div class="text-[9px] text-slate-600">${dt.ddmm}</div>
+                                <div class="mt-0.5 py-0.5 px-1 bg-pink-600 text-white rounded text-[8px] font-extrabold">ТЖБ бекітілген</div>
+                            </th>
+                        `;
+                    }).join('');
+
+                    let hasAnySummative = approvedBzhbList.length > 0 || approvedTzhbList.length > 0;
+                    let lockedNoticeCol = !hasAnySummative ? `
+                        <th class="bg-slate-100/80 text-slate-400 min-w-[110px]">
+                            <div class="text-[9px] font-bold">БЖБ / ТЖБ</div>
+                            <div class="text-[8px] text-red-500 font-semibold">Админ бекітпеген</div>
+                        </th>
+                    ` : '';
+
+                    let matrixBodyHtml = students.length > 0 ? students.map((s, idx) => {
+                        let norm = normalizeSubjectGrade((grades[s.username] || {})[currentAssign.subject]);
+
+                        let fbCellsHtml = (!teacherJournalOnlySummative) ? fbDates.map(dStr => {
+                            let entry = norm.formEntries.find(e => e.date === dStr);
+                            return `
+                                <td onclick="openTeacherGradeCellModal('${s.username}', '${currentAssign.subject}', 'ФБ', '${dStr}', '', 10, 'Формативті бағалау')" class="bc-cell-fb text-center cursor-pointer hover:bg-blue-50/90 transition">
+                                    ${entry ? `<span class="inline-block px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-900 font-black">${entry.score}</span>` : '<span class="text-slate-300">+</span>'}
+                                </td>
+                            `;
+                        }).join('') : '';
+
+                        let bzhbCellsHtml = approvedBzhbList.map(sa => {
+                            let entry = norm.bzhbEntries.find(e => e.assessmentId === sa.id) || norm.bzhbEntries.find(e => e.date === sa.date);
+                            return `
+                                <td onclick="openTeacherGradeCellModal('${s.username}', '${currentAssign.subject}', 'БЖБ', '${sa.date}', '${sa.id}', ${sa.maxScore}, '${sa.title.replace(/'/g, '')}')" class="bc-cell-bzhb text-center cursor-pointer hover:bg-amber-100 transition">
+                                    ${entry ? `<span class="font-black text-amber-900">${entry.score}/${sa.maxScore}</span>` : '<span class="text-amber-400 font-bold text-[10px]">+ қою</span>'}
+                                </td>
+                            `;
+                        }).join('');
+
+                        let tzhbCellsHtml = approvedTzhbList.map(sa => {
+                            let entry = norm.tzhbEntries.find(e => e.assessmentId === sa.id) || norm.tzhbEntries.find(e => e.date === sa.date);
+                            return `
+                                <td onclick="openTeacherGradeCellModal('${s.username}', '${currentAssign.subject}', 'ТЖБ', '${sa.date}', '${sa.id}', ${sa.maxScore}, '${sa.title.replace(/'/g, '')}')" class="bc-cell-tzhb text-center cursor-pointer hover:bg-pink-100 transition">
+                                    ${entry ? `<span class="font-black text-pink-900">${entry.score}/${sa.maxScore}</span>` : '<span class="text-pink-400 font-bold text-[10px]">+ қою</span>'}
+                                </td>
+                            `;
+                        }).join('');
+
+                        let lockedCellHtml = !hasAnySummative ? `<td class="text-center text-[10px] text-slate-400">🔒 Құлыптаулы</td>` : '';
+                        let finalDisplay = norm.status || norm.final || 'Таңдалмады';
+
+                        return `
+                            <tr class="hover:bg-blue-50/40">
+                                <td class="bc-sticky-col-1 font-bold text-slate-600">${idx + 1}</td>
+                                <td class="bc-sticky-col-2 font-extrabold text-slate-900 text-left">
+                                    <div class="flex items-center justify-between gap-1">
+                                        <span>${s.name}</span>
+                                        <button onclick="openTeacherAddFBModal('${s.username}', '${currentAssign.subject}')" class="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-black" title="Жаңа ФБ бағасын қою">+ФБ</button>
+                                    </div>
+                                </td>
+                                ${fbCellsHtml}
+                                ${bzhbCellsHtml}
+                                ${tzhbCellsHtml}
+                                ${lockedCellHtml}
+                                <td class="bc-cell-calc text-center text-slate-700">${norm.fbPercent || 0}%</td>
+                                <td class="bc-cell-calc text-center text-amber-800">${norm.bzhbPercent || 0}%</td>
+                                <td class="bc-cell-calc text-center text-pink-800">${norm.tzhbPercent || 0}%</td>
+                                <td class="bc-cell-calc text-center text-emerald-800 font-black">${norm.percent || 0}%</td>
+                                <td class="bc-cell-calc text-center font-black text-blue-900">${norm.suggestedGrade}</td>
+                                <td class="text-center bg-white/90">
+                                    <button onclick="openTeacherFinalGradeModal('${s.username}', '${currentAssign.subject}', '${s.name.replace(/'/g, '')}', '${norm.final}', '${norm.status}')" class="px-2 py-1 rounded-lg border border-slate-300 bg-white hover:bg-blue-50 text-[10px] font-extrabold text-slate-800 w-full flex items-center justify-between">
+                                        <span>${finalDisplay}</span>
+                                        <span class="text-[8px] text-slate-400">▼</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('') : '<tr><td colspan="12" class="text-center text-slate-400 py-6">Бұл сыныпта әлі оқушылар тіркелмеген</td></tr>';
+
+                    let totalFbCols = (!teacherJournalOnlySummative) ? fbDates.length : 0;
+                    let totalSumCols = (approvedBzhbList.length + approvedTzhbList.length) || 1;
 
                     panel.innerHTML = `
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📖 Электронды журнал</h3>
-                        ${!myClass ? '<div class="p-4 bg-amber-50 text-amber-800 rounded text-xs mb-3 font-bold">⚠️ Назар аударыңыз: Сіз әлі сынып ашпадыңыз немесе әкімші сынып бекітпеді!</div>' : `
-                        <div class="p-3 bg-blue-50 border border-blue-200 rounded mb-3 text-xs text-blue-900 font-bold flex justify-between items-center">
-                            <span>Сыныбыңыз: <b class="text-indigo-900">${myClass.name}</b></span>
-                            <span>DCA Коды: <code class="bg-white px-2 py-1 rounded text-blue-700 font-extrabold border">${myClass.dcaCode}</code></span>
-                        </div>`}
-                        <div class="p-3 bg-slate-50 rounded border mb-3 flex items-center gap-3">
-                            <label class="text-xs font-bold uppercase text-slate-600">Пәнді таңдау:</label>
-                            <select id="selected-subject" onchange="updateSelectedSubject(this)" class="border rounded p-1.5 text-xs bg-white font-bold text-blue-700">
-                                ${subjectsList.map(sub => `<option value="${sub}" ${sub === selectedTeacherSubject ? 'selected' : ''}>${sub}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full gov-table">
-                                <thead>
-                                    <tr>
-                                        <th>Оқушы аты-жөні</th><th>Формативті (макс. 10)</th><th>БЖБ</th><th>ТЖБ</th>
-                                        <th>Пайыз (%)</th><th>Қорытынды баға</th><th>Әрекет</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${students.length > 0 ? students.map(s => {
-                                        let studentGrade = ((grades[s.username] || {})[selectedTeacherSubject]) || { form: '', bzhb: '', tzhb: '', final: '', percent: 0 };
-                                        return `
-                                            <tr>
-                                                <td class="font-bold text-left">${s.name}</td>
-                                                <td><input type="text" id="form_${s.username}" class="w-16 text-center border rounded py-1" placeholder="9/10" value="${studentGrade.form}"></td>
-                                                <td><input type="text" id="bzhb_${s.username}" class="w-20 text-center border rounded py-1 font-bold text-blue-600" placeholder="18/20" value="${studentGrade.bzhb}"></td>
-                                                <td><input type="text" id="tzhb_${s.username}" class="w-20 text-center border rounded py-1 font-bold text-indigo-600" placeholder="27/30" value="${studentGrade.tzhb}"></td>
-                                                <td class="font-extrabold text-amber-600 text-center">${studentGrade.percent || 0}%</td>
-                                                <td><input type="text" id="final_${s.username}" class="w-16 text-center border rounded py-1 font-extrabold text-emerald-600" placeholder="5" value="${studentGrade.final}"></td>
-                                                <td>
-                                                    <button onclick="calculateAndSaveGrade('${s.username}')" class="px-2.5 py-1 bg-blue-600 text-white rounded font-bold text-[10px] mr-1">Сақтау</button>
-                                                    <button onclick="deleteGradeRecord('${s.username}')" class="px-2.5 py-1 bg-red-100 text-red-600 rounded font-bold text-[10px]">Жою</button>
-                                                </td>
-                                            </tr>
-                                        `;
-                                    }).join('') : '<tr><td colspan="7" class="text-center text-slate-400 py-4">Бұл сыныпта әлі оқушылар жоқ</td></tr>'}
-                                </tbody>
-                            </table>
+                        <div class="${teacherJournalFullScreen ? 'fixed inset-0 z-50 bg-slate-50 p-4 overflow-auto' : ''}">
+                            <!-- Top BilimClass-style Header -->
+                            <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-200/80 pb-3 mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-1 bg-emerald-600 text-white rounded-xl font-black text-xs">Журнал</span>
+                                    <h3 class="text-sm font-extrabold text-slate-900">
+                                        Журнал — ${currentAssign.className}, ${currentAssign.subject}
+                                    </h3>
+                                    <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
+                                        📅 ${currentAssign.daysInfo}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[11px] font-bold text-slate-600">Журнал статусы: <b class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-lg">Ашық</b></span>
+                                    ${teacherJournalFullScreen ? `<button onclick="toggleTeacherJournalFullScreen()" class="px-3 py-1 bg-slate-800 text-white rounded-xl text-xs font-bold">✕ Кішірейту</button>` : ''}
+                                </div>
+                            </div>
+
+                            <!-- Assigned Class & Subject Selector Bar -->
+                            <div class="p-3 bg-slate-50/90 rounded-2xl border border-slate-200/80 mb-3 flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <div>
+                                        <label class="block text-[9px] font-bold uppercase text-slate-500">Бекітілген сынып және пән:</label>
+                                        <select onchange="selectTeacherAssignment(this.value)" class="p-1.5 text-xs font-extrabold text-blue-800">
+                                            ${assignments.map(a => `<option value="${a.key}" ${a.key === currentAssign.key ? 'selected' : ''}>${a.className} — ${a.subject} (${a.daysInfo})</option>`).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold uppercase text-slate-500">Тоқсан:</label>
+                                        <select onchange="teacherJournalTerm=this.value; renderTabContent()" class="p-1.5 text-xs font-bold">
+                                            <option value="1" ${teacherJournalTerm === '1' ? 'selected' : ''}>1 тоқсан</option>
+                                            <option value="2" ${teacherJournalTerm === '2' ? 'selected' : ''}>2 тоқсан</option>
+                                            <option value="3" ${teacherJournalTerm === '3' ? 'selected' : ''}>3 тоқсан</option>
+                                            <option value="4" ${teacherJournalTerm === '4' ? 'selected' : ''}>4 тоқсан</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center gap-2 pt-3">
+                                        <label class="flex items-center gap-1.5 text-[11px] font-bold text-slate-700 cursor-pointer">
+                                            <input type="checkbox" ${teacherJournalOnlySummative ? 'checked' : ''} onchange="teacherJournalOnlySummative=this.checked; renderTabContent()">
+                                            БЖБ, ТЖБ, Қорытынды бағаларды ғана көрсету
+                                        </label>
+                                        <button onclick="toggleTeacherJournalFullScreen()" class="px-2.5 py-1 bg-white border rounded-xl text-[10px] font-bold text-slate-700 hover:bg-slate-100">
+                                            ⛶ Журналды бүкіл экранға ашу
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="openBulkAddFBDateModal('${currentAssign.className}', '${currentAssign.subject}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow">
+                                        + Сабақ күнін / ФБ бағасын қосу
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Status Indicator for Approved BZhB / TZhB -->
+                            <div class="mb-3 flex flex-wrap items-center gap-2 text-[11px]">
+                                <span class="font-bold text-slate-600">Жиынтық бағалау рұқсаты:</span>
+                                ${approvedSummatives.length > 0 ? approvedSummatives.map(sa => `
+                                    <span class="px-2.5 py-0.5 rounded-lg font-extrabold ${sa.type === 'ТЖБ' ? 'bg-pink-100 text-pink-800 border border-pink-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
+                                        ✓ ${sa.type} бекітілген (${sa.title} — ${sa.date})
+                                    </span>
+                                `).join('') : '<span class="px-2.5 py-0.5 rounded-lg bg-red-50 text-red-700 border border-red-200 font-bold">🔒 Админ БЖБ / ТЖБ күнін әлі бекітпеді (баға қою жабық)</span>'}
+                            </div>
+
+                            <!-- BilimClass Matrix Table -->
+                            <div class="overflow-x-auto rounded-2xl border border-slate-300/80 shadow-xs bg-white/80">
+                                <table class="bc-matrix-table">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" class="bc-sticky-col-1">№</th>
+                                            <th rowspan="2" class="bc-sticky-col-2 text-left">Аты-жөні</th>
+                                            ${totalFbCols > 0 ? `<th colspan="${totalFbCols}" class="bg-slate-100 text-slate-800">Формативті бағалау (Күндер бойынша)</th>` : ''}
+                                            <th colspan="${totalSumCols}" class="bg-amber-50 text-amber-900">Жиынт. бағ. (БЖБ / ТЖБ)</th>
+                                            <th colspan="6" class="bg-emerald-50 text-emerald-900">Кезең бойынша бағалауды есептеу</th>
+                                        </tr>
+                                        <tr>
+                                            ${fbHeadersHtml}
+                                            ${bzhbHeadersHtml}
+                                            ${tzhbHeadersHtml}
+                                            ${lockedNoticeCol}
+                                            <th class="bc-cell-calc min-w-[50px]">% ФБ</th>
+                                            <th class="bc-cell-calc min-w-[50px]">% БЖБ</th>
+                                            <th class="bc-cell-calc min-w-[50px]">% ТЖБ</th>
+                                            <th class="bc-cell-calc min-w-[55px]">% Сома</th>
+                                            <th class="bc-cell-calc min-w-[65px]">Ұсынылатын баға</th>
+                                            <th class="bg-slate-100 min-w-[125px]">Қорытынды баға</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${matrixBodyHtml}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     `;
                 } else if (activeTab === 'teacher_schedule') {
                     let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
                     let myClassName = myClass ? myClass.name : '';
-                    let teacherSchedules = schedules.filter(s => s.className === myClassName || s.teacherName === currentUser.name);
+                    let teacherSchedules = schedules.filter(s => s.className === myClassName || s.teacherName === currentUser.name || s.teacherUsername === currentUser.username);
 
                     let schedRows = teacherSchedules.length > 0 ? teacherSchedules.map((s, idx) => {
                         let realIndex = schedules.indexOf(s);
@@ -2372,37 +3186,11 @@
             else if (currentUser.role === 'parent') {
                 let childUsername = currentUser.parentOf;
                 let childObj = users.find(u => u.username === childUsername);
-                let childName = childObj ? childObj.name : 'Бекітілген бала табылмады';
-
                 let assignedClass = classesList.find(c => (c.students || []).includes(childUsername));
                 let classNameStr = assignedClass ? assignedClass.name : 'Сыныпқа қосылмаған';
 
                 if (activeTab === 'parent_grades') {
-                    let childGrades = grades[childUsername] || {};
-                    let childAtt = (attendance[childUsername] || {})['today'] || '-';
-                    let gradeRows = Object.keys(childGrades).length > 0 ? Object.keys(childGrades).map(sub => `
-                        <tr>
-                            <td class="font-bold text-left">${sub}</td>
-                            <td>${childGrades[sub].form}</td>
-                            <td>${childGrades[sub].bzhb}</td>
-                            <td>${childGrades[sub].tzhb}</td>
-                            <td class="font-extrabold text-amber-600">${childGrades[sub].percent}%</td>
-                            <td class="font-bold text-emerald-600">${childGrades[sub].final}</td>
-                        </tr>
-                    `).join('') : '<tr><td colspan="6" class="text-center text-slate-400 py-4">Баланың бағалары әлі қойылмаған</td></tr>';
-
-                    panel.innerHTML = `
-                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-3 text-xs text-amber-900 font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                            <span>👨‍👩‍👧 Бала: <b class="text-indigo-900 text-sm">${childName}</b> | Сыныбы: <span class="text-blue-700">${classNameStr}</span></span>
-                            <span class="bg-white px-2 py-1 rounded border text-emerald-700 font-extrabold">Қатысуы: [ ${childAtt} ]</span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full gov-table">
-                                <thead><tr><th>Пән</th><th>Формативті (10 б.)</th><th>БЖБ</th><th>ТЖБ</th><th>Пайыз (%)</th><th>Қорытынды баға</th></tr></thead>
-                                <tbody>${gradeRows}</tbody>
-                            </table>
-                        </div>
-                    `;
+                    panel.innerHTML = renderBilimClassStudentGradesUI(childUsername, childObj, assignedClass, true);
                 } else if (activeTab === 'parent_id') {
                     let childCard = bilimCards[childUsername];
                     panel.innerHTML = `
@@ -2410,6 +3198,7 @@
                         ${renderSingleIDCardHTML(childCard, childObj)}
                     `;
                 } else if (activeTab === 'parent_sub') {
+                    let childName = childObj ? childObj.name : 'Бекітілген бала табылмады';
                     let subInfo = bilimSubscriptions[childUsername] || { signed: false, history: [] };
                     let currentStr = getCurrentFormattedDateTime();
                     let startWin = subscriptionSettings.startDate;
@@ -2484,36 +3273,7 @@
                         `;
                         return;
                     }
-
-                    let myGrades = grades[currentUser.username] || {};
-                    let myAtt = (attendance[currentUser.username] || {})['today'] || '-';
-                    let gradeRows = Object.keys(myGrades).length > 0 ? Object.keys(myGrades).map(sub => `
-                        <tr>
-                            <td class="font-bold text-left">${sub}</td>
-                            <td>${myGrades[sub].form}</td>
-                            <td>${myGrades[sub].bzhb}</td>
-                            <td>${myGrades[sub].tzhb}</td>
-                            <td class="font-extrabold text-amber-600">${myGrades[sub].percent}%</td>
-                            <td class="font-bold text-emerald-600">${myGrades[sub].final}</td>
-                        </tr>
-                    `).join('') : '<tr><td colspan="6" class="text-center text-slate-400 py-4">Бағалар әлі қойылмаған</td></tr>';
-
-                    panel.innerHTML = `
-                        <div class="flex justify-between items-center mb-3 border-b pb-2">
-                            <h3 class="text-sm font-extrabold text-slate-900">📊 Менің бағаларым</h3>
-                            <button onclick="downloadPDFReport()" class="px-3 py-1.5 bg-indigo-600 text-white rounded text-xs font-bold shadow-xs">📥 PDF жүктеу</button>
-                        </div>
-                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg mb-3 text-xs text-blue-900 font-bold flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                            <span>Сыныбыңыз: <b class="text-indigo-900 text-sm">${studentClass.name}</b> | Сынып жетекшісі: <b class="text-blue-700 underline">${studentClass.teacher}</b></span>
-                            <span>Бүгінгі қатысу: <span class="text-emerald-700 font-extrabold text-sm">[ ${myAtt} ]</span></span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full gov-table">
-                                <thead><tr><th>Пән</th><th>Формативті (10 б.)</th><th>БЖБ</th><th>ТЖБ</th><th>Пайыз (%)</th><th>Қорытынды</th></tr></thead>
-                                <tbody>${gradeRows}</tbody>
-                            </table>
-                        </div>
-                    `;
+                    panel.innerHTML = renderBilimClassStudentGradesUI(currentUser.username, currentUser, studentClass, false);
                 } else if (activeTab === 'student_test') {
                     let availableTests = bilimTests.filter(t => t.className === (studentClass?.name || ''));
 
@@ -2593,6 +3353,448 @@
                     `;
                 }
             }
+        }
+
+        /* Teacher Journal Matrix Actions & Modals */
+        function selectTeacherAssignment(key) {
+            selectedTeacherAssignmentKey = key;
+            renderTabContent();
+        }
+
+        function toggleTeacherJournalFullScreen() {
+            teacherJournalFullScreen = !teacherJournalFullScreen;
+            renderTabContent();
+        }
+
+        function openTeacherAddFBModal(studentUsername, subject) {
+            let stObj = users.find(u => u.username === studentUsername);
+            let todayIso = new Date().toISOString().split('T')[0];
+
+            let existing = document.getElementById('teacher-grade-modal');
+            if (existing) existing.remove();
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="teacher-grade-modal">
+                    <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full space-y-3 border">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">📝 Формативті баға қою</h3>
+                            <button onclick="document.getElementById('teacher-grade-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
+                        </div>
+                        <div class="text-xs font-bold text-blue-900">${stObj ? stObj.name : studentUsername} — ${subject}</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Баға қойылған датасы:</label>
+                                <input type="date" id="tg-date" value="${todayIso}" class="w-full p-2 text-xs font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Балл (1 - 10):</label>
+                                <input type="number" id="tg-score" min="1" max="10" placeholder="10" class="w-full p-2 text-xs font-black text-emerald-700">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Сабақ тақырыбы:</label>
+                            <input type="text" id="tg-topic" placeholder="Мысалы: Жылу қозғалтқыштары..." class="w-full p-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Пікір (міндетті емес):</label>
+                            <input type="text" id="tg-comment" placeholder="Жарайсың!" class="w-full p-2 text-xs">
+                        </div>
+                        <button onclick="saveTeacherGradeCell('${studentUsername}', '${subject}', 'ФБ', '', 10, 'Формативті бағалау')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow">💾 Бағаны сақтау</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function openTeacherGradeCellModal(studentUsername, subject, kind, dateStr, assessmentId, maxScore, title) {
+            let stObj = users.find(u => u.username === studentUsername);
+            let norm = normalizeSubjectGrade((grades[studentUsername] || {})[subject]);
+            let existingEntry = null;
+
+            if (kind === 'ФБ') {
+                existingEntry = norm.formEntries.find(e => e.date === dateStr);
+            } else if (kind === 'БЖБ') {
+                existingEntry = norm.bzhbEntries.find(e => (assessmentId && e.assessmentId === assessmentId) || e.date === dateStr);
+            } else if (kind === 'ТЖБ') {
+                existingEntry = norm.tzhbEntries.find(e => (assessmentId && e.assessmentId === assessmentId) || e.date === dateStr);
+            }
+
+            let existing = document.getElementById('teacher-grade-modal');
+            if (existing) existing.remove();
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="teacher-grade-modal">
+                    <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full space-y-3 border">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">${kind === 'ФБ' ? '📝 Формативті баға' : `📌 ${title} (${kind})`}</h3>
+                            <button onclick="document.getElementById('teacher-grade-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
+                        </div>
+                        <div class="text-xs font-bold text-blue-900">${stObj ? stObj.name : studentUsername} — ${subject}</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Датасы:</label>
+                                <input type="date" id="tg-date" value="${dateStr}" ${kind !== 'ФБ' ? 'readonly' : ''} class="w-full p-2 text-xs font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Балл (макс. ${maxScore}):</label>
+                                <input type="number" id="tg-score" min="0" max="${maxScore}" value="${existingEntry ? existingEntry.score : ''}" placeholder="0 - ${maxScore}" class="w-full p-2 text-xs font-black text-emerald-700">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Тақырыбы:</label>
+                            <input type="text" id="tg-topic" value="${existingEntry ? (existingEntry.topic || title) : title}" class="w-full p-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Мұғалім пікірі:</label>
+                            <input type="text" id="tg-comment" value="${existingEntry ? (existingEntry.comment || '') : ''}" placeholder="Пікір..." class="w-full p-2 text-xs">
+                        </div>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="saveTeacherGradeCell('${studentUsername}', '${subject}', '${kind}', '${assessmentId}', ${maxScore}, '${title.replace(/'/g, '')}')" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow">💾 Сақтау</button>
+                            ${existingEntry ? `<button onclick="deleteTeacherGradeEntry('${studentUsername}', '${subject}', '${kind}', '${dateStr}', '${assessmentId}')" class="px-3 py-2.5 bg-red-600 text-white rounded-xl font-bold text-xs">Өшіру</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        async function saveTeacherGradeCell(studentUsername, subject, kind, assessmentId, maxScore, title) {
+            let dateVal = document.getElementById('tg-date').value;
+            let scoreVal = parseFloat(document.getElementById('tg-score').value);
+            let topicVal = document.getElementById('tg-topic').value.trim();
+            let commentVal = document.getElementById('tg-comment').value.trim();
+
+            if (!dateVal || isNaN(scoreVal) || scoreVal < 0 || scoreVal > maxScore) {
+                showIosToast(false, "Қате балл!", `0 мен ${maxScore} аралығындағы балл енгізіңіз!`);
+                return;
+            }
+
+            let modal = document.getElementById('teacher-grade-modal');
+            if (modal) modal.remove();
+
+            showSpinner("Баға сақталуда...");
+            await loadDataFromCloud(true);
+
+            if (!grades[studentUsername]) grades[studentUsername] = {};
+            let norm = normalizeSubjectGrade(grades[studentUsername][subject]);
+
+            if (kind === 'ФБ') {
+                let idx = norm.formEntries.findIndex(e => e.date === dateVal);
+                let item = {
+                    id: idx !== -1 ? norm.formEntries[idx].id : 'fb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+                    score: scoreVal,
+                    max: 10,
+                    date: dateVal,
+                    topic: topicVal || 'Формативті бағалау',
+                    comment: commentVal
+                };
+                if (idx !== -1) norm.formEntries[idx] = item;
+                else norm.formEntries.push(item);
+            } else if (kind === 'БЖБ') {
+                let idx = norm.bzhbEntries.findIndex(e => (assessmentId && e.assessmentId === assessmentId) || e.date === dateVal);
+                let item = {
+                    id: idx !== -1 ? norm.bzhbEntries[idx].id : 'bzhb_' + Date.now(),
+                    assessmentId: assessmentId,
+                    title: title || 'БЖБ',
+                    score: scoreVal,
+                    max: maxScore,
+                    date: dateVal,
+                    topic: topicVal || title,
+                    comment: commentVal
+                };
+                if (idx !== -1) norm.bzhbEntries[idx] = item;
+                else norm.bzhbEntries.push(item);
+            } else if (kind === 'ТЖБ') {
+                let idx = norm.tzhbEntries.findIndex(e => (assessmentId && e.assessmentId === assessmentId) || e.date === dateVal);
+                let item = {
+                    id: idx !== -1 ? norm.tzhbEntries[idx].id : 'tzhb_' + Date.now(),
+                    assessmentId: assessmentId,
+                    title: title || 'ТЖБ',
+                    score: scoreVal,
+                    max: maxScore,
+                    date: dateVal,
+                    topic: topicVal || title,
+                    comment: commentVal
+                };
+                if (idx !== -1) norm.tzhbEntries[idx] = item;
+                else norm.tzhbEntries.push(item);
+            }
+
+            let metrics = computeSubjectMetrics(norm.formEntries, norm.bzhbEntries, norm.tzhbEntries);
+            let latestFb = norm.formEntries[norm.formEntries.length - 1];
+            let latestB = norm.bzhbEntries[norm.bzhbEntries.length - 1];
+            let latestT = norm.tzhbEntries[norm.tzhbEntries.length - 1];
+
+            grades[studentUsername][subject] = {
+                formEntries: norm.formEntries,
+                bzhbEntries: norm.bzhbEntries,
+                tzhbEntries: norm.tzhbEntries,
+                form: latestFb ? `${latestFb.score}/10` : '',
+                bzhb: latestB ? `${latestB.score}/${latestB.max}` : '',
+                tzhb: latestT ? `${latestT.score}/${latestT.max}` : '',
+                percent: metrics.totalPercent,
+                final: norm.final,
+                status: norm.status,
+                updatedAt: dateVal
+            };
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `Баға (${scoreVal}/${maxScore}) ${dateVal} күніне сақталды!`);
+            renderTabContent();
+        }
+
+        async function deleteTeacherGradeEntry(studentUsername, subject, kind, dateStr, assessmentId) {
+            let modal = document.getElementById('teacher-grade-modal');
+            if (modal) modal.remove();
+
+            showSpinner("Өшірілуде...");
+            await loadDataFromCloud(true);
+            if (grades[studentUsername] && grades[studentUsername][subject]) {
+                let norm = normalizeSubjectGrade(grades[studentUsername][subject]);
+                if (kind === 'ФБ') {
+                    norm.formEntries = norm.formEntries.filter(e => e.date !== dateStr);
+                } else if (kind === 'БЖБ') {
+                    norm.bzhbEntries = norm.bzhbEntries.filter(e => !((assessmentId && e.assessmentId === assessmentId) || e.date === dateStr));
+                } else if (kind === 'ТЖБ') {
+                    norm.tzhbEntries = norm.tzhbEntries.filter(e => !((assessmentId && e.assessmentId === assessmentId) || e.date === dateStr));
+                }
+                let metrics = computeSubjectMetrics(norm.formEntries, norm.bzhbEntries, norm.tzhbEntries);
+                grades[studentUsername][subject] = {
+                    ...grades[studentUsername][subject],
+                    formEntries: norm.formEntries,
+                    bzhbEntries: norm.bzhbEntries,
+                    tzhbEntries: norm.tzhbEntries,
+                    percent: metrics.totalPercent
+                };
+                await saveDataToCloud();
+            }
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Баға өшірілді.");
+            renderTabContent();
+        }
+
+        function openBulkAddFBDateModal(className, subject) {
+            let targetClassObj = classesList.find(c => c.name === className);
+            let students = targetClassObj ? users.filter(u => u.role === 'student' && (targetClassObj.students || []).includes(u.username)) : [];
+            if (students.length === 0) {
+                showIosToast(false, "Оқушылар жоқ!", "Бұл сыныпта әлі оқушылар тіркелмеген.");
+                return;
+            }
+            let todayIso = new Date().toISOString().split('T')[0];
+
+            let existing = document.getElementById('bulk-fb-modal');
+            if (existing) existing.remove();
+
+            let rowsHtml = students.map(s => `
+                <div class="flex items-center justify-between gap-2 py-1.5 border-b border-slate-100 text-xs">
+                    <span class="font-bold text-slate-800">${s.name}</span>
+                    <input type="number" id="bulk_sc_${s.username}" min="1" max="10" placeholder="1-10" class="w-16 p-1 text-center font-black text-emerald-700">
+                </div>
+            `).join('');
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="bulk-fb-modal">
+                    <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-md w-full space-y-3 border max-h-[90vh] overflow-y-auto">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">+ Сабақ күні және ФБ бағалары</h3>
+                            <button onclick="document.getElementById('bulk-fb-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Сабақ күні:</label>
+                                <input type="date" id="bulk-fb-date" value="${todayIso}" class="w-full p-2 text-xs font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Сабақ тақырыбы:</label>
+                                <input type="text" id="bulk-fb-topic" placeholder="Сабақ тақырыбы" class="w-full p-2 text-xs">
+                            </div>
+                        </div>
+                        <div class="space-y-1 max-h-60 overflow-y-auto pr-1">
+                            ${rowsHtml}
+                        </div>
+                        <button onclick="saveBulkFBGrades('${className}', '${subject}')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow">💾 Барлық бағаны сақтау</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        async function saveBulkFBGrades(className, subject) {
+            let dateVal = document.getElementById('bulk-fb-date').value;
+            let topicVal = document.getElementById('bulk-fb-topic').value.trim() || 'Сабақ бағасы';
+            if (!dateVal) {
+                showIosToast(false, "Дата таңдаңыз!", "Сабақ күнін көрсетіңіз!");
+                return;
+            }
+
+            let targetClassObj = classesList.find(c => c.name === className);
+            let students = targetClassObj ? users.filter(u => u.role === 'student' && (targetClassObj.students || []).includes(u.username)) : [];
+
+            let modal = document.getElementById('bulk-fb-modal');
+            if (modal) modal.remove();
+
+            showSpinner("Бағалар сақталуда...");
+            await loadDataFromCloud(true);
+
+            let savedCount = 0;
+            students.forEach(s => {
+                let inp = document.getElementById(`bulk_sc_${s.username}`);
+                if (!inp) return;
+                let val = parseFloat(inp.value);
+                if (!isNaN(val) && val >= 1 && val <= 10) {
+                    if (!grades[s.username]) grades[s.username] = {};
+                    let norm = normalizeSubjectGrade(grades[s.username][subject]);
+                    let idx = norm.formEntries.findIndex(e => e.date === dateVal);
+                    let item = {
+                        id: idx !== -1 ? norm.formEntries[idx].id : 'fb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+                        score: val,
+                        max: 10,
+                        date: dateVal,
+                        topic: topicVal,
+                        comment: ''
+                    };
+                    if (idx !== -1) norm.formEntries[idx] = item;
+                    else norm.formEntries.push(item);
+
+                    let metrics = computeSubjectMetrics(norm.formEntries, norm.bzhbEntries, norm.tzhbEntries);
+                    grades[s.username][subject] = {
+                        ...grades[s.username][subject],
+                        formEntries: norm.formEntries,
+                        bzhbEntries: norm.bzhbEntries,
+                        tzhbEntries: norm.tzhbEntries,
+                        form: `${val}/10`,
+                        percent: metrics.totalPercent,
+                        final: norm.final,
+                        status: norm.status,
+                        updatedAt: dateVal
+                    };
+                    savedCount++;
+                }
+            });
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `${savedCount} оқушыға баға қойылды!`);
+            renderTabContent();
+        }
+
+        /* BilimClass-Style Final Grade & Attestation Dropdown Modal */
+        function openTeacherFinalGradeModal(studentUsername, subject, studentName, currentFinal, currentStatus) {
+            let existing = document.getElementById('final-grade-modal');
+            if (existing) existing.remove();
+
+            let options = [
+                { val: '5', label: 'Бағалау: 5', isGrade: true },
+                { val: '4', label: 'Бағалау: 4', isGrade: true },
+                { val: '3', label: 'Бағалау: 3', isGrade: true },
+                { val: '2', label: 'Бағалау: 2', isGrade: true },
+                { val: 'Уақытша аттест. жоқ', label: 'Уақытша аттест. жоқ', isGrade: false },
+                { val: 'Аттест. жоқ', label: 'Аттест. жоқ', isGrade: false },
+                { val: 'Босатылған', label: 'Босатылған', isGrade: false },
+                { val: '', label: 'Таңдалмады', isGrade: false }
+            ];
+
+            let activeVal = currentStatus || currentFinal || '';
+            let btnsHtml = options.map(opt => {
+                let isSelected = activeVal === opt.val;
+                return `
+                    <button onclick="saveTeacherFinalGrade('${studentUsername}', '${subject}', '${opt.val}', ${opt.isGrade})" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-50 hover:bg-blue-50 text-slate-800'}">
+                        <span>${opt.label}</span>
+                        ${isSelected ? '<span>✓</span>' : ''}
+                    </button>
+                `;
+            }).join('');
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="final-grade-modal" onclick="if(event.target.id==='final-grade-modal') this.remove()">
+                    <div class="bg-white p-5 rounded-3xl shadow-2xl max-w-xs w-full space-y-2 border">
+                        <div class="flex justify-between items-center border-b pb-2 mb-1">
+                            <div>
+                                <div class="text-xs font-extrabold text-slate-900">Қорытынды баға</div>
+                                <div class="text-[10px] text-slate-500 font-semibold">${studentName} — ${subject}</div>
+                            </div>
+                            <button onclick="document.getElementById('final-grade-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
+                        </div>
+                        <div class="space-y-1.5">
+                            ${btnsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        async function saveTeacherFinalGrade(studentUsername, subject, val, isGrade) {
+            let modal = document.getElementById('final-grade-modal');
+            if (modal) modal.remove();
+
+            showSpinner("Қорытынды баға сақталуда...");
+            await loadDataFromCloud(true);
+
+            if (!grades[studentUsername]) grades[studentUsername] = {};
+            let norm = normalizeSubjectGrade(grades[studentUsername][subject]);
+
+            grades[studentUsername][subject] = {
+                ...grades[studentUsername][subject],
+                formEntries: norm.formEntries,
+                bzhbEntries: norm.bzhbEntries,
+                tzhbEntries: norm.tzhbEntries,
+                percent: norm.percent,
+                final: isGrade ? val : '',
+                status: !isGrade ? val : ''
+            };
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Қорытынды баға бекітілді!");
+            renderTabContent();
+        }
+
+        /* Admin Approve / Delete Summative Assessments (БЖБ / ТЖБ) */
+        async function adminApproveSummative() {
+            let className = document.getElementById('sum-class').value;
+            let subject = document.getElementById('sum-subject').value;
+            let type = document.getElementById('sum-type').value;
+            let dateVal = document.getElementById('sum-date').value;
+            let maxScore = parseInt(document.getElementById('sum-max').value) || (type === 'ТЖБ' ? 25 : 15);
+            let title = document.getElementById('sum-title').value.trim() || `${type} 1`;
+
+            if (!className || !subject || !dateVal) {
+                showIosToast(false, "Толық емес!", "Сынып, пән және датаны таңдаңыз!");
+                return;
+            }
+
+            showSpinner("БЖБ / ТЖБ бекітілуде...");
+            await loadDataFromCloud(true);
+
+            summativeAssessments.push({
+                id: 'sum_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+                className,
+                subject,
+                type,
+                title,
+                date: dateVal,
+                maxScore,
+                approvedBy: currentUser.username,
+                approvedAt: getCurrentDateDDMMYYYY()
+            });
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "✓ Бекітілді!", `${className} — ${subject} (${type}) бекітілді! Мұғалім мен оқушыға көрінеді.`);
+            renderTabContent();
+        }
+
+        async function adminDeleteSummative(idx) {
+            if (!confirm("Бұл БЖБ / ТЖБ рұқсатын өшіргіңіз келе ме?")) return;
+            showSpinner("Өшірілуде...");
+            await loadDataFromCloud(true);
+            summativeAssessments.splice(idx, 1);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Жиынтық бағалау кестеден өшірілді.");
+            renderTabContent();
         }
 
         /* Admin Cooker Menu Management (Create, Configure/Edit, Delete) */
@@ -3077,276 +4279,165 @@
         }
 
         async function verifyTopUpSms() {
-            let codeInput = document.getElementById('topup-sms-input').value.trim();
-            document.getElementById('topup-modal-3').remove();
-
-            if (codeInput !== window.tempSmsCode) {
-                showIosToast(false, "Сәтсіз!", "SMS код дұрыс емес!");
+            let entered = document.getElementById('topup-sms-input').value.trim();
+            if (entered !== window.tempSmsCode) {
+                showIosToast(false, "Сәтсіз!", "Қате SMS коды!");
                 return;
             }
-
-            showSpinner("Төлем өңделуде...");
-            await loadDataFromCloud(true);
-            let sum = Number(window.tempTopUpSum || 0);
+            document.getElementById('topup-modal-3').remove();
+            showSpinner("Шот толтырылуда...");
+            let sum = window.tempTopUpSum;
             bPayWallets[currentUser.username] = Number(bPayWallets[currentUser.username] || 0) + sum;
-
             bPayTransactions.unshift({
                 username: currentUser.username,
-                serviceName: 'Картаны толтыру (B-Pay)',
+                serviceName: 'B-Pay картасын толтыру',
                 amount: sum,
                 date: getCurrentDateDDMMYYYY(),
                 status: 'Сәтті'
             });
-
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "✓ Сәтті!", `Баланс ${sum} ₸ толықтырылды!`);
+            showIosToast(true, "Сәтті!", `Баланс +${sum} ₸ толтырылды!`);
             renderTabContent();
         }
 
         async function transferToChild() {
-            let sum = parseFloat(document.getElementById('child-transfer-amount').value) || 0;
             let childUsername = currentUser.parentOf;
-
             if (!childUsername) {
-                showIosToast(false, "Сәтсіз!", "Бекітілген бала жоқ!");
+                showIosToast(false, "Сәтсіз!", "Бекітілген бала табылмады!");
                 return;
             }
-
-            showSpinner("Аударым орындалуда...");
-            await loadDataFromCloud(true);
+            let sum = parseFloat(document.getElementById('child-transfer-amount').value) || 0;
             let parentBal = Number(bPayWallets[currentUser.username] || 0);
-
             if (sum <= 0 || parentBal < sum) {
-                hideSpinner();
                 showIosToast(false, "Сәтсіз!", "Қаражат жеткіліксіз немесе сома қате!");
                 return;
             }
-
+            showSpinner("Баланың шотына аударылуда...");
             bPayWallets[currentUser.username] = parentBal - sum;
             bPayWallets[childUsername] = Number(bPayWallets[childUsername] || 0) + sum;
-
             bPayTransactions.unshift({
                 username: childUsername,
-                serviceName: `Ата-анадан аударым (${currentUser.name})`,
+                serviceName: 'Ата-анадан түсім',
                 amount: sum,
                 date: getCurrentDateDDMMYYYY(),
                 status: 'Сәтті'
             });
-
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "✓ Сәтті!", `Баланың шотына ${sum} ₸ аударылды!`);
+            showIosToast(true, "Сәтті!", `Баланың шотына ${sum} ₸ аударылды!`);
             renderTabContent();
         }
 
         function openHoldingModal(holdingId) {
             let h = schoolHoldings.find(x => x.id === holdingId);
             if (!h) return;
-
             let modalHtml = `
-                <div class="ios-modal-backdrop" id="holding-modal">
-                    <div class="bg-white p-5 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto space-y-3 relative border">
-                        <h3 class="text-sm font-extrabold text-blue-900 border-b pb-2">${h.name} (${h.type})</h3>
-                        <div class="text-xs text-slate-700 space-y-1">
-                            <div><b>Мектеп:</b> ${h.school}</div>
-                            <div><b>Басшысы:</b> ${h.head}</div>
-                            <div><b>Ай сайынғы төлем:</b> <span class="text-emerald-700 font-extrabold">${h.amount} ₸</span></div>
-                            <div class="pt-1"><b>Сипаттамасы:</b> ${h.desc}</div>
+                <div class="ios-modal-backdrop" id="holding-sub-modal">
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full space-y-3 border">
+                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2">${h.name} — Жазылым шарты</h3>
+                        <div class="text-xs text-slate-600 space-y-2 max-h-48 overflow-y-auto p-2 bg-slate-50 rounded">
+                            <p><b>Оферта:</b> ${h.oferta || 'Көрсетілмеген'}</p>
+                            <p><b>Саясат шарттары:</b> ${h.policy || 'Көрсетілмеген'}</p>
                         </div>
-                        <div class="p-3 bg-slate-50 border rounded-lg text-[11px] text-slate-600 max-h-28 overflow-y-auto space-y-2">
-                            <div><b>Оферта шарттары:</b> ${h.oferta}</div>
-                            <div><b>Условия политики:</b> ${h.policy}</div>
-                        </div>
-
-                        <div class="space-y-1.5 pt-1">
-                            <div class="flex justify-between items-center">
-                                <label class="text-[11px] font-extrabold text-slate-800">✍️ Шарттармен таныстым, қолтаңбаңызды салыңыз:</label>
-                                <button type="button" onclick="clearSignatureCanvas('sub-sig-canvas')" class="text-[10px] text-red-600 font-bold underline">Тазалау</button>
-                            </div>
-                            <canvas id="sub-sig-canvas" width="360" height="110" class="sig-canvas w-full h-[110px]"></canvas>
-                        </div>
-
-                        <button onclick="subscribeHolding('${h.id}')" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow">Жазылымды рәсімдеу</button>
-                        <button onclick="document.getElementById('holding-modal').remove()" class="w-full py-2 bg-slate-200 text-slate-700 rounded font-bold text-xs">Жабу</button>
+                        <label class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
+                            <input type="checkbox" id="holding-agree-chk"> Мен оферта және саясат шарттарымен келісемін
+                        </label>
+                        <button onclick="confirmHoldingSubscription('${h.id}')" class="w-full py-2.5 bg-blue-600 text-white rounded-xl font-bold text-xs">Жазылуды растау</button>
+                        <button onclick="document.getElementById('holding-sub-modal').remove()" class="w-full py-2 bg-slate-200 text-slate-700 rounded font-bold text-xs">Жабу</button>
                     </div>
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
-            initSignatureCanvas('sub-sig-canvas');
         }
 
-        async function subscribeHolding(holdingId) {
-            const canvas = document.getElementById('sub-sig-canvas');
-            if (!canvas || canvas.dataset.hasSigned !== "true") {
-                showIosToast(false, "Қолтаңба қажет!", "Жазылымды рәсімдеу үшін алдымен қолыңызды салыңыз!");
+        async function confirmHoldingSubscription(holdingId) {
+            if (!document.getElementById('holding-agree-chk').checked) {
+                showIosToast(false, "Сәтсіз!", "Шарттармен келісіміңізді растаңыз!");
                 return;
             }
-            const sigDataUrl = canvas.toDataURL('image/png');
-            window.lastSubscriptionSignature = sigDataUrl;
-
-            document.getElementById('holding-modal').remove();
-            showSpinner("Қолтаңба расталып, жазылым рәсімделуде...");
-            await loadDataFromCloud(true);
+            document.getElementById('holding-sub-modal').remove();
+            showSpinner("Жазылым тіркелуде...");
             if (!parentHoldingsSubscribed[currentUser.username]) parentHoldingsSubscribed[currentUser.username] = [];
             if (!parentHoldingsSubscribed[currentUser.username].includes(holdingId)) {
                 parentHoldingsSubscribed[currentUser.username].push(holdingId);
             }
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "✓ Сәтті!", "Қолтаңба қабылданды, холдингке жазылым рәсімделді!");
-            renderTabContent();
-        }
-
-        function openUnsubscribeConfirmModal(holdingId) {
-            let h = schoolHoldings.find(x => x.id === holdingId);
-            if (!h) return;
-
-            let modalHtml = `
-                <div class="ios-modal-backdrop" id="unsub-confirm-modal">
-                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center space-y-4 border border-red-200">
-                        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full mx-auto flex items-center justify-center text-2xl font-black">⚠️</div>
-                        <h3 class="text-base font-extrabold text-red-700">Ескерту!</h3>
-                        <p class="text-xs text-slate-700 font-semibold leading-relaxed">
-                            Сіз <b>«${h.name}»</b> холдингінен бас тартасыз және барлық көрсетілген қызметтерден айырыласыз.<br><br>
-                            <span class="text-slate-900 font-extrabold">Сенімдісіз бе?</span>
-                        </p>
-                        <div class="flex gap-2 pt-2">
-                            <button onclick="openUnsubscribeSignatureModal('${h.id}')" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow">Ия</button>
-                            <button onclick="document.getElementById('unsub-confirm-modal').remove()" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold text-xs">Жоқ</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        }
-
-        function openUnsubscribeSignatureModal(holdingId) {
-            let confirmModal = document.getElementById('unsub-confirm-modal');
-            if (confirmModal) confirmModal.remove();
-
-            let h = schoolHoldings.find(x => x.id === holdingId);
-            if (!h) return;
-
-            let modalHtml = `
-                <div class="ios-modal-backdrop" id="unsub-esign-modal">
-                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full space-y-4 border">
-                        <div class="text-center border-b pb-3">
-                            <div class="w-10 h-10 bg-blue-50 text-blue-700 rounded-xl mx-auto flex items-center justify-center text-lg font-black mb-1">✒️</div>
-                            <h3 class="text-sm font-extrabold text-slate-900">Электронды қол (ЭҚ) талап етіледі</h3>
-                            <p class="text-[11px] text-slate-500 mt-1">«${h.name}» холдингінен бас тартуды растау үшін төмендегі өріске қолыңызды салып беріңіз</p>
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[11px] font-bold text-slate-700">Тұтынушы қолтаңбасы:</span>
-                                <button type="button" onclick="clearSignatureCanvas('unsub-sig-canvas')" class="text-[10px] text-red-600 font-bold underline">Қолды тазалау</button>
-                            </div>
-                            <canvas id="unsub-sig-canvas" width="360" height="130" class="sig-canvas w-full h-[130px]"></canvas>
-                        </div>
-
-                        <div class="flex gap-2">
-                            <button onclick="executeUnsubscribeHolding('${h.id}')" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow">Растау</button>
-                            <button onclick="document.getElementById('unsub-esign-modal').remove()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs">Болдырмау</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            initSignatureCanvas('unsub-sig-canvas');
-        }
-
-        async function executeUnsubscribeHolding(holdingId) {
-            const canvas = document.getElementById('unsub-sig-canvas');
-            if (!canvas || canvas.dataset.hasSigned !== "true") {
-                showIosToast(false, "ЭҚ салынбады!", "Холдингтен шығуды растау үшін қолтаңбаңызды салыңыз!");
-                return;
-            }
-
-            document.getElementById('unsub-esign-modal').remove();
-            showSpinner("ЭҚ тексеріліп, холдингтен шығарылуда...");
-            await loadDataFromCloud(true);
-            if (parentHoldingsSubscribed[currentUser.username]) {
-                parentHoldingsSubscribed[currentUser.username] = parentHoldingsSubscribed[currentUser.username].filter(id => id !== holdingId);
-            }
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "✓ Сәтті!", "Электронды қол расталды. Сіз холдингтен сәтті шықтыңыз.");
+            showIosToast(true, "Сәтті!", "Холдингке сәтті жазылдыңыз!");
             renderTabContent();
         }
 
         function openPayHoldingModal(holdingId) {
             let h = schoolHoldings.find(x => x.id === holdingId);
             if (!h) return;
-
-            let currentStr = getCurrentFormattedDateTime();
-            if (h.payStart && h.payEnd && (currentStr < h.payStart || currentStr > h.payEnd)) {
-                showIosToast(false, "Мерзім аяқталды!", "Бұл холдингті төлеу уақыты аяқталған немесе әлі басталмаған.");
-                renderTabContent();
-                return;
-            }
-
-            let parentBal = Number(bPayWallets[currentUser.username] || 0);
-
             let modalHtml = `
                 <div class="ios-modal-backdrop" id="pay-holding-modal">
-                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-3 relative border kaspi-card">
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2">Холдинг төлемі</h3>
-                        <div class="text-xs space-y-1">
-                            <div>Холдинг атауы: <b>${h.name}</b></div>
-                            <div>Ай сайынғы төлем: <b>${h.amount} ₸</b></div>
-                            <div>Басшысы: <b>${h.head}</b></div>
-                            <div>Қазіргі төлейтін сома: <b class="text-blue-700">${h.amount} ₸</b></div>
-                            <div>Баланс: <b class="text-emerald-700">${parentBal} ₸</b></div>
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-3 border">
+                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2">${h.name} — Төлем және ЭҚ</h3>
+                        <p class="text-xs text-slate-600">Төлем сомасы: <b class="text-emerald-700">${h.amount} ₸</b></p>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Электрондық қолтаңбаңызды салыңыз:</label>
+                            <canvas id="holding-sig-canvas" width="280" height="90" class="sig-canvas w-full"></canvas>
+                            <button type="button" onclick="clearSignatureCanvas('holding-sig-canvas')" class="text-[10px] text-blue-600 underline mt-1">Тазалау</button>
                         </div>
-                        <button onclick="executePayHolding('${h.id}', ${h.amount})" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow">Төлеу</button>
-                        <button onclick="document.getElementById('pay-holding-modal').remove()" class="w-full py-2 bg-slate-200 text-slate-700 rounded font-bold text-xs">Жабу</button>
+                        <button onclick="executePayHolding('${h.id}')" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow">Төлеу (${h.amount} ₸)</button>
+                        <button onclick="document.getElementById('pay-holding-modal').remove()" class="w-full py-2 bg-slate-200 text-slate-700 rounded font-bold text-xs">Бас тарту</button>
                     </div>
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
+            initSignatureCanvas('holding-sig-canvas');
         }
 
-        async function executePayHolding(holdingId, amount) {
-            document.getElementById('pay-holding-modal').remove();
-            showSpinner("Төлем өңделуде...");
-            await loadDataFromCloud(true);
-
+        async function executePayHolding(holdingId) {
             let h = schoolHoldings.find(x => x.id === holdingId);
-            let parentBal = Number(bPayWallets[currentUser.username] || 0);
-            let paySum = Number(amount);
-
-            if (parentBal < paySum) {
-                hideSpinner();
-                showIosToast(false, "Мақұлданбады", "Қаражат жеткіліксіз!");
+            if (!h) return;
+            const canvas = document.getElementById('holding-sig-canvas');
+            if (!canvas || canvas.dataset.hasSigned !== "true") {
+                showIosToast(false, "Сәтсіз!", "Төлемді растау үшін қолтаңба салыңыз!");
                 return;
             }
+            let parentBal = Number(bPayWallets[currentUser.username] || 0);
+            if (parentBal < h.amount) {
+                showIosToast(false, "Қаражат жеткіліксіз!", `Баланс: ${parentBal} ₸`);
+                return;
+            }
+            let sigData = canvas.toDataURL();
+            document.getElementById('pay-holding-modal').remove();
 
-            bPayWallets[currentUser.username] = parentBal - paySum;
-
+            showSpinner("Төлем өңделуде...");
+            bPayWallets[currentUser.username] = parentBal - h.amount;
             if (!parentHoldingPayments[currentUser.username]) parentHoldingPayments[currentUser.username] = [];
             parentHoldingPayments[currentUser.username].push({
-                holdingId: holdingId,
-                amount: paySum,
-                originalAmount: paySum,
+                holdingId: h.id,
+                amount: h.amount,
+                originalAmount: h.amount,
                 date: getCurrentDateDDMMYYYY(),
-                periodKey: (h && h.payStart && h.payEnd) ? `${h.payStart}_${h.payEnd}` : 'default',
-                signature: window.lastSubscriptionSignature || '',
+                periodKey: (h.payStart && h.payEnd) ? `${h.payStart}_${h.payEnd}` : '',
+                signature: sigData,
                 refunded: false
             });
-
             bPayTransactions.unshift({
                 username: currentUser.username,
-                serviceName: `Холдинг төлемі (${h ? h.name : 'Холдинг'})`,
-                amount: paySum,
+                serviceName: `Холдинг төлемі (${h.name})`,
+                amount: h.amount,
                 date: getCurrentDateDDMMYYYY(),
                 status: 'Сәтті'
             });
-
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "✓ Сәтті!", "Төлем сәтті мақұлданды!");
+            showIosToast(true, "Сәтті!", "Төлем сәтті қабылданды!");
             renderTabContent();
+        }
+
+        function openUnsubscribeConfirmModal(holdingId) {
+            if (!confirm("Бұл холдингтен жазылымды өшіргіңіз келе ме?")) return;
+            parentHoldingsSubscribed[currentUser.username] = (parentHoldingsSubscribed[currentUser.username] || []).filter(id => id !== holdingId);
+            saveDataToCloud().then(() => {
+                showIosToast(true, "Сәтті!", "Холдинг жазылымы өшірілді.");
+                renderTabContent();
+            });
         }
 
         async function createHoldingRecord() {
@@ -3360,738 +4451,53 @@
             let amount = parseFloat(document.getElementById('holding-amount').value) || 0;
 
             if (!name || !head || amount <= 0) {
-                showIosToast(false, "Сәтсіз!", "Барлық міндетті өрістерді толтырыңыз!");
+                showIosToast(false, "Сәтсіз!", "Холдинг атауын, басшысын және сомасын енгізіңіз!");
                 return;
             }
-
             showSpinner("Холдинг тіркелуде...");
             schoolHoldings.push({
-                id: 'hold_' + Math.random().toString(36).substring(2, 9),
+                id: 'hold_' + Date.now(),
                 name, type, school, head, oferta, policy, desc, amount,
                 payStart: '', payEnd: ''
             });
-
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Жаңа холдинг тіркелді!");
+            showIosToast(true, "Сәтті!", "Жаңа холдинг ашылды!");
             renderTabContent();
         }
 
         async function deleteHolding(idx) {
-            if (confirm("Бұл холдингті өшіргіңіз келе ме?")) {
-                showSpinner("Өшірілуде...");
-                schoolHoldings.splice(idx, 1);
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Холдинг өшірілді.");
-                renderTabContent();
-            }
-        }
-
-        async function saveScheduleByAdmin() {
-            let className = document.getElementById('sched-class').value;
-            let day = document.getElementById('sched-day').value;
-            let subject = document.getElementById('sched-subject').value;
-            let teacherName = document.getElementById('sched-teacher-select').value;
-            let time = document.getElementById('sched-time').value.trim();
-
-            if(!className || !time) {
-                showIosToast(false, "Сәтсіз!", "Сынып пен уақытты толтырыңыз!");
-                return;
-            }
-
-            showSpinner("Кесте жариялануда...");
-            schedules.push({ className, day, subject, teacherName: teacherName || '', topic: '', homework: '', time });
+            if (!confirm("Бұл холдингті өшіргіңіз келе ме?")) return;
+            showSpinner("Өшірілуде...");
+            schoolHoldings.splice(idx, 1);
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Сабақ кестесі жарияланды!");
+            showIosToast(true, "Сәтті!", "Холдинг өшірілді.");
             renderTabContent();
         }
 
-        async function adminSaveTeacherToSchedule(sIdx) {
-            let selectElem = document.getElementById(`admin_sched_teacher_${sIdx}`);
-            let chosenTeacher = selectElem.value;
-            
-            showSpinner("Мұғалім бекітілуде...");
-            schedules[sIdx].teacherName = chosenTeacher;
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", `Пәнге мұғалім бекітілді: ${chosenTeacher || 'Жоқ'}`);
-            renderTabContent();
+        async function keepSession(sessId) {
+            showIosToast(true, "Белсенді", "Бұл сеанс сақталды.");
         }
 
-        async function teacherSaveTopicAndHW(sIdx) {
-            let topicVal = document.getElementById(`teach_topic_${sIdx}`).value.trim();
-            let hwVal = document.getElementById(`teach_hw_${sIdx}`).value.trim();
-
-            showSpinner("Сабақ тақырыбы мен үй тапсырмасы сақталуда...");
-            schedules[sIdx].topic = topicVal;
-            schedules[sIdx].homework = hwVal;
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Сабақ тақырыбы мен үй тапсырмасы сақталды және оқушыларға көрсетілді!");
-            renderTabContent();
-        }
-
-        function renderScheduleView(panelTitle, targetClassName) {
-            let dayButtonsHTML = daysList.map(d => `
-                <button onclick="switchScheduleDay('${d}')" class="px-3 py-1.5 rounded text-xs font-bold transition-all ${activeScheduleDay === d ? 'bg-blue-600 text-white shadow' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}">${d}</button>
-            `).join('');
-
-            let filteredSchedules = targetClassName ? schedules.filter(s => s.className === targetClassName && (s.day || 'Дүйсенбі') === activeScheduleDay) : [];
-
-            let rows = filteredSchedules.length > 0 ? filteredSchedules.map(s => `
-                <tr>
-                    <td><b>${s.className}</b></td>
-                    <td>
-                        <div class="font-bold text-blue-900">${s.subject}</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5">👨‍🏫 Мұғалім: <b class="text-indigo-900">${s.teacherName || 'Бекітілмеген'}</b></div>
-                    </td>
-                    <td><b>${s.topic || '<span class="text-slate-400 font-normal">—</span>'}</b></td>
-                    <td><span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold">${s.homework || 'Жоқ'}</span></td>
-                    <td>${s.time}</td>
-                </tr>
-            `).join('') : `<tr><td colspan="5" class="text-center text-slate-400 py-6">Бұл күнге (${activeScheduleDay}) сабақ кестесі тіркелмеген</td></tr>`;
-
-            return `
-                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${panelTitle} ${targetClassName ? `(${targetClassName} сыныбы)` : ''}</h3>
-                <div class="flex flex-wrap gap-2 mb-4 bg-slate-50 p-2 rounded-lg border">${dayButtonsHTML}</div>
-                <div class="overflow-x-auto">
-                    <table class="w-full gov-table">
-                        <thead><tr><th>Сынып</th><th>Пән және Мұғалім</th><th>Сабақ тақырыбы</th><th>Үй тапсырмасы</th><th>Уақыты</th></tr></thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        function switchScheduleDay(day) {
-            activeScheduleDay = day;
-            renderTabContent();
-        }
-
-        async function publishNews() {
-            let title = document.getElementById('news-title').value.trim();
-            let text = document.getElementById('news-text').value.trim();
-            let datetime = getCurrentDateDDMMYYYY();
-
-            if (!title || !text) {
-                showIosToast(false, "Сәтсіз!", "Жаңалық тақырыбы мен мәтінін толық жазыңыз!");
-                return;
-            }
-
-            showSpinner("Жаңалық жариялануда...");
-            newsList.unshift({ title, text, datetime });
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Жаңалық сәтті жарияланды!");
-            renderTabContent();
-        }
-
-        async function deleteNewsItem(index) {
-            if (confirm("Бұл жаңалықты өшіргіңіз келе ме?")) {
-                showSpinner("Өшірілуде...");
-                newsList.splice(index, 1);
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Жаңалық өшірілді.");
-                renderTabContent();
-            }
-        }
-
-        function renderSingleIDCardHTML(cardData, userObj) {
-            if(!cardData) {
-                return `<div class="p-6 text-center bg-slate-50 border rounded-xl text-slate-500 text-xs">Сізге әлі BilimID картасы рәсімделмеген. Әкімшілікке хабарласыңыз.</div>`;
-            }
-
-            let statusColor = cardData.status === 'ACTIVE' ? 'bg-emerald-500 text-white' : (cardData.status === 'INACTIVE' ? 'bg-amber-500 text-white' : 'bg-red-600 text-white animate-pulse');
-            let roleLabel = cardData.role === 'teacher' ? 'Мұғалім' : 'Оқушы';
-
-            let qrDataString = JSON.stringify({
-                app: 'BilimAL_ID',
-                username: cardData.username,
-                name: cardData.name,
-                role: roleLabel,
-                school: cardData.school,
-                className: cardData.className,
-                dob: cardData.dob,
-                idNumber: cardData.idNumber,
-                issueDate: cardData.issueDate,
-                approveDate: cardData.approveDate,
-                validUntil: cardData.validUntil,
-                status: cardData.status
-            });
-            let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(qrDataString)}`;
-
-            return `
-                <div class="max-w-md mx-auto id-card-gradient text-white rounded-2xl p-6 shadow-xl border border-blue-400/30 relative overflow-hidden space-y-4">
-                    <div class="flex justify-between items-start border-b border-white/10 pb-3">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 rounded bg-white text-blue-950 font-black flex items-center justify-center text-xs">BA</div>
-                            <div>
-                                <div class="text-xs font-extrabold tracking-widest">BilimID</div>
-                                <div class="text-[9px] text-blue-300 uppercase">Цифрлық жеке куәлік</div>
-                            </div>
-                        </div>
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shadow ${statusColor}">
-                            ${cardData.status}
-                        </span>
-                    </div>
-
-                    <div class="flex gap-4 items-center">
-                        <div class="bg-white p-2 rounded-xl shadow shrink-0">
-                            <img src="${qrUrl}" alt="BilimID QR" class="w-28 h-28 rounded" />
-                        </div>
-                        <div class="space-y-1 text-xs">
-                            <div class="text-[10px] text-blue-300 uppercase">Аты-жөні:</div>
-                            <div class="font-extrabold text-sm tracking-tight">${cardData.name}</div>
-                            
-                            <div class="text-[10px] text-blue-300 uppercase pt-1">Қызметі / Сыныбы:</div>
-                            <div class="font-bold text-slate-200">${roleLabel} ${cardData.className !== '—' ? `(${cardData.className})` : ''}</div>
-
-                            <div class="text-[10px] text-blue-300 uppercase pt-1">Мектеп:</div>
-                            <div class="font-semibold text-slate-200 text-[11px] leading-tight">${cardData.school}</div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 pt-3 border-t border-white/10 text-[10px]">
-                        <div>
-                            <span class="text-blue-300 block">BilimID Нөмірі:</span>
-                            <span class="font-mono font-bold text-xs tracking-wider text-amber-300">${cardData.idNumber}</span>
-                        </div>
-                        <div>
-                            <span class="text-blue-300 block">Туған күні:</span>
-                            <span class="font-bold text-slate-100">${cardData.dob || 'Көрсетілмеген'}</span>
-                        </div>
-                        <div>
-                            <span class="text-blue-300 block">Берілген / Мақұлданған:</span>
-                            <span class="font-semibold text-slate-200">${cardData.issueDate} / ${cardData.approveDate}</span>
-                        </div>
-                        <div>
-                            <span class="text-blue-300 block">Жарамдылық мерзімі:</span>
-                            <span class="font-bold text-emerald-300">${cardData.validUntil}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function createOrUpdateBilimID() {
-            let username = document.getElementById('id-username').value;
-            let school = document.getElementById('id-school').value.trim();
-            let className = document.getElementById('id-class').value;
-            let dob = document.getElementById('id-dob').value.trim();
-            let status = document.getElementById('id-status').value;
-            let validUntil = document.getElementById('id-valid').value.trim();
-
-            let targetUser = users.find(u => u.username === username);
-            if(!targetUser || !school) {
-                showIosToast(false, "Сәтсіз!", "Барлық өрістерді дұрыс толтырыңыз!");
-                return;
-            }
-
-            showSpinner("BilimID генерациялануда...");
-            let todayDate = new Date().toLocaleDateString('kk-KZ');
-            let randomId = 'BL-' + Math.floor(10000000 + Math.random() * 90000000);
-
-            bilimCards[username] = {
-                username: targetUser.username,
-                name: targetUser.name,
-                role: targetUser.role,
-                school: school,
-                className: className,
-                dob: dob || '01.01.2010',
-                idNumber: bilimCards[username]?.idNumber || randomId,
-                issueDate: bilimCards[username]?.issueDate || todayDate,
-                approveDate: todayDate,
-                validUntil: validUntil || '31.05.2027',
-                status: status
-            };
-
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "BilimID сәтті жасалды және сақталды!");
-            renderTabContent();
-        }
-
-        async function extendBilimID(username) {
-            let newValid = prompt("Жаңа жарамдылық мерзімін енгізіңіз (мысалы: 31.05.2028):", bilimCards[username].validUntil);
-            if(newValid && newValid.trim()) {
-                showSpinner("Мерзім ұзартылуда...");
-                bilimCards[username].validUntil = newValid.trim();
-                bilimCards[username].status = 'ACTIVE';
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "BilimID мерзімі ұзартылды!");
-                renderTabContent();
-            }
-        }
-
-        async function deleteBilimID(username) {
-            if(confirm("Бұл BilimID картасын өшіруге сенімдісіз бе?")) {
-                showSpinner("Өшірілуде...");
-                delete bilimCards[username];
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "BilimID картасы өшірілді.");
-                renderTabContent();
-            }
-        }
-
-        async function saveBilimLimit() {
-            let sVal = document.getElementById('limit-start-datetime').value;
-            let eVal = document.getElementById('limit-end-datetime').value;
-            let reasonVal = document.getElementById('limit-reason-input').value.trim();
-
-            if (!sVal || !eVal) {
-                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын таңдаңыз!");
-                return;
-            }
-
-            showSpinner("Шектеу бекітілуде...");
-            let formattedStart = sVal.replace(/-/g, '/').replace('T', '-');
-            let formattedEnd = eVal.replace(/-/g, '/').replace('T', '-');
-
-            bilimLimitSettings = { startDate: formattedStart, endDate: formattedEnd, reason: reasonVal || 'Әкімшілік шешім' };
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "BilimLimit шектеуі сәтті орнатылды!");
-            renderTabContent();
-        }
-
-        async function clearBilimLimit() {
-            showSpinner("Шектеу алынып тасталуда...");
-            bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "BilimLimit шектеуі алынып тасталды.");
-            renderTabContent();
-        }
-
-        function startAddingQuestions() {
-            let title = document.getElementById('test-title-input').value.trim();
-            let className = document.getElementById('test-class-select').value;
-            if(!title || !className) {
-                showIosToast(false, "Сәтсіз!", "Сыныпты және тест тақырыбын жазыңыз!");
-                return;
-            }
-            tempQuestions = [];
-            document.getElementById('current-q-num').innerText = '1';
-            document.getElementById('test-questions-builder').classList.remove('hidden');
-        }
-
-        function addQuestionCard() {
-            let qText = document.getElementById('q-text').value.trim();
-            let o0 = document.getElementById('opt_0').value.trim();
-            let o1 = document.getElementById('opt_1').value.trim();
-            let o2 = document.getElementById('opt_2').value.trim();
-            let o3 = document.getElementById('opt_3').value.trim();
-            let correctIdx = parseInt(document.querySelector('input[name="correct_opt"]:checked').value);
-
-            if(!qText || !o0 || !o1 || !o2 || !o3) {
-                showIosToast(false, "Сәтсіз!", "Сұрақты және 4 жауап нұсқасын толық толтырыңыз!");
-                return;
-            }
-
-            tempQuestions.push({ question: qText, options: [o0, o1, o2, o3], correctIndex: correctIdx });
-            document.getElementById('q-text').value = '';
-            document.getElementById('opt_0').value = '';
-            document.getElementById('opt_1').value = '';
-            document.getElementById('opt_2').value = '';
-            document.getElementById('opt_3').value = '';
-            document.getElementById('current-q-num').innerText = tempQuestions.length + 1;
-            showIosToast(true, "Сәтті!", `Сұрақ №${tempQuestions.length} сақталды!`);
-        }
-
-        async function publishBilimTest() {
-            let qText = document.getElementById('q-text').value.trim();
-            if(qText) {
-                let o0 = document.getElementById('opt_0').value.trim();
-                let o1 = document.getElementById('opt_1').value.trim();
-                let o2 = document.getElementById('opt_2').value.trim();
-                let o3 = document.getElementById('opt_3').value.trim();
-                let correctIdx = parseInt(document.querySelector('input[name="correct_opt"]:checked').value);
-                if(o0 && o1 && o2 && o3) tempQuestions.push({ question: qText, options: [o0, o1, o2, o3], correctIndex: correctIdx });
-            }
-
-            if(tempQuestions.length === 0) {
-                showIosToast(false, "Сәтсіз!", "Кемінде 1 сұрақ қосыңыз!");
-                return;
-            }
-
-            showSpinner("Тест жариялануда...");
-            let title = document.getElementById('test-title-input').value.trim();
-            let className = document.getElementById('test-class-select').value;
-            let testId = 'test_' + Math.random().toString(36).substring(2, 9);
-
-            bilimTests.push({ id: testId, title: title, className: className, author: currentUser.username, questions: tempQuestions });
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "BilimTest сәтті жарияланды!");
-            tempQuestions = [];
-            renderTabContent();
-        }
-
-        async function deleteBilimTest(testId) {
-            if(confirm("Бұл тестті жоюға сенімдісіз бе?")) {
-                showSpinner("Өшірілуде...");
-                bilimTests = bilimTests.filter(t => t.id !== testId);
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Тест өшірілді.");
-                renderTabContent();
-            }
-        }
-
-        function startStudentTest(testId) {
-            let test = bilimTests.find(t => t.id === testId);
-            if(!test) return;
-
-            let viewContainer = document.getElementById('student-test-view');
-            let cardsHTML = test.questions.map((q, idx) => `
-                <div class="p-4 bg-white border rounded-xl shadow-xs space-y-2 mb-3">
-                    <div class="font-bold text-xs text-slate-900">${idx + 1}. ${q.question}</div>
-                    <div class="space-y-1.5 text-xs">
-                        ${q.options.map((opt, oIdx) => `
-                            <label class="flex items-center gap-2 p-2 rounded border hover:bg-blue-50 cursor-pointer">
-                                <input type="radio" name="ans_q_${idx}" value="${oIdx}">
-                                <span>${opt}</span>
-                            </label>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-
-            viewContainer.innerHTML = `
-                <div class="p-3 bg-blue-50 border border-blue-200 rounded mb-3 font-extrabold text-xs text-blue-900">${test.title}</div>
-                ${cardsHTML}
-                <button onclick="submitStudentTest('${testId}')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded shadow w-full">✅ Тестті аяқтау және тексеру</button>
-            `;
-        }
-
-        async function submitStudentTest(testId) {
-            let test = bilimTests.find(t => t.id === testId);
-            if(!test) return;
-
-            let correctCount = 0;
-            test.questions.forEach((q, idx) => {
-                let checked = document.querySelector(`input[name="ans_q_${idx}"]:checked`);
-                if(checked && parseInt(checked.value) === q.correctIndex) correctCount++;
-            });
-
-            showSpinner("Нәтижелер есептелуде...");
-            let suggestedGrade = Math.round((correctCount / test.questions.length) * 10);
-
-            if(!testResults[testId]) testResults[testId] = {};
-            testResults[testId][currentUser.username] = { correctCount: correctCount, total: test.questions.length, suggestedGrade: suggestedGrade };
-
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", `Тест аяқталды! Сіз ${correctCount}/${test.questions.length} сұраққа дұрыс жауап бердіңіз.`);
-            renderTabContent();
-        }
-
-        function startQRScanner() {
-            if(html5QrScanner) { try { html5QrScanner.clear(); } catch(e){} }
-            html5QrScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 200 });
-            html5QrScanner.render(onScanSuccess, onScanFailure);
-        }
-
-        function onScanSuccess(decodedText) {
-            try {
-                let parsed = JSON.parse(decodedText);
-                if(parsed.app === 'BilimAL_ID') {
-                    let resCard = document.getElementById('scan-result-card');
-                    resCard.classList.remove('hidden');
-
-                    let isInvalid = parsed.status === 'INVALID' || parsed.status === 'INACTIVE';
-                    resCard.className = `p-4 rounded-xl border text-xs space-y-2 animate-fade ${isInvalid ? 'bg-red-50 border-red-400 text-red-900' : 'bg-emerald-50 border-emerald-400 text-emerald-900'}`;
-
-                    resCard.innerHTML = `
-                        <div class="flex justify-between items-center border-b pb-1 font-extrabold text-sm">
-                            <span>${isInvalid ? '🚨 НАЗАР АУДАРЫҢЫЗ: ЖАРАМСЫЗ!' : '✅ БІЛІМ ID РАСТАЛДЫ'}</span>
-                            <span>${parsed.status}</span>
-                        </div>
-                        <div><b>Аты-жөні:</b> ${parsed.name}</div>
-                        <div><b>Қызметі / Сыныбы:</b> ${parsed.role} (${parsed.className})</div>
-                        <div><b>BilimID №:</b> ${parsed.idNumber}</div>
-                        <div><b>Туған күні:</b> ${parsed.dob}</div>
-                        <div><b>Жарамдылық мерзімі:</b> ${parsed.validUntil}</div>
-                    `;
-                    if(html5QrScanner) html5QrScanner.clear();
-                    showIosToast(true, "Сәтті!", "QR-код сәтті оқылды!");
-                }
-            } catch(e) {
-                showIosToast(false, "Сәтсіз!", "Бұл BilimID QR-коды емес!");
-            }
-        }
-        function onScanFailure(err) {}
-
-        function renderAdminSubTable() {
-            let classSelect = document.getElementById('admin-sub-class-select');
-            let container = document.getElementById('admin-sub-table-container');
-            if(!classSelect || !container) return;
-
-            let selectedClassName = classSelect.value;
-            let targetClass = classesList.find(c => c.name === selectedClassName);
-            if(!targetClass) {
-                container.innerHTML = '<p class="text-xs text-slate-400">Сынып табылмады</p>';
-                return;
-            }
-
-            let studentsInClass = users.filter(u => u.role === 'student' && (targetClass.students || []).includes(u.username));
-            let rows = studentsInClass.map(st => {
-                let parent = users.find(u => u.role === 'parent' && u.parentOf === st.username);
-                let subInfo = bilimSubscriptions[st.username] || { signed: false, signedAt: '—' };
-
-                return `
-                    <tr class="text-xs">
-                        <td class="font-bold">${st.name}</td>
-                        <td>${parent ? `${parent.name} (@${parent.username})` : '<span class="text-slate-400">Ата-ана тіркелмеген</span>'}</td>
-                        <td><span class="px-2 py-0.5 rounded font-bold ${subInfo.signed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${subInfo.signed ? '✅ Қол қойылған' : '❌ Қол қойылмаған'}</span></td>
-                        <td>${subInfo.signedAt || '—'}</td>
-                        <td>
-                            <button onclick="setStudentSubStatus('${st.username}', true)" class="px-2 py-1 bg-emerald-600 text-white rounded font-bold text-[10px]">Қойылды ету</button>
-                            <button onclick="setStudentSubStatus('${st.username}', false)" class="px-2 py-1 bg-red-600 text-white rounded font-bold text-[10px]">Бас тарту</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            container.innerHTML = `
-                <table class="w-full gov-table">
-                    <thead><tr><th>Оқушы аты-жөні</th><th>Ата-анасы</th><th>Қол қою мәртебесі</th><th>Қойылған уақыты</th><th>Басқару</th></tr></thead>
-                    <tbody>${rows || '<tr><td colspan="5" class="text-center text-slate-400 py-4">Оқушылар жоқ</td></tr>'}</tbody>
-                </table>
-            `;
-        }
-
-        async function saveSubscriptionSettings() {
-            let sVal = document.getElementById('sub-start-datetime').value;
-            let eVal = document.getElementById('sub-end-datetime').value;
-
-            if (!sVal || !eVal) {
-                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу мерзімін таңдаңыз!");
-                return;
-            }
-
-            showSpinner("Мерзім сақталуда...");
-            let formattedStart = sVal.replace(/-/g, '/').replace('T', '-');
-            let formattedEnd = eVal.replace(/-/g, '/').replace('T', '-');
-
-            subscriptionSettings = { startDate: formattedStart, endDate: formattedEnd };
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", `Табельге қол қою мерзімі бекітілді!`);
-            renderTabContent();
-        }
-
-        async function signParentSubscription() {
-            let childUsername = currentUser.parentOf;
-            if(!childUsername) {
-                showIosToast(false, "Сәтсіз!", "Бекітілген бала табылмады!");
-                return;
-            }
-
-            showSpinner("Төлем өңделуде...");
-            let currentStr = getCurrentFormattedDateTime();
-            let existingSub = bilimSubscriptions[childUsername] || { signed: false, history: [] };
-            if (!existingSub.history) existingSub.history = [];
-
-            existingSub.history.unshift({ periodStart: subscriptionSettings.startDate, periodEnd: subscriptionSettings.endDate, signedAt: currentStr });
-
-            bilimSubscriptions[childUsername] = { signed: true, signedAt: currentStr, history: existingSub.history };
-
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Табель төлемі мен қолы сәтті расталды!");
-            renderTabContent();
-        }
-
-        async function setStudentSubStatus(studentUsername, isSigned) {
-            showSpinner("Өзгеріс сақталуда...");
-            let existing = bilimSubscriptions[studentUsername] || { history: [] };
-            bilimSubscriptions[studentUsername] = { signed: isSigned, signedAt: isSigned ? getCurrentFormattedDateTime() : '—', history: existing.history || [] };
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Мәртебе жаңартылды!");
-            renderAdminSubTable();
-        }
-
-        async function terminateSession(sessionId) {
-            if (!confirm("Бұл құрылғының сеансын жоюға сенімдісіз бе?")) return;
-
+        async function terminateSession(sessId) {
             showSpinner("Сеанс тоқтатылуда...");
-            await loadDataFromCloud(true);
-            let mySessions = activeSessionsStore[currentUser.username] || [];
-            activeSessionsStore[currentUser.username] = mySessions.filter(s => s.id !== sessionId);
+            activeSessionsStore[currentUser.username] = (activeSessionsStore[currentUser.username] || []).filter(s => s.id !== sessId);
             await saveDataToCloud();
             hideSpinner();
-
-            let currentSessId = localStorage.getItem('bilim_current_session_id');
-            if (sessionId === currentSessId) {
+            if (sessId === localStorage.getItem('bilim_current_session_id')) {
                 logout();
             } else {
-                showIosToast(true, "Сәтті!", "Таңдалған құрылғының сеансы жойылды.");
+                showIosToast(true, "Сәтті!", "Құрылғы сеансы жойылды.");
                 renderTabContent();
             }
         }
 
-        function keepSession(sessionId) {
-            showIosToast(true, "Сәтті!", "Бұл сеанс сақталды және белсенді күйде қалды.");
-        }
-
-        function toggleParentStudentSelect(roleValue) {
-            const parentSelect = document.getElementById('reg-parent-of');
-            if(roleValue === 'parent') parentSelect.classList.remove('hidden');
-            else parentSelect.classList.add('hidden');
-        }
-
-        function updateSelectedSubject(selectElem) { selectedTeacherSubject = selectElem.value; renderTabContent(); }
-
-        function getStandardGrade(p) {
-            if(p >= 85) return 5;
-            if(p >= 65) return 4;
-            if(p >= 40) return 3;
-            return 2;
-        }
-
-        async function calculateAndSaveGrade(studentUsername) {
-            let fStr = document.getElementById(`form_${studentUsername}`).value.trim();
-            let bStr = document.getElementById(`bzhb_${studentUsername}`).value.trim();
-            let tStr = document.getElementById(`tzhb_${studentUsername}`).value.trim();
-
-            if(fStr && !fStr.includes('/')) {
-                let fNum = parseFloat(fStr);
-                if(!isNaN(fNum)) {
-                    if(fNum > 10) fNum = 10;
-                    fStr = `${fNum}/10`;
-                    document.getElementById(`form_${studentUsername}`).value = fStr;
-                }
-            }
-
-            let fPerc = 0, bPerc = 0, tPerc = 0;
-            let hasB = false, hasT = false;
-
-            if(fStr.includes('/')) {
-                let [got, max] = fStr.split('/').map(Number);
-                if(max > 0) { if(max > 10) max = 10; if(got > 10) got = 10; fPerc = (got / max) * 100; }
-            }
-            if(bStr.includes('/')) {
-                let [got, max] = bStr.split('/').map(Number);
-                if(max > 0) { bPerc = (got / max) * 100; hasB = true; }
-            }
-            if(tStr.includes('/')) {
-                let [got, max] = tStr.split('/').map(Number);
-                if(max > 0) { tPerc = (got / max) * 100; hasT = true; }
-            }
-
-            let totalPercent = 0;
-            if(hasB && hasT) totalPercent = Math.round((fPerc * 0.25) + (bPerc * 0.25) + (tPerc * 0.50));
-            else if(hasB) totalPercent = Math.round((fPerc * 0.50) + (bPerc * 0.50));
-            else totalPercent = Math.round(fPerc);
-
-            let computedGrade = getStandardGrade(totalPercent);
-            document.getElementById(`final_${studentUsername}`).value = computedGrade;
-
-            showSpinner("Баға сақталуда...");
-            if(!grades[studentUsername]) grades[studentUsername] = {};
-            grades[studentUsername][selectedTeacherSubject] = { form: fStr, bzhb: bStr, tzhb: tStr, percent: totalPercent, final: computedGrade };
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", `Баға есептеліп сақталды (${totalPercent}%).`);
-            renderTabContent();
-        }
-
-        async function deleteGradeRecord(studentUsername) {
-            if(grades[studentUsername] && grades[studentUsername][selectedTeacherSubject]) {
-                showSpinner("Баға өшірілуде...");
-                delete grades[studentUsername][selectedTeacherSubject];
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Баға жазбасы өшірілді.");
-                renderTabContent();
-            }
-        }
-
-        async function saveAttendance(studentUsername) {
-            let status = document.getElementById(`att_status_${studentUsername}`).value;
-            showSpinner("Қатысу сақталуда...");
-            if(!attendance[studentUsername]) attendance[studentUsername] = {};
-            attendance[studentUsername]['today'] = status;
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Қатысу белгісі сақталды.");
-            renderTabContent();
-        }
-
-        async function createNewClass() {
-            let name = document.getElementById('new-class-name').value.trim();
-            if(!name) return;
-            showSpinner("Сынып тіркелуде...");
-            let dcaCode = 'DCA-' + Math.floor(1000 + Math.random() * 9000);
-            classesList.push({ name: name, creator: currentUser.name, teacher: currentUser.name, teacherUsername: currentUser.username, dcaCode: dcaCode, students: [] });
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Жаңа сынып ашылды!");
-            renderTabContent();
-        }
-
-        async function adminUpdateClassTeacher(idx) {
-            let selectElem = document.getElementById(`admin_teacher_select_${idx}`);
-            let newTeacherUsername = selectElem.value;
-            let teacherObj = users.find(u => u.username === newTeacherUsername);
-            if(teacherObj && classesList[idx]) {
-                showSpinner("Жетекші ауыстырылуда...");
-                classesList[idx].teacherUsername = teacherObj.username;
-                classesList[idx].teacher = teacherObj.name;
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", `Сынып жетекшісі "${teacherObj.name}" болып тағайындалды!`);
-                renderTabContent();
-            }
-        }
-
-        async function deleteClassRecord(idx) {
-            let targetClass = classesList[idx];
-            if(!targetClass) return;
-            if(confirm(`"${targetClass.name}" сыныбын толығымен жоюға сенімдісіз бе?`)) {
-                showSpinner("Сынып жойылуда...");
-                classesList.splice(idx, 1);
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Сынып өшірілді.");
-                renderTabContent();
-            }
-        }
-
-        async function joinClassByDCA() {
-            let code = document.getElementById('dca-code-input').value.trim().toUpperCase();
-            showSpinner("DCA код тексерілуде...");
-            await loadDataFromCloud(true);
-            let targetClass = classesList.find(c => c.dcaCode === code);
-            if(!targetClass) {
-                hideSpinner();
-                showIosToast(false, "Сәтсіз!", "Қате DCA код! Мұндай сынып табылмады.");
-                return;
-            }
-            if(!targetClass.students) targetClass.students = [];
-            if(!targetClass.students.includes(currentUser.username)) targetClass.students.push(currentUser.username);
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", `Сіз ${targetClass.name} сыныбына қосылдыңыз!`);
-            switchTab('student_grades');
-        }
-
-        async function saveKtp() {
-            let title = document.getElementById('ktp-title').value.trim();
-            if(!title) return;
-            showSpinner("КТЖ қосылуда...");
-            ktpList.push(title);
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "КТЖ жоспарына қосылды.");
-            renderTabContent();
+        function toggleParentStudentSelect(roleVal) {
+            const sel = document.getElementById('reg-parent-of');
+            if (!sel) return;
+            if (roleVal === 'parent') sel.classList.remove('hidden');
+            else sel.classList.add('hidden');
         }
 
         async function registerNewUser() {
@@ -4099,26 +4505,18 @@
             let username = document.getElementById('reg-user').value.trim();
             let password = document.getElementById('reg-pass').value.trim();
             let role = document.getElementById('reg-role').value;
-            let parentOf = document.getElementById('reg-parent-of').value;
+            let parentOf = role === 'parent' ? document.getElementById('reg-parent-of').value : '';
 
-            if(!name || !username || !password) {
+            if (!name || !username || !password) {
                 showIosToast(false, "Сәтсіз!", "Барлық өрістерді толтырыңыз!");
                 return;
             }
-            if(role === 'parent' && !parentOf) {
-                showIosToast(false, "Сәтсіз!", "Ата-ана үшін баланы міндетті түрде таңдаңыз!");
+            if (users.some(u => u.username === username)) {
+                showIosToast(false, "Қате!", "Бұл логин бос емес!");
                 return;
             }
-            if(users.some(u => u.username === username)) {
-                showIosToast(false, "Сәтсіз!", "Бұл логин жүйеде бар!");
-                return;
-            }
-
             showSpinner("Пайдаланушы тіркелуде...");
-            let newUserObj = { username, password, role, name, warningReason: '', status: 'active' };
-            if(role === 'parent') newUserObj.parentOf = parentOf;
-
-            users.push(newUserObj);
+            users.push({ name, username, password, role, parentOf, status: 'active', warningReason: '' });
             await saveDataToCloud();
             hideSpinner();
             showIosToast(true, "Сәтті!", "Жаңа пайдаланушы тіркелді!");
@@ -4126,32 +4524,136 @@
         }
 
         async function deleteSystemUser(username) {
-            if(confirm("Бұл қолданушыны өшіргіңіз келе ме?")) {
-                showSpinner("Өшірілуде...");
-                users = users.filter(u => u.username !== username);
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Қолданушы өшірілді.");
-                renderTabContent();
-            }
-        }
-
-        async function deleteSchedule(idx) {
-            showSpinner("Өшірілуде...");
-            schedules.splice(idx, 1);
+            if (!confirm(`@${username} пайдаланушысын жойғыңыз келе ме?`)) return;
+            showSpinner("Жойылуда...");
+            users = users.filter(u => u.username !== username);
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Сабақ кестесі өшірілді.");
+            showIosToast(true, "Сәтті!", "Пайдаланушы жүйеден жойылды.");
+            renderTabContent();
+        }
+
+        async function issueWarningPrompt(username) {
+            let reason = prompt("Ескерту себебін жазыңыз:");
+            if (reason === null) return;
+            showSpinner("Ескерту жіберілуде...");
+            let u = users.find(x => x.username === username);
+            if (u) u.warningReason = reason.trim();
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Ескерту сақталды.");
+            renderTabContent();
+        }
+
+        async function toggleBlockUser(username) {
+            showSpinner("Мәртебе өзгертілуде...");
+            let u = users.find(x => x.username === username);
+            if (u) u.status = u.status === 'blocked' ? 'active' : 'blocked';
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Қолданушы мәртебесі жаңартылды.");
+            renderTabContent();
+        }
+
+        async function adminUpdateClassTeacher(idx) {
+            let sel = document.getElementById(`admin_teacher_select_${idx}`);
+            if (!sel) return;
+            let tUsername = sel.value;
+            let tObj = users.find(u => u.username === tUsername);
+            if (!tObj) return;
+            showSpinner("Сақталуда...");
+            classesList[idx].teacherUsername = tObj.username;
+            classesList[idx].teacher = tObj.name;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Сынып жетекшісі ауыстырылды.");
+            renderTabContent();
+        }
+
+        async function deleteClassRecord(idx) {
+            if (!confirm("Бұл сыныпты жойғыңыз келе ме?")) return;
+            showSpinner("Жойылуда...");
+            classesList.splice(idx, 1);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Сынып жойылды.");
+            renderTabContent();
+        }
+
+        async function saveScheduleByAdmin() {
+            let className = document.getElementById('sched-class').value;
+            let day = document.getElementById('sched-day').value;
+            let subject = document.getElementById('sched-subject').value;
+            let teacherUsername = document.getElementById('sched-teacher-select').value;
+            let teacherObj = users.find(u => u.username === teacherUsername);
+            let teacherName = teacherObj ? teacherObj.name : '';
+            let time = document.getElementById('sched-time').value.trim();
+
+            if (!className || !subject) {
+                showIosToast(false, "Сәтсіз!", "Сынып пен пәнді таңдаңыз!");
+                return;
+            }
+            showSpinner("Кесте жариялануда...");
+            schedules.push({ className, day, subject, teacherUsername, teacherName, time: time || '08:30', topic: '', homework: '' });
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `${className} (${day}) — ${subject} кестеге қосылды және мұғалім бекітілді!`);
+            renderTabContent();
+        }
+
+        async function adminSaveTeacherToSchedule(sIdx) {
+            let tUsername = document.getElementById(`admin_sched_teacher_${sIdx}`).value;
+            let tObj = users.find(u => u.username === tUsername);
+            showSpinner("Бекітілуде...");
+            schedules[sIdx].teacherUsername = tObj ? tObj.username : '';
+            schedules[sIdx].teacherName = tObj ? tObj.name : '';
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Мұғалім сабақ кестесіне бекітілді! Журналы автоматты ашылды.");
+            renderTabContent();
+        }
+
+        async function deleteSchedule(sIdx) {
+            showSpinner("Жойылуда...");
+            schedules.splice(sIdx, 1);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Сабақ кестеден жойылды.");
+            renderTabContent();
+        }
+
+        async function publishNews() {
+            let title = document.getElementById('news-title').value.trim();
+            let text = document.getElementById('news-text').value.trim();
+            let datetime = document.getElementById('news-datetime').value;
+            if (!title || !text) {
+                showIosToast(false, "Сәтсіз!", "Тақырып пен мәтінді толтырыңыз!");
+                return;
+            }
+            showSpinner("Жаңалық жариялануда...");
+            newsList.unshift({ title, text, datetime });
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Жаңалық жарияланды!");
+            renderTabContent();
+        }
+
+        async function deleteNewsItem(idx) {
+            showSpinner("Өшірілуде...");
+            newsList.splice(idx, 1);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Жаңалық өшірілді.");
             renderTabContent();
         }
 
         async function saveAnnouncement() {
             currentAnnouncement = document.getElementById('announcement-input').value.trim();
-            showSpinner("Хабарландыру жариялануда...");
+            showSpinner("Сақталуда...");
             await saveDataToCloud();
             hideSpinner();
             checkBanners();
-            showIosToast(true, "Сәтті!", "Хабарландыру жарияланды!");
+            showIosToast(true, "Сәтті!", "Хабарландыру жарияланды.");
         }
 
         async function clearAnnouncement() {
@@ -4164,70 +4666,405 @@
             showIosToast(true, "Сәтті!", "Хабарландыру өшірілді.");
         }
 
-        async function issueWarningPrompt(username) {
-            let reason = prompt("Ескерту себебін жазыңыз:");
-            if(reason) {
-                showSpinner("Ескерту берілуде...");
-                let target = users.find(u => u.username === username);
-                if(target) target.warningReason = reason;
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Ескерту берілді.");
-                renderTabContent();
-            }
-        }
-
-        async function toggleBlockUser(username) {
-            showSpinner("Мәртебе өзгертілуде...");
-            let target = users.find(u => u.username === username);
-            if(target) target.status = target.status === 'blocked' ? 'active' : 'blocked';
+        async function saveBilimLimit() {
+            let s = document.getElementById('limit-start-datetime').value;
+            let e = document.getElementById('limit-end-datetime').value;
+            let r = document.getElementById('limit-reason-input').value.trim();
+            bilimLimitSettings = {
+                startDate: s ? s.replace(/-/g, '/').replace('T', '-') : '',
+                endDate: e ? e.replace(/-/g, '/').replace('T', '-') : '',
+                reason: r
+            };
+            showSpinner("Сақталуда...");
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Пайдаланушы мәртебесі өзгертілді.");
+            showIosToast(true, "Сәтті!", "BilimLimit шектеуі бекітілді.");
+        }
+
+        async function clearBilimLimit() {
+            bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
+            showSpinner("Тазалануда...");
+            await saveDataToCloud();
+            hideSpinner();
+            renderTabContent();
+            showIosToast(true, "Сәтті!", "Шектеу алынып тасталды.");
+        }
+
+        async function createOrUpdateBilimID() {
+            let username = document.getElementById('id-username').value;
+            let uObj = users.find(u => u.username === username);
+            if (!uObj) return;
+            let school = document.getElementById('id-school').value.trim();
+            let className = document.getElementById('id-class').value;
+            let dob = document.getElementById('id-dob').value.trim() || '01.01.2010';
+            let status = document.getElementById('id-status').value;
+            let validUntil = document.getElementById('id-valid').value.trim() || '31.05.2027';
+            let today = getCurrentDateDDMMYYYY().split(' ')[0];
+
+            showSpinner("BilimID генерациялануда...");
+            bilimCards[username] = {
+                name: uObj.name,
+                role: uObj.role,
+                school, className, dob, status, validUntil,
+                idNumber: bilimCards[username]?.idNumber || ('BID-' + Math.floor(100000 + Math.random() * 900000)),
+                issueDate: today,
+                approveDate: today
+            };
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "BilimID картасы сақталды!");
             renderTabContent();
         }
 
-        async function sendSupportMessage() {
-            let input = document.getElementById('support-msg') || document.getElementById('stud-support-msg');
-            let text = input.value.trim();
-            if(!text) return;
+        async function extendBilimID(username) {
+            if (!bilimCards[username]) return;
+            showSpinner("Ұзартылуда...");
+            bilimCards[username].validUntil = '31.05.2028';
+            bilimCards[username].status = 'ACTIVE';
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "BilimID мерзімі 2028 жылға дейін ұзартылды.");
+            renderTabContent();
+        }
 
-            showSpinner("Хабарлама жіберілуде...");
-            let lowerText = text.toLowerCase();
-            let containsProfanity = badWords.some(word => lowerText.includes(word));
+        async function deleteBilimID(username) {
+            if (!confirm("Картаны жойғыңыз келе ме?")) return;
+            showSpinner("Жойылуда...");
+            delete bilimCards[username];
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "BilimID жойылды.");
+            renderTabContent();
+        }
 
-            if(containsProfanity) {
-                let target = users.find(u => u.username === currentUser.username);
-                if(target) {
-                    target.warningReason = "AI Security System: Қолдау қызметіне былапыт сөздер жазғаны үшін автоматты ескерту!";
-                    currentUser.warningReason = target.warningReason;
-                }
-                supportTickets.push({ from: currentUser.username, text: text, reply: 'AI Security Violation: Ескерту берілді.', flagged: true });
-                await saveDataToCloud();
-                hideSpinner();
-                checkBanners();
-                showIosToast(false, "AI Security Ескерту!", "Бейәдеп сөздер үшін автоматты ескерту берілді!");
-            } else {
-                supportTickets.push({ from: currentUser.username, text: text, reply: '', flagged: false });
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Өтініш әкімшілікке жіберілді!");
-            }
+        async function saveSubscriptionSettings() {
+            let s = document.getElementById('sub-start-datetime').value;
+            let e = document.getElementById('sub-end-datetime').value;
+            subscriptionSettings = {
+                startDate: s ? s.replace(/-/g, '/').replace('T', '-') : '',
+                endDate: e ? e.replace(/-/g, '/').replace('T', '-') : ''
+            };
+            showSpinner("Сақталуда...");
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "BilimSubscription мерзімі сақталды.");
+        }
+
+        function renderAdminSubTable() {
+            const container = document.getElementById('admin-sub-table-container');
+            const sel = document.getElementById('admin-sub-class-select');
+            if (!container || !sel) return;
+            let className = sel.value;
+            let cls = classesList.find(c => c.name === className);
+            let students = cls ? (cls.students || []) : [];
+
+            let rows = students.map(stUn => {
+                let stObj = users.find(u => u.username === stUn);
+                let sub = bilimSubscriptions[stUn] || { signed: false };
+                return `
+                    <tr class="text-xs">
+                        <td class="font-bold">${stObj ? stObj.name : stUn}</td>
+                        <td>${sub.signed ? `<span class="text-emerald-700 font-bold">✅ Расталды (${sub.signedAt})</span>` : '<span class="text-amber-600 font-bold">⏳ Күтілуде</span>'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            container.innerHTML = `<table class="w-full gov-table"><thead><tr><th>Оқушы</th><th>Ата-ана растауы</th></tr></thead><tbody>${rows || '<tr><td colspan="2" class="text-center text-slate-400">Оқушылар жоқ</td></tr>'}</tbody></table>`;
+        }
+
+        async function signParentSubscription() {
+            let childUsername = currentUser.parentOf;
+            if (!childUsername) return;
+            showSpinner("Төлем және табель расталуда...");
+            let nowStr = getCurrentFormattedDateTime();
+            if (!bilimSubscriptions[childUsername]) bilimSubscriptions[childUsername] = { signed: false, history: [] };
+            bilimSubscriptions[childUsername].signed = true;
+            bilimSubscriptions[childUsername].signedAt = nowStr;
+            bilimSubscriptions[childUsername].history.unshift({
+                periodStart: subscriptionSettings.startDate,
+                periodEnd: subscriptionSettings.endDate,
+                signedAt: nowStr
+            });
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Қатысу табелі сәтті расталды!");
             renderTabContent();
         }
 
         async function replyTicket(idx) {
-            let replyText = document.getElementById(`reply_${idx}`).value.trim();
-            if(!replyText) return;
+            let inp = document.getElementById(`reply_${idx}`);
+            if (!inp || !inp.value.trim()) return;
             showSpinner("Жауап жіберілуде...");
-            supportTickets[idx].reply = replyText;
+            supportTickets[idx].reply = inp.value.trim();
             await saveDataToCloud();
             hideSpinner();
             showIosToast(true, "Сәтті!", "Жауап жіберілді.");
             renderTabContent();
         }
 
-        function downloadPDFReport() { window.print(); }
+        async function sendSupportMessage() {
+            let inp = document.getElementById('support-msg') || document.getElementById('stud-support-msg');
+            if (!inp || !inp.value.trim()) return;
+            let text = inp.value.trim();
+            let flagged = badWords.some(bw => text.toLowerCase().includes(bw));
+            showSpinner("Жіберілуде...");
+            supportTickets.unshift({ from: currentUser.username, text, flagged, reply: '' });
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Хабарламаңыз қолдау қызметіне жіберілді.");
+            renderTabContent();
+        }
+
+        function updateSelectedSubject(sel) {
+            selectedTeacherSubject = sel.value;
+            renderTabContent();
+        }
+
+        async function teacherSaveTopicAndHW(realIndex) {
+            let topic = document.getElementById(`teach_topic_${realIndex}`).value.trim();
+            let hw = document.getElementById(`teach_hw_${realIndex}`).value.trim();
+            showSpinner("Сақталуда...");
+            schedules[realIndex].topic = topic;
+            schedules[realIndex].homework = hw;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Тақырып пен үй тапсырмасы сақталды.");
+        }
+
+        async function saveAttendance(studentUsername) {
+            let status = document.getElementById(`att_status_${studentUsername}`).value;
+            showSpinner("Сақталуда...");
+            if (!attendance[studentUsername]) attendance[studentUsername] = {};
+            attendance[studentUsername]['today'] = status;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Қатысу белгіленді.");
+            renderTabContent();
+        }
+
+        async function createNewClass() {
+            let name = document.getElementById('new-class-name').value.trim();
+            if (!name) return;
+            let dcaCode = 'DCA-' + Math.floor(1000 + Math.random() * 9000);
+            showSpinner("Сынып тіркелуде...");
+            classesList.push({
+                name,
+                teacher: currentUser.name,
+                teacherUsername: currentUser.username,
+                creator: currentUser.name,
+                dcaCode,
+                students: []
+            });
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `Сынып ашылды! DCA коды: ${dcaCode}`);
+            renderTabContent();
+        }
+
+        async function joinClassByDCA() {
+            let code = document.getElementById('dca-code-input').value.trim().toUpperCase();
+            let cls = classesList.find(c => c.dcaCode === code);
+            if (!cls) {
+                showIosToast(false, "Табылмады!", "Мұндай DCA коды бар сынып жоқ!");
+                return;
+            }
+            showSpinner("Сыныпқа қосылуда...");
+            if (!cls.students) cls.students = [];
+            if (!cls.students.includes(currentUser.username)) cls.students.push(currentUser.username);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `Сіз ${cls.name} сыныбына қосылдыңыз!`);
+            switchTab('student_grades');
+        }
+
+        async function saveKtp() {
+            let title = document.getElementById('ktp-title').value.trim();
+            if (!title) return;
+            showSpinner("Сақталуда...");
+            ktpList.push(title);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "КТЖ қосылды.");
+            renderTabContent();
+        }
+
+        function startAddingQuestions() {
+            let title = document.getElementById('test-title-input').value.trim();
+            if (!title) {
+                showIosToast(false, "Сәтсіз!", "Тест тақырыбын жазыңыз!");
+                return;
+            }
+            tempQuestions = [];
+            document.getElementById('test-questions-builder').classList.remove('hidden');
+            document.getElementById('current-q-num').innerText = '1';
+        }
+
+        function addQuestionCard() {
+            let qText = document.getElementById('q-text').value.trim();
+            let opts = [0, 1, 2, 3].map(i => document.getElementById(`opt_${i}`).value.trim());
+            let correctIdx = parseInt(document.querySelector('input[name="correct_opt"]:checked').value);
+            if (!qText || opts.some(o => !o)) {
+                showIosToast(false, "Сәтсіз!", "Сұрақ пен барлық 4 нұсқаны толтырыңыз!");
+                return;
+            }
+            tempQuestions.push({ qText, opts, correctIdx });
+            document.getElementById('q-text').value = '';
+            [0, 1, 2, 3].forEach(i => document.getElementById(`opt_${i}`).value = '');
+            document.getElementById('current-q-num').innerText = String(tempQuestions.length + 1);
+            showIosToast(true, "Қосылды", `Сұрақ №${tempQuestions.length} сақталды.`);
+        }
+
+        async function publishBilimTest() {
+            let qText = document.getElementById('q-text').value.trim();
+            if (qText) addQuestionCard();
+            if (tempQuestions.length === 0) {
+                showIosToast(false, "Сәтсіз!", "Кемінде 1 сұрақ қосыңыз!");
+                return;
+            }
+            let className = document.getElementById('test-class-select').value;
+            let title = document.getElementById('test-title-input').value.trim();
+            showSpinner("Тест жариялануда...");
+            bilimTests.unshift({
+                id: 'test_' + Date.now(),
+                className, title,
+                author: currentUser.username,
+                questions: tempQuestions
+            });
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "BilimTest жарияланды!");
+            renderTabContent();
+        }
+
+        async function deleteBilimTest(testId) {
+            showSpinner("Өшірілуде...");
+            bilimTests = bilimTests.filter(t => t.id !== testId);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Тест өшірілді.");
+            renderTabContent();
+        }
+
+        function startStudentTest(testId) {
+            let t = bilimTests.find(x => x.id === testId);
+            if (!t) return;
+            const view = document.getElementById('student-test-view');
+            view.innerHTML = `
+                <div class="p-4 bg-white border rounded-2xl space-y-4">
+                    <h4 class="text-sm font-extrabold text-blue-900">${t.title}</h4>
+                    ${t.questions.map((q, qIdx) => `
+                        <div class="p-3 bg-slate-50 rounded-xl space-y-2">
+                            <div class="text-xs font-bold">${qIdx + 1}. ${q.qText}</div>
+                            ${q.opts.map((opt, oIdx) => `
+                                <label class="flex items-center gap-2 text-xs cursor-pointer">
+                                    <input type="radio" name="st_ans_${qIdx}" value="${oIdx}"> ${opt}
+                                </label>
+                            `).join('')}
+                        </div>
+                    `).join('')}
+                    <button onclick="submitStudentTest('${t.id}')" class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-xs">Аяқтау және тапсыру</button>
+                </div>
+            `;
+        }
+
+        async function submitStudentTest(testId) {
+            let t = bilimTests.find(x => x.id === testId);
+            if (!t) return;
+            let correctCount = 0;
+            t.questions.forEach((q, qIdx) => {
+                let sel = document.querySelector(`input[name="st_ans_${qIdx}"]:checked`);
+                if (sel && parseInt(sel.value) === q.correctIdx) correctCount++;
+            });
+            let suggestedGrade = Math.max(1, Math.round((correctCount / t.questions.length) * 10));
+            showSpinner("Нәтиже сақталуда...");
+            if (!testResults[testId]) testResults[testId] = {};
+            testResults[testId][currentUser.username] = { correctCount, suggestedGrade };
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", `Нәтиже: ${correctCount}/${t.questions.length} (${suggestedGrade}/10 балл)`);
+            renderTabContent();
+        }
+
+        function startQRScanner() {
+            if (html5QrScanner) { try { html5QrScanner.clear(); } catch(e){} }
+            html5QrScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 200 });
+            html5QrScanner.render((decodedText) => {
+                const resCard = document.getElementById('scan-result-card');
+                resCard.classList.remove('hidden');
+                resCard.innerHTML = `<div class="font-bold text-emerald-800">✅ BilimID расталды:</div><div>${decodedText}</div>`;
+            }, () => {});
+        }
+
+        function renderSingleIDCardHTML(card, userObj) {
+            if (!card) {
+                return `<div class="p-6 text-center bg-slate-50 rounded-2xl border text-xs text-slate-500">Бұл қолданушыға әлі BilimID картасы рәсімделмеген. Әкімшілікке хабарласыңыз.</div>`;
+            }
+            let qrData = `BilimID: ${card.idNumber} | ${card.name} | ${card.school} | ${card.status}`;
+            let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(qrData)}`;
+            return `
+                <div class="id-card-gradient text-white p-6 rounded-3xl max-w-md mx-auto shadow-2xl space-y-4 border border-white/20">
+                    <div class="flex justify-between items-center border-b border-white/20 pb-3">
+                        <div>
+                            <div class="text-[10px] uppercase tracking-widest text-blue-200 font-bold">Қазақстан Республикасы • BilimAL</div>
+                            <div class="text-base font-black tracking-tight">DIGITAL BILIM ID</div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-black ${card.status === 'ACTIVE' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}">${card.status}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="space-y-1.5 text-xs">
+                            <div><span class="text-blue-200 text-[10px] block">Аты-жөні:</span><b class="text-sm">${card.name}</b></div>
+                            <div><span class="text-blue-200 text-[10px] block">Мектеп / Сынып:</span><b>${card.school} (${card.className})</b></div>
+                            <div><span class="text-blue-200 text-[10px] block">ID Нөмірі:</span><code class="font-mono font-black text-amber-300">${card.idNumber}</code></div>
+                            <div><span class="text-blue-200 text-[10px] block">Жарамдылық мерзімі:</span><b>${card.validUntil}</b></div>
+                        </div>
+                        <div class="bg-white p-2 rounded-2xl shrink-0">
+                            <img src="${qrUrl}" alt="BilimID QR" class="w-24 h-24 rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScheduleView(title, targetClassName) {
+            let filtered = targetClassName ? schedules.filter(s => s.className === targetClassName) : [];
+            let dayTabs = daysList.map(d => `
+                <button onclick="activeScheduleDay='${d}'; renderTabContent()" class="px-3 py-1.5 rounded-xl text-xs font-bold ${activeScheduleDay === d ? 'bg-blue-600 text-white' : 'bg-white/80 text-slate-700'}">${d}</button>
+            `).join('');
+
+            let dayItems = filtered.filter(s => (s.day || 'Дүйсенбі') === activeScheduleDay);
+            let rows = dayItems.length > 0 ? dayItems.map(s => `
+                <tr>
+                    <td class="font-bold">${s.time}</td>
+                    <td class="font-extrabold text-blue-900">${s.subject}</td>
+                    <td>${s.teacherName || '—'}</td>
+                    <td>${s.topic || '—'}</td>
+                    <td class="text-emerald-700 font-semibold">${s.homework || '—'}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="5" class="text-center text-slate-400 py-4">Бұл күнге сабақтар тіркелмеген</td></tr>';
+
+            return `
+                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${title} (${targetClassName || 'Сыныпсыз'})</h3>
+                <div class="flex flex-wrap gap-1.5 mb-4">${dayTabs}</div>
+                <div class="overflow-x-auto">
+                    <table class="w-full gov-table">
+                        <thead><tr><th>Уақыты</th><th>Пән</th><th>Мұғалім</th><th>Тақырып</th><th>Үй тапсырмасы</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function downloadPDFReport() {
+            window.print();
+        }
+
+        /* Legacy / Standard Grade Calculation Helpers */
+        function getStandardGrade(percent) {
+            if (percent >= 85) return 5;
+            if (percent >= 65) return 4;
+            if (percent >= 40) return 3;
+            return 2;
+        }
     </script>
 </body>
 </html>
