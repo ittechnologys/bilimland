@@ -391,7 +391,7 @@
                 <div class="liquid-glass p-5 rounded-2xl space-y-2">
                     <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-700 flex items-center justify-center font-black text-xs">03</div>
                     <h3 class="text-xs font-extrabold text-slate-900 uppercase">Мұғалім мүмкіндігі</h3>
-                    <p class="text-[11px] text-slate-600 leading-relaxed">Электронды журнал толтыру, сынып ашу (DCA код), BilimTest құру және қатысуды бақылау.</p>
+                    <p class="text-[11px] text-slate-600 leading-relaxed">Бақылау тақтасы, электронды журнал толтыру, сынып ашу (DCA код), BilimTest құру және қатысуды бақылау.</p>
                 </div>
                 <div class="liquid-glass p-5 rounded-2xl space-y-2">
                     <div class="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-700 flex items-center justify-center font-black text-xs">04</div>
@@ -525,7 +525,7 @@
         ];
 
         const badWords = ["бля", "сука", "еба", "нах", "хуй", "анал", "дебил", "дурак", "шлюха", "пидор", "мразь", "тупой"];
-        const daysList = ["Дүйсенбі", "Сейсенбі", "Сәрсенбі", "Бейсенбі", "Жұма"];
+        const daysList = ["Дүйсенбі", "Сейсенбі", "Сәрсенбі", "Бейсенбі", "Жұма", "Сенбі"];
 
         let currentUser = null;
         let activeTab = '';
@@ -546,12 +546,19 @@
 
         // Summative Assessments (БЖБ / ТЖБ) Approved by Admin
         let summativeAssessments = []; 
+        // Journal open/closed statuses per assignmentKey
+        let journalOpenStatus = {};
         // Selected assignment in teacher journal
         let selectedTeacherAssignmentKey = '';
         let teacherJournalTerm = '1';
         let teacherJournalOnlySummative = false;
         let teacherJournalFullScreen = false;
         let studentGradesSubTab = 'subjects';
+
+        // Teacher Dashboard filters
+        let teacherDashboardTerm = '1';
+        let teacherDashboardWeek = 'current';
+        let teacherDashboardLegendOpen = true;
 
         let bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
 
@@ -725,6 +732,49 @@
             };
         }
 
+        /* User Sticker SVG Icon for Excused (Yellow) and Sick (Red) Attendance */
+        function getAttendanceUserStickerHtml(status, dateStr = '') {
+            if (status === 'С') {
+                return `
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-amber-100 border border-amber-300 shadow-2xs" title="Себепті қатыспады (${dateStr}) — Баға қойылмайды">
+                        <svg class="w-4 h-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                        </svg>
+                    </span>
+                `;
+            }
+            if (status === 'А') {
+                return `
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-red-100 border border-red-300 shadow-2xs" title="Ауырып жатыр (${dateStr}) — Баға қойылмайды">
+                        <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                        </svg>
+                    </span>
+                `;
+            }
+            return '';
+        }
+
+        function getStudentAttendanceStatusForDate(studentUsername, dateStr) {
+            let rec = attendance[studentUsername] || {};
+            if (dateStr && rec[dateStr]) return rec[dateStr];
+            // Also check if 'today' matches dateStr
+            let todayIso = new Date().toISOString().split('T')[0];
+            if (dateStr === todayIso && rec['today']) return rec['today'];
+            return '+';
+        }
+
+        function getStudentActiveAbsenceDates(studentUsername) {
+            let rec = attendance[studentUsername] || {};
+            let result = [];
+            Object.keys(rec).forEach(k => {
+                if (k !== 'today' && (rec[k] === 'С' || rec[k] === 'А')) {
+                    result.push({ date: k, status: rec[k] });
+                }
+            });
+            return result.sort((a, b) => a.date.localeCompare(b.date));
+        }
+
         function initSignatureCanvas(canvasId) {
             const canvas = document.getElementById(canvasId);
             if (!canvas) return;
@@ -793,6 +843,7 @@
                 adminSupport: "🛟 Қолдау кірістері",
                 adminLimit: "⏳ BilimLimit (Шектеу)", adminSub: "📜 BilimSubscription (Табельдер)",
                 adminHoldingPayments: "💳 HoldingPayments",
+                teachDash: "🖥️ Бақылау тақтасы",
                 teachJorn: "📖 Бағалар журналы", teachAtt: "📋 Қатысу журналы", teachClass: "➕ Сынып ашу (DCA)",
                 teachSched: "📅 Сабақ кестесі", teachNews: "📰 Жаңалықтар",
                 teachKtp: "📑 КТЖ (Күнтізбелік жоспар)", teachSup: "🛟 Қолдау қызметі",
@@ -814,6 +865,7 @@
                 adminSupport: "🛟 Входящие тикеты",
                 adminLimit: "⏳ BilimLimit (Лимиты)", adminSub: "📜 BilimSubscription (Табели)",
                 adminHoldingPayments: "💳 HoldingPayments",
+                teachDash: "🖥️ Панель управления",
                 teachJorn: "📖 Журнал оценок", teachAtt: "📋 Посещаемость", teachClass: "➕ Создать класс (DCA)",
                 teachSched: "📅 Расписание", teachNews: "📰 Новости", teachKtp: "📑 КТП",
                 teachSup: "🛟 Поддержка", teachTest: "📝 BilimTest (Тесты)",
@@ -832,6 +884,7 @@
                 adminSupport: "🛟 Support Tickets",
                 adminLimit: "⏳ BilimLimit", adminSub: "📜 BilimSubscription",
                 adminHoldingPayments: "💳 HoldingPayments",
+                teachDash: "🖥️ Teacher Dashboard",
                 teachJorn: "📖 Gradebook", teachAtt: "📋 Attendance", teachClass: "➕ Create Class (DCA)",
                 teachSched: "📅 Schedule", teachNews: "📰 News", teachKtp: "📑 KTP",
                 teachSup: "🛟 Support", teachTest: "📝 BilimTest",
@@ -869,6 +922,7 @@
                 ];
             } else if (currentUser.role === 'teacher') {
                 return [
+                    { id: 'teacher_dashboard', label: t.teachDash },
                     { id: 'teacher_journal', label: t.teachJorn },
                     { id: 'teacher_attendance', label: t.teachAtt },
                     { id: 'teacher_classes', label: t.teachClass },
@@ -1081,6 +1135,7 @@
                         parentHoldingPayments = data.parentHoldingPayments || {};
                         cookerOrders = data.cookerOrders || [];
                         summativeAssessments = data.summativeAssessments || [];
+                        journalOpenStatus = data.journalOpenStatus || {};
                         if (Array.isArray(data.cookerMenu)) {
                             cookerMenu = data.cookerMenu;
                         }
@@ -1101,7 +1156,7 @@
                         users, classesList, schedules, grades, attendance, ktpList, supportTickets, announcement: currentAnnouncement, newsList, activeLives, activeSessionsStore, bilimLimitSettings,
                         bilimTests, testResults, bilimCards, bilimSubscriptions, subscriptionSettings,
                         bPayWallets, bPayTransactions, schoolHoldings, parentHoldingsSubscribed, parentHoldingPayments,
-                        cookerOrders, cookerMenu, summativeAssessments
+                        cookerOrders, cookerMenu, summativeAssessments, journalOpenStatus
                     });
                     lastCloudSyncTime = Date.now();
                 } catch(e) { console.error(e); }
@@ -1333,7 +1388,7 @@
             document.getElementById('welcome-role').innerText = roleTitle;
 
             if(currentUser.role === 'admin') activeTab = 'admin_monitoring';
-            else if(currentUser.role === 'teacher') activeTab = 'teacher_journal';
+            else if(currentUser.role === 'teacher') activeTab = 'teacher_dashboard';
             else if(currentUser.role === 'parent') activeTab = 'parent_grades';
             else activeTab = 'student_grades';
 
@@ -1476,6 +1531,7 @@
                             className: s.className,
                             subject: s.subject,
                             daysInfo: daysInfo || 'Кестеде бекітілген',
+                            lessons: classSchedules,
                             source: 'schedule'
                         });
                     }
@@ -1491,10 +1547,30 @@
                     className: myHomeroom.name,
                     subject: selectedTeacherSubject,
                     daysInfo: 'Сынып жетекшісі',
+                    lessons: [],
                     source: 'homeroom'
                 });
             }
             return assignments;
+        }
+
+        function isJournalOpenForAssignment(key) {
+            return journalOpenStatus[key] !== false;
+        }
+
+        async function setJournalOpenState(key, isOpen) {
+            showSpinner(isOpen ? "Журнал ашылуда..." : "Журнал жабылуда...");
+            await loadDataFromCloud(true);
+            journalOpenStatus[key] = isOpen;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, isOpen ? "Журнал ашылды!" : "Журнал жабылды!", isOpen ? "Енді баға қоюға болады." : "Журнал уақытша жабылды.");
+            renderTabContent();
+        }
+
+        function openJournalFromDashboard(key) {
+            selectedTeacherAssignmentKey = key;
+            switchTab('teacher_journal');
         }
 
         /* Helper: Normalize grade record to support both legacy format and detailed multi-entry format */
@@ -1507,7 +1583,6 @@
             let bzhbEntries = Array.isArray(rawRecord.bzhbEntries) ? [...rawRecord.bzhbEntries] : [];
             let tzhbEntries = Array.isArray(rawRecord.tzhbEntries) ? [...rawRecord.tzhbEntries] : [];
 
-            // Backward compatibility ONLY for legacy records that haven't been migrated to modern arrays yet
             if (!hasModernArrays && formEntries.length === 0 && rawRecord.form) {
                 let parts = String(rawRecord.form).split('/');
                 let score = parseFloat(parts[0]);
@@ -1517,7 +1592,7 @@
                         id: 'leg_fb',
                         score: score,
                         max: max,
-                        date: rawRecord.formDate || rawRecord.updatedAt || '2026-11-17',
+                        date: rawRecord.formDate || rawRecord.updatedAt || '2026-11-18',
                         topic: rawRecord.formTopic || 'Сабақ бағасы',
                         comment: rawRecord.formComment || ''
                     });
@@ -1534,7 +1609,7 @@
                         title: 'БЖБ 1',
                         score: score,
                         max: max,
-                        date: rawRecord.bzhbDate || rawRecord.updatedAt || '2026-11-17',
+                        date: rawRecord.bzhbDate || rawRecord.updatedAt || '2026-11-18',
                         topic: 'Бөлім бойынша жиынтық бағалау',
                         comment: ''
                     });
@@ -1551,7 +1626,7 @@
                         title: 'ТЖБ 1',
                         score: score,
                         max: max,
-                        date: rawRecord.tzhbDate || rawRecord.updatedAt || '2026-11-17',
+                        date: rawRecord.tzhbDate || rawRecord.updatedAt || '2026-11-18',
                         topic: 'Тоқсандық жиынтық бағалау',
                         comment: ''
                     });
@@ -1612,13 +1687,12 @@
             };
         }
 
-        /* Student & Parent BilimClass-Style Grades Dashboard with Class Analytics Modal */
+        /* Student & Parent BilimClass-Style Grades Dashboard (Without top BZhB/TZhB banner — shown inside Schedule under subject) */
         function renderBilimClassStudentGradesUI(targetStudentUsername, studentObj, studentClass, isParentView = false) {
             let studentGrades = grades[targetStudentUsername] || {};
             let myAtt = (attendance[targetStudentUsername] || {})['today'] || '-';
             let classStudents = studentClass ? (studentClass.students || []) : [targetStudentUsername];
 
-            // Gather all subjects for this student (from active grades + schedules for their class)
             let subjectSet = new Set();
             Object.keys(studentGrades).forEach(sub => {
                 let normCheck = normalizeSubjectGrade(studentGrades[sub]);
@@ -1632,36 +1706,11 @@
             }
             let allSubjects = Array.from(subjectSet);
 
-            // Upcoming / Approved Summative Assessments (БЖБ / ТЖБ) for this class
-            let classSummatives = studentClass ? summativeAssessments.filter(sa => sa.className === studentClass.name) : [];
-            let summativeBannerHtml = classSummatives.length > 0 ? `
-                <div class="mb-4 p-3.5 liquid-glass rounded-2xl border border-amber-300/80 bg-amber-50/70 space-y-2">
-                    <div class="text-xs font-extrabold text-amber-900 flex items-center gap-1.5">
-                        <span>📌</span> Әкімшілік бекіткен БЖБ және ТЖБ кестесі (${studentClass.name})
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        ${classSummatives.map(sa => {
-                            let dt = getShortKazakhDate(sa.date);
-                            let badgeColor = sa.type === 'ТЖБ' ? 'bg-pink-600 text-white' : 'bg-amber-600 text-white';
-                            return `
-                                <div class="px-3 py-1.5 bg-white/90 rounded-xl border border-amber-200 text-[11px] flex items-center gap-2 shadow-2xs">
-                                    <span class="px-1.5 py-0.5 rounded font-black text-[9px] ${badgeColor}">${sa.type} бекітілген</span>
-                                    <b class="text-slate-900">${sa.subject}:</b>
-                                    <span class="text-slate-700 font-semibold">${sa.title}</span>
-                                    <span class="text-blue-700 font-bold">(${dt.shortChip})</span>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            ` : '';
-
             let subjectsCardsHtml = allSubjects.length > 0 ? allSubjects.map(sub => {
                 let norm = normalizeSubjectGrade(studentGrades[sub]);
                 let schedForSub = studentClass ? schedules.find(s => s.className === studentClass.name && s.subject === sub) : null;
                 let teacherName = schedForSub?.teacherName || (studentClass ? studentClass.teacher : 'Пән мұғалімі');
 
-                // Combine all grade chips (Formative, БЖБ, ТЖБ) sorted newest first
                 let chips = [];
                 norm.formEntries.forEach(e => {
                     chips.push({
@@ -1787,8 +1836,6 @@
                     </div>
                 </div>
 
-                ${summativeBannerHtml}
-
                 ${studentGradesSubTab === 'subjects' ? `
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         ${subjectsCardsHtml}
@@ -1823,8 +1870,7 @@
             let info = JSON.parse(decodeURIComponent(encodedPayload));
             let dt = getShortKazakhDate(info.date);
 
-            // Compute class distribution for this specific grade/assessment
-            let distribution = {}; // score -> count
+            let distribution = {};
             let totalPeersWithGrade = 0;
 
             (info.classStudents || []).forEach(stUn => {
@@ -1848,7 +1894,6 @@
                 }
             });
 
-            // Ensure current student's own score is represented
             let myScoreNum = Number(info.score);
             if (!distribution[myScoreNum]) {
                 distribution[myScoreNum] = 1;
@@ -1919,6 +1964,220 @@
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        /* Teacher Dashboard UI (Screenshot 1 Style + BilimAL Glass) */
+        function renderTeacherDashboardUI() {
+            let assignments = getTeacherAssignments(currentUser);
+
+            // Calculate current week dates (Mon - Sat) around current date (Nov 18, 2026 is Wednesday)
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ...
+            const diffToMon = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + diffToMon + (teacherDashboardWeek === 'next' ? 7 : (teacherDashboardWeek === 'prev' ? -7 : 0)));
+
+            let weekDaysData = [];
+            for (let i = 0; i < 6; i++) {
+                let d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                let dd = String(d.getDate()).padStart(2, '0');
+                let mm = String(d.getMonth() + 1).padStart(2, '0');
+                let yyyy = d.getFullYear();
+                let iso = `${yyyy}-${mm}-${dd}`;
+                let isToday = (d.toDateString() === now.toDateString());
+                weekDaysData.push({
+                    dayName: daysList[i],
+                    shortDate: `${dd}.${mm}`,
+                    fullDate: `${dd}.${mm}.${yyyy}`,
+                    iso: iso,
+                    isToday: isToday
+                });
+            }
+
+            let rangeTitle = `${weekDaysData[0].fullDate} - ${weekDaysData[5].fullDate} бойынша`;
+
+            // Gather all teacher lessons across the week
+            let teacherLessons = schedules.filter(s =>
+                (s.teacherUsername && s.teacherUsername === currentUser.username) ||
+                (s.teacherName && s.teacherName === currentUser.name)
+            );
+
+            let hasAnyLessonsInWeek = teacherLessons.length > 0;
+
+            let weekGridColumnsHtml = weekDaysData.map(wd => {
+                let dayLessons = teacherLessons.filter(l => (l.day || 'Дүйсенбі') === wd.dayName);
+                let cardsHtml = dayLessons.map(l => {
+                    let assignKey = `${l.className}|||${l.subject}`;
+                    let isOpen = isJournalOpenForAssignment(assignKey);
+                    let summativesForSlot = summativeAssessments.filter(sa => sa.className === l.className && sa.subject === l.subject);
+
+                    return `
+                        <div class="p-3 rounded-2xl bg-white/95 border ${isOpen ? 'border-emerald-300' : 'border-red-300'} shadow-xs space-y-2 text-left">
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="px-2 py-0.5 rounded-lg bg-blue-600 text-white font-black text-[10px]">${l.className}</span>
+                                <span class="text-[10px] font-bold ${isOpen ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'} px-1.5 py-0.5 rounded">
+                                    ${isOpen ? '🟢 Ашық' : '🔒 Жабық'}
+                                </span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-extrabold text-slate-900">${l.subject}</div>
+                                <div class="text-[10px] text-slate-500 font-semibold">🕒 ${l.time || 'Кесте бойынша'}</div>
+                                ${l.topic ? `<div class="text-[10px] text-slate-600 mt-0.5 truncate" title="${l.topic}">📌 ${l.topic}</div>` : ''}
+                            </div>
+                            ${summativesForSlot.length > 0 ? `
+                                <div class="flex flex-wrap gap-1">
+                                    ${summativesForSlot.map(sa => `<span class="px-1.5 py-0.5 rounded text-[9px] font-black ${sa.type === 'ТЖБ' ? 'bg-pink-100 text-pink-800' : 'bg-amber-100 text-amber-800'}">${sa.type} (${sa.date})</span>`).join('')}
+                                </div>
+                            ` : ''}
+                            <div class="pt-1.5 border-t border-slate-100 flex flex-col gap-1">
+                                <button onclick="openJournalFromDashboard('${assignKey}')" class="w-full py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[10px] flex items-center justify-center gap-1">
+                                    <span>👁️</span> Журналды көру
+                                </button>
+                                <div class="grid grid-cols-2 gap-1">
+                                    <button onclick="setJournalOpenState('${assignKey}', true)" class="py-1 ${isOpen ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'} rounded-lg font-bold text-[9px]">
+                                        Журналды ашу
+                                    </button>
+                                    <button onclick="setJournalOpenState('${assignKey}', false)" class="py-1 ${!isOpen ? 'bg-red-600 text-white' : 'bg-red-50 text-red-700 hover:bg-red-100'} rounded-lg font-bold text-[9px]">
+                                        Журналды жабу
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="border-r border-slate-200/80 last:border-r-0 flex flex-col min-h-[260px]">
+                        <div class="p-2.5 text-center border-b border-slate-200/80 ${wd.isToday ? 'bg-emerald-50/90' : 'bg-slate-50/80'}">
+                            <div class="text-[10px] font-bold text-slate-500">${wd.dayName}</div>
+                            <div class="text-sm font-black ${wd.isToday ? 'text-emerald-700' : 'text-slate-900'} flex items-center justify-center gap-1">
+                                ${wd.isToday ? '<span class="w-2 h-2 rounded-full bg-emerald-500"></span>' : ''}
+                                <span>${wd.shortDate}</span>
+                            </div>
+                        </div>
+                        <div class="p-2 space-y-2 flex-1 bg-white/40">
+                            ${cardsHtml || '<div class="text-[10px] text-slate-300 text-center pt-6">—</div>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Quick Assignment Summary Cards (if teacher has assignments)
+            let quickAssignmentsHtml = assignments.length > 0 ? `
+                <div class="mt-4 pt-4 border-t border-slate-200/80">
+                    <h4 class="text-xs font-extrabold text-slate-800 uppercase mb-2.5">📚 Сізге бекітілген сыныптар мен журналдарды басқару</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        ${assignments.map(a => {
+                            let isOpen = isJournalOpenForAssignment(a.key);
+                            return `
+                                <div class="p-3.5 rounded-2xl bg-white/90 border ${isOpen ? 'border-emerald-200' : 'border-red-200'} space-y-2.5 shadow-2xs">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-lg font-black text-[10px]">${a.className}</span>
+                                            <h5 class="text-sm font-extrabold text-slate-900 mt-1">${a.subject}</h5>
+                                            <p class="text-[10px] text-slate-500 font-semibold">📅 ${a.daysInfo}</p>
+                                        </div>
+                                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold ${isOpen ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}">
+                                            ${isOpen ? 'Ашық' : 'Жабық'}
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1.5 pt-2 border-t border-slate-100">
+                                        <button onclick="setJournalOpenState('${a.key}', true)" class="flex-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[10px]">
+                                            🟢 Журналды ашу
+                                        </button>
+                                        <button onclick="setJournalOpenState('${a.key}', false)" class="flex-1 py-1.5 px-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-[10px]">
+                                            🔒 Журналды жабу
+                                        </button>
+                                        <button onclick="openJournalFromDashboard('${a.key}')" class="w-full py-1.5 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[10px]">
+                                            📖 Журналды көру
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            return `
+                <div class="space-y-4">
+                    <!-- Top Header matching Screenshot 1 -->
+                    <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-200/80 pb-3">
+                        <div>
+                            <h3 class="text-base font-extrabold text-slate-900">
+                                Мұғалімнің бақылау тақтасы <span class="text-slate-500 font-semibold text-xs ml-1">${rangeTitle}</span>
+                            </h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-500">Белсенді</span>
+                            <span class="px-2.5 py-1 rounded-xl bg-white border text-xs font-extrabold text-slate-800">2026-2027 ⌄</span>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible Legend Bar ("Таңбаларды белгілеу") -->
+                    <div class="rounded-2xl bg-white/90 border border-slate-200/80 overflow-hidden shadow-2xs">
+                        <div onclick="teacherDashboardLegendOpen=!teacherDashboardLegendOpen; renderTabContent()" class="px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-slate-50/80">
+                            <span class="text-xs font-extrabold text-slate-800">Таңбаларды белгілеу</span>
+                            <span class="text-xs font-bold text-slate-500">${teacherDashboardLegendOpen ? 'Жасыру ⌃' : 'Көрсету ⌄'}</span>
+                        </div>
+                        ${teacherDashboardLegendOpen ? `
+                            <div class="px-4 pb-3 pt-1 border-t border-slate-100 flex flex-wrap gap-4 text-[11px] text-slate-700">
+                                <div class="flex items-center gap-1.5">
+                                    ${getAttendanceUserStickerHtml('С')}
+                                    <span>— <b>Себепті қатыспады</b> (Баға қойылмайды)</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    ${getAttendanceUserStickerHtml('А')}
+                                    <span>— <b>Ауырып жатыр</b> (Баға қойылмайды)</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-extrabold text-[10px]">+</span>
+                                    <span>— <b>Сабаққа қатысты</b> (Баға қоюға рұқсат)</span>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Term & Week Filter + Weekly Schedule Grid -->
+                    <div class="rounded-2xl bg-white/90 border border-slate-200/80 p-4 space-y-4 shadow-2xs">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Тоқсан:</label>
+                                <select onchange="teacherDashboardTerm=this.value; renderTabContent()" class="px-3 py-1.5 text-xs font-bold min-w-[130px]">
+                                    <option value="1" ${teacherDashboardTerm === '1' ? 'selected' : ''}>1 тоқсан</option>
+                                    <option value="2" ${teacherDashboardTerm === '2' ? 'selected' : ''}>2 тоқсан</option>
+                                    <option value="3" ${teacherDashboardTerm === '3' ? 'selected' : ''}>3 тоқсан</option>
+                                    <option value="4" ${teacherDashboardTerm === '4' ? 'selected' : ''}>4 тоқсан</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Апта:</label>
+                                <select onchange="teacherDashboardWeek=this.value; renderTabContent()" class="px-3 py-1.5 text-xs font-bold min-w-[180px]">
+                                    <option value="current" ${teacherDashboardWeek === 'current' ? 'selected' : ''}>Ағымдағы апта (${weekDaysData[0].shortDate} - ${weekDaysData[5].shortDate})</option>
+                                    <option value="prev" ${teacherDashboardWeek === 'prev' ? 'selected' : ''}>Алдыңғы апта</option>
+                                    <option value="next" ${teacherDashboardWeek === 'next' ? 'selected' : ''}>Келесі апта</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="border border-slate-200/80 rounded-2xl overflow-hidden">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+                                ${weekGridColumnsHtml}
+                            </div>
+                            ${!hasAnyLessonsInWeek ? `
+                                <div class="p-8 text-center bg-white/95 border-t border-slate-100 space-y-2">
+                                    <div class="text-4xl">👩‍💻📅</div>
+                                    <div class="text-base font-extrabold text-slate-800">Бұл аптада сабақтар жоқ</div>
+                                    <p class="text-xs text-slate-500">Әкімші сабақ кестесінде сізді сабаққа бекіткен соң, барлық сыныптар мен сабақтар осы жерде көрінеді.</p>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        ${quickAssignmentsHtml}
+                    </div>
+                </div>
+            `;
         }
 
         async function renderTabContent() {
@@ -2346,7 +2605,7 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                             <div class="p-4 bg-slate-50 rounded-2xl border space-y-3">
                                 <h4 class="text-xs font-extrabold text-blue-900 uppercase">1. Сабақ кестесіне мұғалім бекіту</h4>
-                                <p class="text-[11px] text-slate-500">Мұғалімді бекіткен соң, оның журналында сол сынып, пән және сабақ күні автоматты түрде ашылады.</p>
+                                <p class="text-[11px] text-slate-500">Мұғалімді бекіткен соң, оның бақылау тақтасы мен журналында сол сынып, пән және сабақ күні автоматты түрде ашылады.</p>
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
                                         <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Сынып:</label>
@@ -2377,7 +2636,7 @@
 
                             <div class="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-3">
                                 <h4 class="text-xs font-extrabold text-amber-900 uppercase">2. БЖБ және ТЖБ күндерін бекіту (Рұқсат ашу)</h4>
-                                <p class="text-[11px] text-amber-800">Админ бекіткеннен кейін мұғалім мен оқушыға «БЖБ/ТЖБ бекітілген» хабарламасы көрінеді және мұғалімге баға қою бағаны ашылады.</p>
+                                <p class="text-[11px] text-amber-800">Админ бекіткеннен кейін оқушының сабақ кестесінде сол пәннің астында БЖБ/ТЖБ көрінеді және мұғалімге баға қою бағаны ашылады.</p>
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
                                         <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Сынып:</label>
@@ -2398,7 +2657,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Өткізілетін күні:</label>
-                                        <input type="date" id="sum-date" value="2026-11-17" class="w-full p-2 text-xs font-bold">
+                                        <input type="date" id="sum-date" value="2026-11-18" class="w-full p-2 text-xs font-bold">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Макс. балл:</label>
@@ -2543,7 +2802,9 @@
                 }
             }
             else if (currentUser.role === 'teacher') {
-                if (activeTab === 'teacher_journal') {
+                if (activeTab === 'teacher_dashboard') {
+                    panel.innerHTML = renderTeacherDashboardUI();
+                } else if (activeTab === 'teacher_journal') {
                     let assignments = getTeacherAssignments(currentUser);
                     if (assignments.length === 0) {
                         panel.innerHTML = `
@@ -2562,24 +2823,24 @@
                     }
                     let currentAssign = assignments.find(a => a.key === selectedTeacherAssignmentKey);
                     selectedTeacherSubject = currentAssign.subject;
+                    let isJournalOpen = isJournalOpenForAssignment(currentAssign.key);
 
                     let targetClassObj = classesList.find(c => c.name === currentAssign.className);
                     let students = targetClassObj ? users.filter(u => u.role === 'student' && (targetClassObj.students || []).includes(u.username)) : [];
 
-                    // Approved BZhB and TZhB for this class & subject
                     let approvedSummatives = summativeAssessments.filter(sa => sa.className === currentAssign.className && sa.subject === currentAssign.subject);
                     let approvedBzhbList = approvedSummatives.filter(sa => sa.type === 'БЖБ');
                     let approvedTzhbList = approvedSummatives.filter(sa => sa.type === 'ТЖБ');
 
-                    // Collect all formative dates across students in this class+subject
+                    // Collect all formative dates + any absence dates (С or А) marked by homeroom teacher across students in this class
                     let fbDatesSet = new Set();
                     students.forEach(s => {
                         let norm = normalizeSubjectGrade((grades[s.username] || {})[currentAssign.subject]);
                         norm.formEntries.forEach(e => { if (e.date) fbDatesSet.add(e.date); });
+                        getStudentActiveAbsenceDates(s.username).forEach(ab => fbDatesSet.add(ab.date));
                     });
                     let fbDates = Array.from(fbDatesSet).sort();
 
-                    // Dynamic columns for BilimClass-style Matrix
                     let fbHeadersHtml = (!teacherJournalOnlySummative) ? fbDates.map(dStr => {
                         let dt = getShortKazakhDate(dStr);
                         return `
@@ -2622,9 +2883,30 @@
 
                     let matrixBodyHtml = students.length > 0 ? students.map((s, idx) => {
                         let norm = normalizeSubjectGrade((grades[s.username] || {})[currentAssign.subject]);
+                        let todayStatus = (attendance[s.username] || {})['today'] || '+';
+                        let studentNameSticker = (todayStatus === 'С' || todayStatus === 'А') ? getAttendanceUserStickerHtml(todayStatus, 'Бүгін') : '';
 
                         let fbCellsHtml = (!teacherJournalOnlySummative) ? fbDates.map(dStr => {
+                            let attStatus = getStudentAttendanceStatusForDate(s.username, dStr);
                             let entry = norm.formEntries.find(e => e.date === dStr);
+
+                            // If Excused (С) -> Yellow User Sticker, grading blocked
+                            if (attStatus === 'С') {
+                                return `
+                                    <td onclick="showIosToast(false, 'Баға қойылмайды!', '${s.name} (${dStr}) — Себепті сабаққа қатыспады')" class="bc-cell-fb text-center cursor-not-allowed bg-amber-50/60">
+                                        ${getAttendanceUserStickerHtml('С', dStr)}
+                                    </td>
+                                `;
+                            }
+                            // If Sick (А) -> Red User Sticker, grading blocked
+                            if (attStatus === 'А') {
+                                return `
+                                    <td onclick="showIosToast(false, 'Баға қойылмайды!', '${s.name} (${dStr}) — Ауырып жатыр')" class="bc-cell-fb text-center cursor-not-allowed bg-red-50/60">
+                                        ${getAttendanceUserStickerHtml('А', dStr)}
+                                    </td>
+                                `;
+                            }
+
                             return `
                                 <td onclick="openTeacherGradeCellModal('${s.username}', '${currentAssign.subject}', 'ФБ', '${dStr}', '', 10, 'Формативті бағалау')" class="bc-cell-fb text-center cursor-pointer hover:bg-blue-50/90 transition">
                                     ${entry ? `<span class="inline-block px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-900 font-black">${entry.score}</span>` : '<span class="text-slate-300">+</span>'}
@@ -2633,6 +2915,14 @@
                         }).join('') : '';
 
                         let bzhbCellsHtml = approvedBzhbList.map(sa => {
+                            let attStatus = getStudentAttendanceStatusForDate(s.username, sa.date);
+                            if (attStatus === 'С' || attStatus === 'А') {
+                                return `
+                                    <td onclick="showIosToast(false, 'Баға қойылмайды!', '${s.name} (${sa.date}) — Сабаққа қатыспады (${attStatus === 'С' ? 'Себепті' : 'Ауырып жатыр'})')" class="bc-cell-bzhb text-center cursor-not-allowed">
+                                        ${getAttendanceUserStickerHtml(attStatus, sa.date)}
+                                    </td>
+                                `;
+                            }
                             let entry = norm.bzhbEntries.find(e => e.assessmentId === sa.id) || norm.bzhbEntries.find(e => e.date === sa.date);
                             return `
                                 <td onclick="openTeacherGradeCellModal('${s.username}', '${currentAssign.subject}', 'БЖБ', '${sa.date}', '${sa.id}', ${sa.maxScore}, '${sa.title.replace(/'/g, '')}')" class="bc-cell-bzhb text-center cursor-pointer hover:bg-amber-100 transition">
@@ -2642,6 +2932,14 @@
                         }).join('');
 
                         let tzhbCellsHtml = approvedTzhbList.map(sa => {
+                            let attStatus = getStudentAttendanceStatusForDate(s.username, sa.date);
+                            if (attStatus === 'С' || attStatus === 'А') {
+                                return `
+                                    <td onclick="showIosToast(false, 'Баға қойылмайды!', '${s.name} (${sa.date}) — Сабаққа қатыспады (${attStatus === 'С' ? 'Себепті' : 'Ауырып жатыр'})')" class="bc-cell-tzhb text-center cursor-not-allowed">
+                                        ${getAttendanceUserStickerHtml(attStatus, sa.date)}
+                                    </td>
+                                `;
+                            }
                             let entry = norm.tzhbEntries.find(e => e.assessmentId === sa.id) || norm.tzhbEntries.find(e => e.date === sa.date);
                             return `
                                 <td onclick="openTeacherGradeCellModal('${s.username}', '${currentAssign.subject}', 'ТЖБ', '${sa.date}', '${sa.id}', ${sa.maxScore}, '${sa.title.replace(/'/g, '')}')" class="bc-cell-tzhb text-center cursor-pointer hover:bg-pink-100 transition">
@@ -2658,7 +2956,7 @@
                                 <td class="bc-sticky-col-1 font-bold text-slate-600">${idx + 1}</td>
                                 <td class="bc-sticky-col-2 font-extrabold text-slate-900 text-left">
                                     <div class="flex items-center justify-between gap-1">
-                                        <span>${s.name}</span>
+                                        <span class="flex items-center gap-1">${studentNameSticker}<span>${s.name}</span></span>
                                         <button onclick="openTeacherAddFBModal('${s.username}', '${currentAssign.subject}')" class="px-1.5 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[9px] font-black" title="Жаңа ФБ бағасын қою">+ФБ</button>
                                     </div>
                                 </td>
@@ -2698,10 +2996,23 @@
                                     </span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-[11px] font-bold text-slate-600">Журнал статусы: <b class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-lg">Ашық</b></span>
+                                    <span class="text-[11px] font-bold text-slate-600">Журнал статусы: 
+                                        <b class="px-2 py-0.5 ${isJournalOpen ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'} rounded-lg">
+                                            ${isJournalOpen ? 'Ашық' : 'Жабық'}
+                                        </b>
+                                    </span>
+                                    <button onclick="setJournalOpenState('${currentAssign.key}', ${!isJournalOpen})" class="px-2.5 py-1 ${isJournalOpen ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'} rounded-xl text-[10px] font-bold">
+                                        ${isJournalOpen ? '🔒 Журналды жабу' : '🟢 Журналды ашу'}
+                                    </button>
                                     ${teacherJournalFullScreen ? `<button onclick="toggleTeacherJournalFullScreen()" class="px-3 py-1 bg-slate-800 text-white rounded-xl text-xs font-bold">✕ Кішірейту</button>` : ''}
                                 </div>
                             </div>
+
+                            ${!isJournalOpen ? `
+                                <div class="mb-3 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-bold flex items-center justify-between">
+                                    <span>🔒 Бұл журнал қазір жабық! Жаңа баға қою немесе өзгерту үшін «Журналды ашу» батырмасын басыңыз.</span>
+                                </div>
+                            ` : ''}
 
                             <!-- Assigned Class & Subject Selector Bar -->
                             <div class="p-3 bg-slate-50/90 rounded-2xl border border-slate-200/80 mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -2738,14 +3049,20 @@
                                 </div>
                             </div>
 
-                            <!-- Status Indicator for Approved BZhB / TZhB -->
-                            <div class="mb-3 flex flex-wrap items-center gap-2 text-[11px]">
-                                <span class="font-bold text-slate-600">Жиынтық бағалау рұқсаты:</span>
-                                ${approvedSummatives.length > 0 ? approvedSummatives.map(sa => `
-                                    <span class="px-2.5 py-0.5 rounded-lg font-extrabold ${sa.type === 'ТЖБ' ? 'bg-pink-100 text-pink-800 border border-pink-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
-                                        ✓ ${sa.type} бекітілген (${sa.title} — ${sa.date})
-                                    </span>
-                                `).join('') : '<span class="px-2.5 py-0.5 rounded-lg bg-red-50 text-red-700 border border-red-200 font-bold">🔒 Админ БЖБ / ТЖБ күнін әлі бекітпеді (баға қою жабық)</span>'}
+                            <!-- Status Indicator for Approved BZhB / TZhB & Attendance Legend -->
+                            <div class="mb-3 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="font-bold text-slate-600">Жиынтық бағалау рұқсаты:</span>
+                                    ${approvedSummatives.length > 0 ? approvedSummatives.map(sa => `
+                                        <span class="px-2.5 py-0.5 rounded-lg font-extrabold ${sa.type === 'ТЖБ' ? 'bg-pink-100 text-pink-800 border border-pink-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
+                                            ✓ ${sa.type} бекітілген (${sa.title} — ${sa.date})
+                                        </span>
+                                    `).join('') : '<span class="px-2.5 py-0.5 rounded-lg bg-red-50 text-red-700 border border-red-200 font-bold">🔒 Админ БЖБ / ТЖБ күнін әлі бекітпеді (баға қою жабық)</span>'}
+                                </div>
+                                <div class="flex items-center gap-3 text-[10px] font-bold text-slate-600">
+                                    <span class="flex items-center gap-1">${getAttendanceUserStickerHtml('С')} Себепті</span>
+                                    <span class="flex items-center gap-1">${getAttendanceUserStickerHtml('А')} Ауырып жатыр</span>
+                                </div>
                             </div>
 
                             <!-- BilimClass Matrix Table -->
@@ -2886,27 +3203,54 @@
                 } else if (activeTab === 'teacher_attendance') {
                     let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
                     let students = myClass ? users.filter(u => u.role === 'student' && (myClass.students || []).includes(u.username)) : [];
+                    let todayIso = new Date().toISOString().split('T')[0];
                     panel.innerHTML = `
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📋 Қатысу журналы</h3>
-                        <div class="p-3 bg-slate-50 rounded border mb-3 flex gap-2 items-center">
-                            <input type="date" id="att-date" class="border rounded p-1 text-xs bg-white">
-                            <span class="text-xs text-slate-500">Күнді таңдап, тек сыныптағы оқушылардың қатысуын белгілеңіз.</span>
+                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">📋 Қатысу журналы (${myClass ? myClass.name : 'Сынып жетекшісі'})</h3>
+                        <div class="p-3 bg-slate-50 rounded-xl border mb-3 flex flex-wrap gap-3 items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-bold text-slate-700">Күнді таңдаңыз:</label>
+                                <input type="date" id="att-date" value="${todayIso}" onchange="refreshAttendanceTableByDate(this.value)" class="border rounded p-1.5 text-xs bg-white font-bold">
+                            </div>
+                            <div class="flex items-center gap-3 text-[11px] font-bold">
+                                <span class="text-emerald-700">[+] Қатысты — Баға қойылады</span>
+                                <span class="flex items-center gap-1 text-amber-700">${getAttendanceUserStickerHtml('С')} Себепті (Сары таңба — баға қойылмайды)</span>
+                                <span class="flex items-center gap-1 text-red-700">${getAttendanceUserStickerHtml('А')} Ауырып жатыр (Қызыл таңба — баға қойылмайды)</span>
+                            </div>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full gov-table">
-                                <thead><tr><th>Оқушы</th><th>Мәртебесі</th><th>Қатысуды таңдау</th><th>Әрекет</th></tr></thead>
-                                <tbody>
+                                <thead><tr><th>Оқушы</th><th>Таңба / Мәртебесі</th><th>Белгіленген күндер тарихы</th><th>Қатысуды таңдау</th><th>Әрекет</th></tr></thead>
+                                <tbody id="att-table-body">
                                     ${students.map(s => {
-                                        let attRecord = (attendance[s.username] || {})['today'] || '-';
+                                        let attRecord = getStudentAttendanceStatusForDate(s.username, todayIso);
+                                        let sticker = getAttendanceUserStickerHtml(attRecord, todayIso);
+                                        let historyTags = getStudentActiveAbsenceDates(s.username).map(ab => `
+                                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${ab.status === 'С' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-red-50 text-red-800 border border-red-200'}">
+                                                ${getAttendanceUserStickerHtml(ab.status, ab.date)} ${ab.date}
+                                            </span>
+                                        `).join(' ') || '<span class="text-slate-400">Қатыспаған күндер жоқ</span>';
+
                                         return `
                                             <tr>
                                                 <td class="font-bold text-left">${s.name}</td>
-                                                <td><span class="font-bold">${attRecord}</span></td>
-                                                <td><select id="att_status_${s.username}" class="border rounded p-1 text-xs bg-white"><option value="-">Белгіленбеді (-)</option><option value="+">Қатысты (+)</option><option value="С">Себепті (С)</option><option value="А">Ауырып жатыр (А)</option></select></td>
+                                                <td>
+                                                    <div class="flex items-center justify-center gap-1.5">
+                                                        ${sticker}
+                                                        <span class="font-extrabold">${attRecord === '+' ? 'Қатысты (+)' : (attRecord === 'С' ? 'Себепті (С)' : (attRecord === 'А' ? 'Ауырып жатыр (А)' : '-'))}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-left">${historyTags}</td>
+                                                <td>
+                                                    <select id="att_status_${s.username}" class="border rounded p-1 text-xs bg-white font-bold">
+                                                        <option value="+" ${attRecord === '+' ? 'selected' : ''}>Қатысты (+)</option>
+                                                        <option value="С" ${attRecord === 'С' ? 'selected' : ''}>Себепті (С — Сары белгі)</option>
+                                                        <option value="А" ${attRecord === 'А' ? 'selected' : ''}>Ауырып жатыр (А — Қызыл белгі)</option>
+                                                    </select>
+                                                </td>
                                                 <td><button onclick="saveAttendance('${s.username}')" class="px-3 py-1 bg-blue-600 text-white rounded font-bold text-[10px]">Сақтау</button></td>
                                             </tr>
                                         `;
-                                    }).join('') || '<tr><td colspan="4" class="text-center text-slate-400">Оқушылар жоқ</td></tr>'}
+                                    }).join('') || '<tr><td colspan="5" class="text-center text-slate-400">Оқушылар жоқ</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -3108,6 +3452,44 @@
             }
         }
 
+        function refreshAttendanceTableByDate(dateVal) {
+            let myClass = classesList.find(c => c.teacherUsername === currentUser.username);
+            let students = myClass ? users.filter(u => u.role === 'student' && (myClass.students || []).includes(u.username)) : [];
+            let tbody = document.getElementById('att-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = students.map(s => {
+                let attRecord = getStudentAttendanceStatusForDate(s.username, dateVal);
+                let sticker = getAttendanceUserStickerHtml(attRecord, dateVal);
+                let historyTags = getStudentActiveAbsenceDates(s.username).map(ab => `
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${ab.status === 'С' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-red-50 text-red-800 border border-red-200'}">
+                        ${getAttendanceUserStickerHtml(ab.status, ab.date)} ${ab.date}
+                    </span>
+                `).join(' ') || '<span class="text-slate-400">Қатыспаған күндер жоқ</span>';
+
+                return `
+                    <tr>
+                        <td class="font-bold text-left">${s.name}</td>
+                        <td>
+                            <div class="flex items-center justify-center gap-1.5">
+                                ${sticker}
+                                <span class="font-extrabold">${attRecord === '+' ? 'Қатысты (+)' : (attRecord === 'С' ? 'Себепті (С)' : (attRecord === 'А' ? 'Ауырып жатыр (А)' : '-'))}</span>
+                            </div>
+                        </td>
+                        <td class="text-left">${historyTags}</td>
+                        <td>
+                            <select id="att_status_${s.username}" class="border rounded p-1 text-xs bg-white font-bold">
+                                <option value="+" ${attRecord === '+' ? 'selected' : ''}>Қатысты (+)</option>
+                                <option value="С" ${attRecord === 'С' ? 'selected' : ''}>Себепті (С — Сары белгі)</option>
+                                <option value="А" ${attRecord === 'А' ? 'selected' : ''}>Ауырып жатыр (А — Қызыл белгі)</option>
+                            </select>
+                        </td>
+                        <td><button onclick="saveAttendance('${s.username}')" class="px-3 py-1 bg-blue-600 text-white rounded font-bold text-[10px]">Сақтау</button></td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="5" class="text-center text-slate-400">Оқушылар жоқ</td></tr>';
+        }
+
         /* Teacher Journal Matrix Actions & Modals */
         function selectTeacherAssignment(key) {
             selectedTeacherAssignmentKey = key;
@@ -3120,6 +3502,11 @@
         }
 
         function openTeacherAddFBModal(studentUsername, subject) {
+            let assignKey = selectedTeacherAssignmentKey;
+            if (assignKey && !isJournalOpenForAssignment(assignKey)) {
+                showIosToast(false, "Журнал жабық!", "Алдымен «Журналды ашу» батырмасын басыңыз!");
+                return;
+            }
             let stObj = users.find(u => u.username === studentUsername);
             let todayIso = new Date().toISOString().split('T')[0];
 
@@ -3160,6 +3547,17 @@
         }
 
         function openTeacherGradeCellModal(studentUsername, subject, kind, dateStr, assessmentId, maxScore, title) {
+            let assignKey = selectedTeacherAssignmentKey;
+            if (assignKey && !isJournalOpenForAssignment(assignKey)) {
+                showIosToast(false, "Журнал жабық!", "Алдымен «Журналды ашу» батырмасын басыңыз!");
+                return;
+            }
+            let attStatus = getStudentAttendanceStatusForDate(studentUsername, dateStr);
+            if (attStatus === 'С' || attStatus === 'А') {
+                showIosToast(false, "Баға қойылмайды!", `Бұл күні (${dateStr}) оқушы сабаққа қатыспаған (${attStatus === 'С' ? 'Себепті' : 'Ауырып жатыр'})!`);
+                return;
+            }
+
             let stObj = users.find(u => u.username === studentUsername);
             let norm = normalizeSubjectGrade((grades[studentUsername] || {})[subject]);
             let existingEntry = null;
@@ -3219,6 +3617,12 @@
 
             if (!dateVal || isNaN(scoreVal) || scoreVal < 0 || scoreVal > maxScore) {
                 showIosToast(false, "Қате балл!", `0 мен ${maxScore} аралығындағы балл енгізіңіз!`);
+                return;
+            }
+
+            let attStatus = getStudentAttendanceStatusForDate(studentUsername, dateVal);
+            if (attStatus === 'С' || attStatus === 'А') {
+                showIosToast(false, "Баға қойылмайды!", `Бұл күні (${dateVal}) оқушы сабаққа қатыспаған (${attStatus === 'С' ? 'Себепті' : 'Ауырып жатыр'})!`);
                 return;
             }
 
@@ -3286,14 +3690,13 @@
                 bzhb: latestB ? `${latestB.score}/${latestB.max}` : '',
                 tzhb: latestT ? `${latestT.score}/${latestT.max}` : '',
                 percent: metrics.totalPercent,
-                final: norm.final,
-                status: norm.status,
-                updatedAt: dateVal
+                final: norm.final || '',
+                status: norm.status || ''
             };
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `Баға (${scoreVal}/${maxScore}) ${dateVal} күніне сақталды!`);
+            showIosToast(true, "Сәтті!", `${kind} бағасы (${scoreVal}/${maxScore}) журналға енгізілді!`);
             renderTabContent();
         }
 
@@ -3301,71 +3704,84 @@
             let modal = document.getElementById('teacher-grade-modal');
             if (modal) modal.remove();
 
-            showSpinner("Өшірілуде...");
+            showSpinner("Баға өшірілуде...");
             await loadDataFromCloud(true);
-            if (grades[studentUsername] && grades[studentUsername][subject]) {
-                let norm = normalizeSubjectGrade(grades[studentUsername][subject]);
-                if (kind === 'ФБ') {
-                    norm.formEntries = norm.formEntries.filter(e => e.date !== dateStr);
-                } else if (kind === 'БЖБ') {
-                    norm.bzhbEntries = norm.bzhbEntries.filter(e => !((assessmentId && e.assessmentId === assessmentId) || e.date === dateStr));
-                } else if (kind === 'ТЖБ') {
-                    norm.tzhbEntries = norm.tzhbEntries.filter(e => !((assessmentId && e.assessmentId === assessmentId) || e.date === dateStr));
-                }
 
-                let hasAnyRemaining = norm.formEntries.length > 0 || norm.bzhbEntries.length > 0 || norm.tzhbEntries.length > 0 || norm.final || norm.status;
-                if (!hasAnyRemaining) {
-                    delete grades[studentUsername][subject];
-                } else {
-                    let metrics = computeSubjectMetrics(norm.formEntries, norm.bzhbEntries, norm.tzhbEntries);
-                    let latestFb = norm.formEntries[norm.formEntries.length - 1];
-                    let latestB = norm.bzhbEntries[norm.bzhbEntries.length - 1];
-                    let latestT = norm.tzhbEntries[norm.tzhbEntries.length - 1];
-
-                    grades[studentUsername][subject] = {
-                        formEntries: norm.formEntries,
-                        bzhbEntries: norm.bzhbEntries,
-                        tzhbEntries: norm.tzhbEntries,
-                        form: latestFb ? `${latestFb.score}/10` : '',
-                        bzhb: latestB ? `${latestB.score}/${latestB.max}` : '',
-                        tzhb: latestT ? `${latestT.score}/${latestT.max}` : '',
-                        percent: metrics.totalPercent,
-                        final: norm.final,
-                        status: norm.status,
-                        updatedAt: latestFb ? latestFb.date : (latestB ? latestB.date : (latestT ? latestT.date : ''))
-                    };
-                }
-                await saveDataToCloud();
+            if (!grades[studentUsername] || !grades[studentUsername][subject]) {
+                hideSpinner();
+                return;
             }
+            let norm = normalizeSubjectGrade(grades[studentUsername][subject]);
+
+            if (kind === 'ФБ') {
+                norm.formEntries = norm.formEntries.filter(e => e.date !== dateStr);
+            } else if (kind === 'БЖБ') {
+                norm.bzhbEntries = norm.bzhbEntries.filter(e => !((assessmentId && e.assessmentId === assessmentId) || e.date === dateStr));
+            } else if (kind === 'ТЖБ') {
+                norm.tzhbEntries = norm.tzhbEntries.filter(e => !((assessmentId && e.assessmentId === assessmentId) || e.date === dateStr));
+            }
+
+            let metrics = computeSubjectMetrics(norm.formEntries, norm.bzhbEntries, norm.tzhbEntries);
+            let latestFb = norm.formEntries[norm.formEntries.length - 1];
+            let latestB = norm.bzhbEntries[norm.bzhbEntries.length - 1];
+            let latestT = norm.tzhbEntries[norm.tzhbEntries.length - 1];
+
+            grades[studentUsername][subject] = {
+                formEntries: norm.formEntries,
+                bzhbEntries: norm.bzhbEntries,
+                tzhbEntries: norm.tzhbEntries,
+                form: latestFb ? `${latestFb.score}/10` : '',
+                bzhb: latestB ? `${latestB.score}/${latestB.max}` : '',
+                tzhb: latestT ? `${latestT.score}/${latestT.max}` : '',
+                percent: metrics.totalPercent,
+                final: norm.final || '',
+                status: norm.status || ''
+            };
+
+            await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Баға толық жойылды.");
+            showIosToast(true, "Өшірілді!", "Таңдалған баға журналдан өшірілді.");
             renderTabContent();
         }
 
         function openBulkAddFBDateModal(className, subject) {
-            let targetClassObj = classesList.find(c => c.name === className);
-            let students = targetClassObj ? users.filter(u => u.role === 'student' && (targetClassObj.students || []).includes(u.username)) : [];
-            if (students.length === 0) {
-                showIosToast(false, "Оқушылар жоқ!", "Бұл сыныпта әлі оқушылар тіркелмеген.");
+            let assignKey = selectedTeacherAssignmentKey;
+            if (assignKey && !isJournalOpenForAssignment(assignKey)) {
+                showIosToast(false, "Журнал жабық!", "Алдымен «Журналды ашу» батырмасын басыңыз!");
                 return;
             }
+            let classObj = classesList.find(c => c.name === className);
+            let students = classObj ? users.filter(u => u.role === 'student' && (classObj.students || []).includes(u.username)) : [];
             let todayIso = new Date().toISOString().split('T')[0];
 
             let existing = document.getElementById('bulk-fb-modal');
             if (existing) existing.remove();
 
-            let rowsHtml = students.map(s => `
-                <div class="flex items-center justify-between gap-2 py-1.5 border-b border-slate-100 text-xs">
-                    <span class="font-bold text-slate-800">${s.name}</span>
-                    <input type="number" id="bulk_sc_${s.username}" min="1" max="10" placeholder="1-10" class="w-16 p-1 text-center font-black text-emerald-700">
-                </div>
-            `).join('');
+            let studentInputsHtml = students.map(s => {
+                let attStatus = getStudentAttendanceStatusForDate(s.username, todayIso);
+                let isAbsent = (attStatus === 'С' || attStatus === 'А');
+                return `
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-100 text-xs ${isAbsent ? 'opacity-75 bg-amber-50/40 px-2 rounded-lg' : ''}">
+                        <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                            ${isAbsent ? getAttendanceUserStickerHtml(attStatus, todayIso) : ''}
+                            <span>${s.name}</span>
+                        </span>
+                        ${isAbsent ? `
+                            <span class="text-[10px] font-extrabold ${attStatus === 'С' ? 'text-amber-700' : 'text-red-700'}">
+                                ${attStatus === 'С' ? 'Себепті (Қойылмайды)' : 'Ауырып жатыр (Қойылмайды)'}
+                            </span>
+                        ` : `
+                            <input type="number" id="bulk_score_${s.username}" min="1" max="10" placeholder="1-10" class="w-20 p-1.5 text-center font-black text-emerald-700">
+                        `}
+                    </div>
+                `;
+            }).join('') || '<div class="text-xs text-slate-400">Оқушылар жоқ</div>';
 
             let modalHtml = `
                 <div class="ios-modal-backdrop" id="bulk-fb-modal">
-                    <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-md w-full space-y-3 border max-h-[90vh] overflow-y-auto">
+                    <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-md w-full space-y-3 border">
                         <div class="flex justify-between items-center border-b pb-2">
-                            <h3 class="text-sm font-extrabold text-slate-900">+ Сабақ күні және ФБ бағалары</h3>
+                            <h3 class="text-sm font-extrabold text-slate-900">📅 Сабақ күні бойынша ФБ қою (${className})</h3>
                             <button onclick="document.getElementById('bulk-fb-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
@@ -3375,13 +3791,13 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-600 mb-1">Сабақ тақырыбы:</label>
-                                <input type="text" id="bulk-fb-topic" placeholder="Сабақ тақырыбы" class="w-full p-2 text-xs">
+                                <input type="text" id="bulk-fb-topic" placeholder="Тақырып..." class="w-full p-2 text-xs">
                             </div>
                         </div>
-                        <div class="space-y-1 max-h-60 overflow-y-auto pr-1">
-                            ${rowsHtml}
+                        <div class="max-h-60 overflow-y-auto space-y-1 bg-slate-50/70 p-3 rounded-2xl border">
+                            ${studentInputsHtml}
                         </div>
-                        <button onclick="saveBulkFBGrades('${className}', '${subject}')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow">💾 Барлық бағаны сақтау</button>
+                        <button onclick="saveBulkFBGrades('${className}', '${subject}')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow">💾 Барлық бағаларды сақтау</button>
                     </div>
                 </div>
             `;
@@ -3392,109 +3808,117 @@
             let dateVal = document.getElementById('bulk-fb-date').value;
             let topicVal = document.getElementById('bulk-fb-topic').value.trim() || 'Сабақ бағасы';
             if (!dateVal) {
-                showIosToast(false, "Дата таңдаңыз!", "Сабақ күнін көрсетіңіз!");
+                showIosToast(false, "Күнді таңдаңыз!", "Сабақ датасын таңдау міндетті.");
                 return;
             }
 
-            let targetClassObj = classesList.find(c => c.name === className);
-            let students = targetClassObj ? users.filter(u => u.role === 'student' && (targetClassObj.students || []).includes(u.username)) : [];
-
-            let modal = document.getElementById('bulk-fb-modal');
-            if (modal) modal.remove();
+            let classObj = classesList.find(c => c.name === className);
+            let students = classObj ? users.filter(u => u.role === 'student' && (classObj.students || []).includes(u.username)) : [];
 
             showSpinner("Бағалар сақталуда...");
             await loadDataFromCloud(true);
 
             let savedCount = 0;
             students.forEach(s => {
-                let inp = document.getElementById(`bulk_sc_${s.username}`);
-                if (!inp) return;
-                let val = parseFloat(inp.value);
-                if (!isNaN(val) && val >= 1 && val <= 10) {
-                    if (!grades[s.username]) grades[s.username] = {};
-                    let norm = normalizeSubjectGrade(grades[s.username][subject]);
-                    let idx = norm.formEntries.findIndex(e => e.date === dateVal);
-                    let item = {
-                        id: idx !== -1 ? norm.formEntries[idx].id : 'fb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
-                        score: val,
-                        max: 10,
-                        date: dateVal,
-                        topic: topicVal,
-                        comment: ''
-                    };
-                    if (idx !== -1) norm.formEntries[idx] = item;
-                    else norm.formEntries.push(item);
+                let attStatus = getStudentAttendanceStatusForDate(s.username, dateVal);
+                if (attStatus === 'С' || attStatus === 'А') return;
 
-                    let metrics = computeSubjectMetrics(norm.formEntries, norm.bzhbEntries, norm.tzhbEntries);
-                    grades[s.username][subject] = {
-                        ...grades[s.username][subject],
-                        formEntries: norm.formEntries,
-                        bzhbEntries: norm.bzhbEntries,
-                        tzhbEntries: norm.tzhbEntries,
-                        form: `${val}/10`,
-                        percent: metrics.totalPercent,
-                        final: norm.final,
-                        status: norm.status,
-                        updatedAt: dateVal
-                    };
-                    savedCount++;
+                let inp = document.getElementById(`bulk_score_${s.username}`);
+                if (inp && inp.value !== '') {
+                    let sc = parseFloat(inp.value);
+                    if (!isNaN(sc) && sc >= 0 && sc <= 10) {
+                        if (!grades[s.username]) grades[s.username] = {};
+                        let norm = normalizeSubjectGrade(grades[s.username][subject]);
+                        let idx = norm.formEntries.findIndex(e => e.date === dateVal);
+                        let item = {
+                            id: idx !== -1 ? norm.formEntries[idx].id : 'fb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+                            score: sc,
+                            max: 10,
+                            date: dateVal,
+                            topic: topicVal,
+                            comment: ''
+                        };
+                        if (idx !== -1) norm.formEntries[idx] = item;
+                        else norm.formEntries.push(item);
+
+                        let metrics = computeSubjectMetrics(norm.formEntries, norm.bzhbEntries, norm.tzhbEntries);
+                        let latestFb = norm.formEntries[norm.formEntries.length - 1];
+                        grades[s.username][subject] = {
+                            formEntries: norm.formEntries,
+                            bzhbEntries: norm.bzhbEntries,
+                            tzhbEntries: norm.tzhbEntries,
+                            form: latestFb ? `${latestFb.score}/10` : '',
+                            bzhb: norm.bzhbEntries.length ? `${norm.bzhbEntries[norm.bzhbEntries.length - 1].score}/${norm.bzhbEntries[norm.bzhbEntries.length - 1].max}` : '',
+                            tzhb: norm.tzhbEntries.length ? `${norm.tzhbEntries[norm.tzhbEntries.length - 1].score}/${norm.tzhbEntries[norm.tzhbEntries.length - 1].max}` : '',
+                            percent: metrics.totalPercent,
+                            final: norm.final || '',
+                            status: norm.status || ''
+                        };
+                        savedCount++;
+                    }
                 }
             });
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `${savedCount} оқушыға баға қойылды!`);
-            renderTabContent();
+            let modal = document.getElementById('bulk-fb-modal');
+            if (modal) modal.remove();
+
+            if (savedCount > 0) {
+                showIosToast(true, "Сәтті!", `${savedCount} оқушыға ФБ бағасы қойылды.`);
+                renderTabContent();
+            } else {
+                showIosToast(false, "Ескерту!", "Ешқандай баға енгізілмеді немесе оқушылар қатыспаған.");
+            }
         }
 
-        /* BilimClass-Style Final Grade & Attestation Dropdown Modal */
         function openTeacherFinalGradeModal(studentUsername, subject, studentName, currentFinal, currentStatus) {
-            let existing = document.getElementById('final-grade-modal');
+            let assignKey = selectedTeacherAssignmentKey;
+            if (assignKey && !isJournalOpenForAssignment(assignKey)) {
+                showIosToast(false, "Журнал жабық!", "Алдымен «Журналды ашу» батырмасын басыңыз!");
+                return;
+            }
+            let existing = document.getElementById('teacher-final-modal');
             if (existing) existing.remove();
 
-            let options = [
-                { val: '5', label: 'Бағалау: 5', isGrade: true },
-                { val: '4', label: 'Бағалау: 4', isGrade: true },
-                { val: '3', label: 'Бағалау: 3', isGrade: true },
-                { val: '2', label: 'Бағалау: 2', isGrade: true },
-                { val: 'Уақытша аттест. жоқ', label: 'Уақытша аттест. жоқ', isGrade: false },
-                { val: 'Аттест. жоқ', label: 'Аттест. жоқ', isGrade: false },
-                { val: 'Босатылған', label: 'Босатылған', isGrade: false },
-                { val: '', label: 'Таңдалмады', isGrade: false }
-            ];
-
-            let activeVal = currentStatus || currentFinal || '';
-            let btnsHtml = options.map(opt => {
-                let isSelected = activeVal === opt.val;
-                return `
-                    <button onclick="saveTeacherFinalGrade('${studentUsername}', '${subject}', '${opt.val}', ${opt.isGrade})" class="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-50 hover:bg-blue-50 text-slate-800'}">
-                        <span>${opt.label}</span>
-                        ${isSelected ? '<span>✓</span>' : ''}
-                    </button>
-                `;
-            }).join('');
-
             let modalHtml = `
-                <div class="ios-modal-backdrop" id="final-grade-modal" onclick="if(event.target.id==='final-grade-modal') this.remove()">
-                    <div class="bg-white p-5 rounded-3xl shadow-2xl max-w-xs w-full space-y-2 border">
-                        <div class="flex justify-between items-center border-b pb-2 mb-1">
-                            <div>
-                                <div class="text-xs font-extrabold text-slate-900">Қорытынды баға</div>
-                                <div class="text-[10px] text-slate-500 font-semibold">${studentName} — ${subject}</div>
-                            </div>
-                            <button onclick="document.getElementById('final-grade-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
+                <div class="ios-modal-backdrop" id="teacher-final-modal">
+                    <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full space-y-3 border">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">🎓 Қорытынды баға қою</h3>
+                            <button onclick="document.getElementById('teacher-final-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
                         </div>
-                        <div class="space-y-1.5">
-                            ${btnsHtml}
+                        <div class="text-xs font-bold text-blue-900">${studentName} — ${subject}</div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Қорытынды баға (2 - 5):</label>
+                            <select id="tf-final" class="w-full p-2 text-xs font-extrabold text-blue-800">
+                                <option value="">-- Автоматты / Таңдалмады --</option>
+                                <option value="5" ${currentFinal === '5' ? 'selected' : ''}>5 (Өте жақсы)</option>
+                                <option value="4" ${currentFinal === '4' ? 'selected' : ''}>4 (Жақсы)</option>
+                                <option value="3" ${currentFinal === '3' ? 'selected' : ''}>3 (Қанағаттанарлық)</option>
+                                <option value="2" ${currentFinal === '2' ? 'selected' : ''}>2 (Қанағаттанарлықсыз)</option>
+                            </select>
                         </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-1">Арнайы мәртебе (қажет болса):</label>
+                            <select id="tf-status" class="w-full p-2 text-xs font-bold text-red-700">
+                                <option value="" ${currentStatus === '' ? 'selected' : ''}>Жоқ (Қалыпты)</option>
+                                <option value="н/а" ${currentStatus === 'н/а' ? 'selected' : ''}>н/а (Аттестатталмаған)</option>
+                                <option value="босатылған" ${currentStatus === 'босатылған' ? 'selected' : ''}>босатылған (Освобожден)</option>
+                            </select>
+                        </div>
+                        <button onclick="saveTeacherFinalGrade('${studentUsername}', '${subject}')" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow">💾 Сақтау</button>
                     </div>
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
-        async function saveTeacherFinalGrade(studentUsername, subject, val, isGrade) {
-            let modal = document.getElementById('final-grade-modal');
+        async function saveTeacherFinalGrade(studentUsername, subject) {
+            let finalVal = document.getElementById('tf-final').value;
+            let statusVal = document.getElementById('tf-status').value;
+
+            let modal = document.getElementById('teacher-final-modal');
             if (modal) modal.remove();
 
             showSpinner("Қорытынды баға сақталуда...");
@@ -3502,42 +3926,37 @@
 
             if (!grades[studentUsername]) grades[studentUsername] = {};
             let norm = normalizeSubjectGrade(grades[studentUsername][subject]);
+            let metrics = computeSubjectMetrics(norm.formEntries, norm.bzhbEntries, norm.tzhbEntries);
 
-            let finalVal = isGrade ? val : '';
-            let statusVal = !isGrade ? val : '';
-            let hasAnyRemaining = norm.formEntries.length > 0 || norm.bzhbEntries.length > 0 || norm.tzhbEntries.length > 0 || finalVal || statusVal;
-
-            if (!hasAnyRemaining) {
-                delete grades[studentUsername][subject];
-            } else {
-                grades[studentUsername][subject] = {
-                    ...grades[studentUsername][subject],
-                    formEntries: norm.formEntries,
-                    bzhbEntries: norm.bzhbEntries,
-                    tzhbEntries: norm.tzhbEntries,
-                    percent: norm.percent,
-                    final: finalVal,
-                    status: statusVal
-                };
-            }
+            grades[studentUsername][subject] = {
+                formEntries: norm.formEntries,
+                bzhbEntries: norm.bzhbEntries,
+                tzhbEntries: norm.tzhbEntries,
+                form: norm.formEntries.length ? `${norm.formEntries[norm.formEntries.length - 1].score}/10` : '',
+                bzhb: norm.bzhbEntries.length ? `${norm.bzhbEntries[norm.bzhbEntries.length - 1].score}/${norm.bzhbEntries[norm.bzhbEntries.length - 1].max}` : '',
+                tzhb: norm.tzhbEntries.length ? `${norm.tzhbEntries[norm.tzhbEntries.length - 1].score}/${norm.tzhbEntries[norm.tzhbEntries.length - 1].max}` : '',
+                percent: metrics.totalPercent,
+                final: finalVal,
+                status: statusVal
+            };
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Қорытынды баға бекітілді!");
+            showIosToast(true, "Сақталды!", "Қорытынды баға бекітілді.");
             renderTabContent();
         }
 
-        /* Admin Approve / Delete Summative Assessments (БЖБ / ТЖБ) */
+        /* Admin Summative (БЖБ / ТЖБ) Management */
         async function adminApproveSummative() {
             let className = document.getElementById('sum-class').value;
             let subject = document.getElementById('sum-subject').value;
             let type = document.getElementById('sum-type').value;
             let dateVal = document.getElementById('sum-date').value;
-            let maxScore = parseInt(document.getElementById('sum-max').value) || (type === 'ТЖБ' ? 25 : 15);
+            let maxScore = parseInt(document.getElementById('sum-max').value) || 15;
             let title = document.getElementById('sum-title').value.trim() || `${type} 1`;
 
             if (!className || !subject || !dateVal) {
-                showIosToast(false, "Толық емес!", "Сынып, пән және датаны таңдаңыз!");
+                showIosToast(false, "Толық толтырыңыз!", "Сынып, пән және датаны таңдаңыз.");
                 return;
             }
 
@@ -3545,327 +3964,199 @@
             await loadDataFromCloud(true);
 
             summativeAssessments.push({
-                id: 'sum_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+                id: 'sa_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
                 className,
                 subject,
                 type,
                 title,
                 date: dateVal,
                 maxScore,
-                approvedBy: currentUser.username,
-                approvedAt: getCurrentDateDDMMYYYY()
+                approvedBy: currentUser.username
             });
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "✓ Бекітілді!", `${className} — ${subject} (${type}) бекітілді! Мұғалім мен оқушыға көрінеді.`);
+            showIosToast(true, "Бекітілді!", `${className} — ${subject} (${title}, ${dateVal}) оқушы кестесіне қосылды.`);
             renderTabContent();
         }
 
         async function adminDeleteSummative(idx) {
-            if (!confirm("Бұл БЖБ / ТЖБ рұқсатын өшіргіңіз келе ме?")) return;
+            if (!confirm("Бұл БЖБ / ТЖБ кестесін өшіресіз бе?")) return;
             showSpinner("Өшірілуде...");
             await loadDataFromCloud(true);
             summativeAssessments.splice(idx, 1);
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Жиынтық бағалау кестеден өшірілді.");
+            showIosToast(true, "Өшірілді!", "Жиынтық бағалау жойылды.");
             renderTabContent();
         }
 
-        function openHoldingSettingsModal(holdingId) {
-            let h = schoolHoldings.find(x => x.id === holdingId);
-            if (!h) return;
-
-            let startUI = h.payStart ? h.payStart.replace(/\//g, '-').replace('-', 'T') : '';
-            let endUI = h.payEnd ? h.payEnd.replace(/\//g, '-').replace('-', 'T') : '';
-
-            let payersList = [];
-            Object.keys(parentHoldingPayments).forEach(pUn => {
-                let userObj = users.find(u => u.username === pUn);
-                (parentHoldingPayments[pUn] || []).forEach((pay, payIdx) => {
-                    if (pay.holdingId === holdingId) {
-                        payersList.push({
-                            parentUsername: pUn,
-                            parentName: userObj ? userObj.name : pUn,
-                            payIdx: payIdx,
-                            ...pay
-                        });
-                    }
-                });
-            });
-
-            let payersRows = payersList.length > 0 ? payersList.map(p => `
-                <tr class="text-[11px]">
-                    <td class="font-bold">${p.parentName} (@${p.parentUsername})</td>
-                    <td class="font-extrabold text-emerald-700">${p.originalAmount || p.amount} ₸</td>
-                    <td>${p.date}</td>
-                    <td>
-                        ${p.signature ? `<img src="${p.signature}" class="h-8 bg-slate-50 border rounded px-1" alt="Қол">` : '<span class="text-slate-400">—</span>'}
-                    </td>
-                    <td>
-                        ${p.refunded ? `<span class="text-amber-600 font-bold">Қайтарылды</span>` : `
-                            <button onclick="refundHoldingPayment('${p.parentUsername}', ${p.payIdx}, '${h.id}')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded font-bold text-[10px]">💸 Қаржыны қайтару</button>
-                        `}
-                    </td>
-                </tr>
-            `).join('') : '<tr><td colspan="5" class="text-center text-slate-400 py-3">Әлі ешкім төлем жасаған жоқ</td></tr>';
-
-            let existingModal = document.getElementById('admin-holding-settings-modal');
-            if (existingModal) existingModal.remove();
-
-            let modalHtml = `
-                <div class="ios-modal-backdrop" id="admin-holding-settings-modal">
-                    <div class="bg-white p-5 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-4 border">
-                        <div class="flex justify-between items-center border-b pb-2">
-                            <h3 class="text-sm font-extrabold text-slate-900">⚙️ Холдинг баптаулары: <span class="text-blue-700">${h.name}</span></h3>
-                            <button onclick="document.getElementById('admin-holding-settings-modal').remove()" class="text-slate-400 hover:text-red-600 font-black text-sm">✕</button>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="p-3 bg-slate-50 border rounded-xl space-y-2.5">
-                                <h4 class="text-xs font-extrabold text-slate-800 uppercase">1. Төлеу мерзімін орнату</h4>
-                                <p class="text-[10px] text-slate-500">Мерзім аяқталған соң ата-аналарда Pay батырмасы автоматты жабылады. Жаңа мерзім қойылғанда қайта ашылады.</p>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Басталу уақыты:</label>
-                                    <input type="datetime-local" id="set-h-start" value="${startUI}" class="w-full border rounded p-1.5 text-xs bg-white font-bold">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Аяқталу уақыты:</label>
-                                    <input type="datetime-local" id="set-h-end" value="${endUI}" class="w-full border rounded p-1.5 text-xs bg-white font-bold">
-                                </div>
-                                <div class="flex gap-1.5">
-                                    <button onclick="saveHoldingDeadline('${h.id}')" class="flex-1 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs">Мерзімді бекіту</button>
-                                    <button onclick="clearHoldingDeadline('${h.id}')" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-bold text-xs">Тазалау</button>
-                                </div>
-                            </div>
-
-                            <div class="p-3 bg-slate-50 border rounded-xl space-y-2.5">
-                                <h4 class="text-xs font-extrabold text-slate-800 uppercase">2. Қызмет бағасын және деректерін өзгерту</h4>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Ай сайынғы төлем бағасы (Тг):</label>
-                                    <input type="number" id="set-h-price" value="${h.amount}" class="w-full border rounded p-1.5 text-xs bg-white font-extrabold text-emerald-700">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Басшысы:</label>
-                                    <input type="text" id="set-h-head" value="${h.head}" class="w-full border rounded p-1.5 text-xs bg-white">
-                                </div>
-                                <button onclick="saveHoldingPriceAndInfo('${h.id}')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs">💾 Бағаны жаңарту</button>
-                            </div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-extrabold text-slate-800 uppercase">3. Төлеген адамдардың тарихы және Қаржыны қайтару</h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full gov-table">
-                                    <thead>
-                                        <tr><th>Ата-ана</th><th>Төленген сома</th><th>Уақыты</th><th>ЭҚ (Қол)</th><th>Қаржыны қайтару</th></tr>
-                                    </thead>
-                                    <tbody>${payersRows}</tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <button onclick="document.getElementById('admin-holding-settings-modal').remove()" class="w-full py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded font-bold text-xs">Жабу</button>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        async function keepSession(sessId) {
+            showIosToast(true, "Сәтті!", "Бұл сеанс құрылғыда сақталды.");
         }
 
-        async function saveHoldingDeadline(holdingId) {
-            let sVal = document.getElementById('set-h-start').value;
-            let eVal = document.getElementById('set-h-end').value;
-            if (!sVal || !eVal) {
-                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу мерзімін толық таңдаңыз!");
+        async function terminateSession(sessId) {
+            if (!confirm("Бұл құрылғыдағы сеансты тоқтатқыңыз келе ме?")) return;
+            showSpinner("Сеанс тоқтатылуда...");
+            await loadDataFromCloud(true);
+
+            let userSessions = activeSessionsStore[currentUser.username] || [];
+            activeSessionsStore[currentUser.username] = userSessions.filter(s => s.id !== sessId);
+            await saveDataToCloud();
+            hideSpinner();
+
+            let currentSessId = localStorage.getItem('bilim_current_session_id');
+            if (sessId === currentSessId) {
+                logout();
+            } else {
+                showIosToast(true, "Сәтті!", "Сеанс қашықтықтан сәтті тоқтатылды.");
+                renderTabContent();
+            }
+        }
+
+        async function saveBilimLimit() {
+            let startRaw = document.getElementById('limit-start-datetime').value;
+            let endRaw = document.getElementById('limit-end-datetime').value;
+            let reason = document.getElementById('limit-reason-input').value.trim();
+
+            if (!startRaw || !endRaw) {
+                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын міндетті түрде таңдаңыз!");
                 return;
             }
-            let h = schoolHoldings.find(x => x.id === holdingId);
-            if (!h) return;
 
-            showSpinner("Мерзім жаңартылуда...");
-            h.payStart = sVal.replace(/-/g, '/').replace('T', '-');
-            h.payEnd = eVal.replace(/-/g, '/').replace('T', '-');
+            let startFormatted = startRaw.replace(/-/g, '/').replace('T', '-');
+            let endFormatted = endRaw.replace(/-/g, '/').replace('T', '-');
+
+            showSpinner("Шектеу бекітілуде...");
+            await loadDataFromCloud(true);
+
+            bilimLimitSettings = {
+                startDate: startFormatted,
+                endDate: endFormatted,
+                reason: reason || 'Әкімшілік тексеру'
+            };
+
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Төлеу мерзімі орнатылды! Pay батырмасы жаңартылды.");
-            openHoldingSettingsModal(holdingId);
-            renderTabContent();
+            showIosToast(true, "Сәтті!", "BilimLimit шектеу уақыты бекітілді!");
         }
 
-        async function clearHoldingDeadline(holdingId) {
-            let h = schoolHoldings.find(x => x.id === holdingId);
-            if (!h) return;
-            showSpinner("Мерзім алынуда...");
-            h.payStart = '';
-            h.payEnd = '';
+        async function clearBilimLimit() {
+            showSpinner("Шектеу алынуда...");
+            await loadDataFromCloud(true);
+            bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Мерзім шектеуі алынып тасталды.");
-            openHoldingSettingsModal(holdingId);
-            renderTabContent();
-        }
-
-        async function saveHoldingPriceAndInfo(holdingId) {
-            let newPrice = parseFloat(document.getElementById('set-h-price').value) || 0;
-            let newHead = document.getElementById('set-h-head').value.trim();
-            if (newPrice <= 0 || !newHead) {
-                showIosToast(false, "Сәтсіз!", "Дұрыс баға мен басшы атын енгізіңіз!");
-                return;
-            }
-            let h = schoolHoldings.find(x => x.id === holdingId);
-            if (!h) return;
-
-            showSpinner("Баға өзгертілуде...");
-            h.amount = newPrice;
-            h.head = newHead;
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", `Холдинг бағасы ${newPrice} ₸ болып жаңартылды!`);
-            openHoldingSettingsModal(holdingId);
-            renderTabContent();
-        }
-
-        async function refundHoldingPayment(parentUsername, payIdx, holdingId) {
-            if (!confirm("Бұл ата-анаға төленген қаражатты B-Pay балансына кері қайтарғыңыз келе ме?")) return;
-
-            let payments = parentHoldingPayments[parentUsername] || [];
-            let targetPay = payments[payIdx];
-            if (!targetPay || targetPay.refunded) return;
-
-            showSpinner("Қаржы кері қайтарылуда...");
-            let refundAmount = Number(targetPay.originalAmount || targetPay.amount || 0);
-
-            bPayWallets[parentUsername] = Number(bPayWallets[parentUsername] || 0) + refundAmount;
-
-            targetPay.refunded = true;
-            targetPay.originalAmount = refundAmount;
-            targetPay.amount = 0;
-
-            let hObj = schoolHoldings.find(x => x.id === holdingId);
-            bPayTransactions.unshift({
-                username: parentUsername,
-                serviceName: `Қаржыны кері қайтару (${hObj ? hObj.name : 'Холдинг'})`,
-                amount: refundAmount,
-                date: getCurrentDateDDMMYYYY(),
-                status: 'Қайтарылды'
-            });
-
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", `${refundAmount} ₸ ата-ананың B-Pay шотына қайтарылды!`);
-            openHoldingSettingsModal(holdingId);
+            showIosToast(true, "Сәтті!", "BilimLimit шектеуі алынып тасталды!");
             renderTabContent();
         }
 
         function openTopUpModal() {
             let modalHtml = `
                 <div class="ios-modal-backdrop" id="topup-modal">
-                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-3 relative border">
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2">Басқа банк картасы ➔ B-Pay</h3>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Басқа банк картасының нөмірі:</label>
-                            <input type="text" id="topup-card-num" placeholder="4400 4300 1234 5678" class="w-full border rounded p-2 text-xs bg-white">
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">💳 Карта арқылы толтыру</h3>
+                            <button onclick="document.getElementById('topup-modal').remove()" class="text-slate-400 hover:text-red-600 font-bold text-sm">✕</button>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="space-y-2.5 text-xs">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Жарамдылық мерзімі:</label>
-                                <input type="text" id="topup-exp" placeholder="MM/ЖЖ" class="w-full border rounded p-2 text-xs bg-white">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Карта нөмірі (16 сан):</label>
+                                <input type="text" id="card-num" maxlength="19" placeholder="4400 4301 0000 0000" class="w-full border rounded p-2 text-xs font-mono font-bold">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Мерзімі:</label>
+                                    <input type="text" id="card-exp" maxlength="5" placeholder="12/28" class="w-full border rounded p-2 text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 mb-1">CVV:</label>
+                                    <input type="password" id="card-cvv" maxlength="3" placeholder="•••" class="w-full border rounded p-2 text-xs font-mono">
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 mb-1">CVV-коды:</label>
-                                <input type="password" id="topup-cvv" placeholder="123" maxlength="3" class="w-full border rounded p-2 text-xs bg-white">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Толтыру сомасы (Тг):</label>
+                                <input type="number" id="topup-amount" value="50000" class="w-full border rounded p-2 text-xs font-extrabold text-blue-700">
                             </div>
                         </div>
-                        <button onclick="nextTopUpStep1()" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow">Ары қарай</button>
-                        <button onclick="document.getElementById('topup-modal').remove()" class="w-full py-2 bg-slate-200 text-slate-700 rounded font-bold text-xs">Жабу</button>
+                        <button onclick="processTopUp()" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow">Балансты толтыру</button>
                     </div>
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
-        function nextTopUpStep1() {
-            let cNum = document.getElementById('topup-card-num').value.trim();
-            let exp = document.getElementById('topup-exp').value.trim();
-            let cvv = document.getElementById('topup-cvv').value.trim();
+        async function processTopUp() {
+            let num = document.getElementById('card-num').value.trim();
+            let exp = document.getElementById('card-exp').value.trim();
+            let cvv = document.getElementById('card-cvv').value.trim();
+            let amt = parseInt(document.getElementById('topup-amount').value);
 
-            if (!cNum || !exp || !cvv) {
-                showIosToast(false, "Сәтсіз!", "Барлық өрістерді толтырыңыз!");
+            if (!num || num.length < 12 || !exp || !cvv || isNaN(amt) || amt <= 0) {
+                showIosToast(false, "Сәтсіз!", "Карта деректерін және соманы дұрыс толтырыңыз!");
                 return;
             }
+
             document.getElementById('topup-modal').remove();
+            showSpinner("Банктік транзакция тексерілуде...");
+            await loadDataFromCloud(true);
 
-            let modalHtml = `
-                <div class="ios-modal-backdrop" id="topup-modal-2">
-                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-3 relative border">
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2">Толтыру сомасын енгізу</h3>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Ақша сомасы (Тг):</label>
-                            <input type="number" id="topup-amount-val" placeholder="Мысалы: 200000" class="w-full border rounded p-2 text-xs bg-white font-bold text-emerald-700">
-                        </div>
-                        <button onclick="completeTopUp()" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow">Аудару</button>
-                        <button onclick="document.getElementById('topup-modal-2').remove()" class="w-full py-2 bg-slate-200 text-slate-700 rounded font-bold text-xs">Жабу</button>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        }
-
-        async function completeTopUp() {
-            let amt = parseFloat(document.getElementById('topup-amount-val').value) || 0;
-            if (amt <= 0) {
-                showIosToast(false, "Сәтсіз!", "Дұрыс сома енгізіңіз!");
-                return;
-            }
-            document.getElementById('topup-modal-2').remove();
-
-            showSpinner("Шот толтырылуда...");
             bPayWallets[currentUser.username] = Number(bPayWallets[currentUser.username] || 0) + amt;
             bPayTransactions.unshift({
+                id: 'tx_' + Date.now(),
                 username: currentUser.username,
-                serviceName: "Картаны толтыру (Басқа банк ➔ B-Pay)",
+                serviceName: 'Карта арқылы баланс толтыру',
                 amount: amt,
                 date: getCurrentDateDDMMYYYY(),
-                status: 'Толтырылды'
+                status: 'Сәтті'
             });
+
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `B-Pay шотыңыз ${amt} ₸ сомаға толтырылды!`);
+            showIosToast(true, "Сәтті!", `Балансыңыз ${amt} ₸ сомасына толтырылды!`);
             renderTabContent();
         }
 
         async function transferToChild() {
-            let amt = parseFloat(document.getElementById('child-transfer-amount').value) || 0;
+            let amt = parseInt(document.getElementById('child-transfer-amount').value);
             let childUsername = currentUser.parentOf;
             if (!childUsername) {
                 showIosToast(false, "Сәтсіз!", "Бекітілген бала табылмады!");
                 return;
             }
-            let parentBal = Number(bPayWallets[currentUser.username] || 0);
-            if (amt <= 0 || amt > parentBal) {
-                showIosToast(false, "Сәтсіз!", "Шотта жеткілікті қаражат жоқ немесе сома қате!");
+            if (isNaN(amt) || amt <= 0) {
+                showIosToast(false, "Сәтсіз!", "Соманы дұрыс енгізіңіз!");
                 return;
             }
 
-            showSpinner("Аударым жасалуда...");
-            bPayWallets[currentUser.username] = parentBal - amt;
+            let parentBal = Number(bPayWallets[currentUser.username] || 0);
+            if (parentBal < amt) {
+                showIosToast(false, "Қаражат жеткіліксіз!", "Балансыңызды толтырыңыз!");
+                return;
+            }
+
+            showSpinner("Аударым орындалуда...");
+            await loadDataFromCloud(true);
+
+            bPayWallets[currentUser.username] = Number(bPayWallets[currentUser.username] || 0) - amt;
             bPayWallets[childUsername] = Number(bPayWallets[childUsername] || 0) + amt;
 
-            let dateStr = getCurrentDateDDMMYYYY();
+            let nowStr = getCurrentDateDDMMYYYY();
             bPayTransactions.unshift({
+                id: 'tx_out_' + Date.now(),
                 username: currentUser.username,
-                serviceName: `Бала шотын толтыру (@${childUsername})`,
+                serviceName: `Бала шотына аударым (@${childUsername})`,
                 amount: amt,
-                date: dateStr,
+                date: nowStr,
                 status: 'Аударылды'
             });
             bPayTransactions.unshift({
+                id: 'tx_in_' + Date.now(),
                 username: childUsername,
                 serviceName: `Ата-анадан аударым (@${currentUser.username})`,
                 amount: amt,
-                date: dateStr,
-                status: 'Түсті'
+                date: nowStr,
+                status: 'Түсім'
             });
 
             await saveDataToCloud();
@@ -3882,29 +4173,121 @@
             let oferta = document.getElementById('holding-oferta').value.trim();
             let policy = document.getElementById('holding-policy').value.trim();
             let desc = document.getElementById('holding-desc').value.trim();
-            let amount = parseFloat(document.getElementById('holding-amount').value) || 165000;
+            let amount = parseInt(document.getElementById('holding-amount').value) || 0;
 
-            if (!name || !school || !head) {
-                showIosToast(false, "Сәтсіз!", "Негізгі деректерді толық енгізіңіз!");
+            if (!name || !head || !amount) {
+                showIosToast(false, "Сәтсіз!", "Атауын, басшысын және ай сайынғы соманы міндетті толтырыңыз!");
                 return;
             }
 
             showSpinner("Холдинг тіркелуде...");
+            await loadDataFromCloud(true);
+
             schoolHoldings.push({
                 id: 'hold_' + Date.now(),
                 name, type, school, head, oferta, policy, desc, amount,
                 payStart: '',
-                payEnd: ''
+                payEnd: '',
+                createdAt: getCurrentDateDDMMYYYY()
             });
+
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Жаңа холдинг тіркелді!");
+            showIosToast(true, "Сәтті!", `${name} холдингі тіркелді!`);
             renderTabContent();
         }
 
+        function openHoldingSettingsModal(holdingId) {
+            let h = schoolHoldings.find(item => item.id === holdingId);
+            if (!h) return;
+
+            let startUI = h.payStart ? h.payStart.replace(/\//g, '-').replace('-', 'T') : '';
+            let endUI = h.payEnd ? h.payEnd.replace(/\//g, '-').replace('-', 'T') : '';
+
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="holding-settings-modal">
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">⚙️ Холдинг баптаулары: ${h.name}</h3>
+                            <button onclick="document.getElementById('holding-settings-modal').remove()" class="text-slate-400 hover:text-red-600 font-bold text-sm">✕</button>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Ата-аналар осы холдингке төлем жасауы тиіс уақыт мерзімін белгілеңіз. Мерзім аяқталғанда төлем жасау мүмкіндігі бұғатталады, ал жаңа мерзім қойылғанда қайта ашылады.</p>
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Төлем басталу уақыты:</label>
+                                <input type="datetime-local" id="h-set-start" value="${startUI}" class="w-full border rounded p-2 text-xs bg-white font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-600 mb-1">Төлем аяқталу уақыты (Дедлайн):</label>
+                                <input type="datetime-local" id="h-set-end" value="${endUI}" class="w-full border rounded p-2 text-xs bg-white font-bold">
+                            </div>
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button onclick="saveHoldingSettings('${h.id}')" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow">💾 Мерзімді сақтау</button>
+                            <button onclick="clearHoldingSettings('${h.id}')" class="px-3 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs">Тазарту</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        async function saveHoldingSettings(holdingId) {
+            let startRaw = document.getElementById('h-set-start').value;
+            let endRaw = document.getElementById('h-set-end').value;
+
+            if (!startRaw || !endRaw) {
+                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын міндетті таңдаңыз!");
+                return;
+            }
+
+            let startFormatted = startRaw.replace(/-/g, '/').replace('T', '-');
+            let endFormatted = endRaw.replace(/-/g, '/').replace('T', '-');
+
+            if (startFormatted >= endFormatted) {
+                showIosToast(false, "Сәтсіз!", "Аяқталу уақыты басталу уақытынан кейін болуы тиіс!");
+                return;
+            }
+
+            document.getElementById('holding-settings-modal').remove();
+            showSpinner("Холдинг мерзімі сақталуда...");
+            await loadDataFromCloud(true);
+
+            let h = schoolHoldings.find(item => item.id === holdingId);
+            if (h) {
+                h.payStart = startFormatted;
+                h.payEnd = endFormatted;
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", `Төлеу мерзімі бекітілді (${startFormatted} — ${endFormatted})`);
+                renderTabContent();
+            } else {
+                hideSpinner();
+            }
+        }
+
+        async function clearHoldingSettings(holdingId) {
+            document.getElementById('holding-settings-modal').remove();
+            showSpinner("Мерзім тазартылуда...");
+            await loadDataFromCloud(true);
+
+            let h = schoolHoldings.find(item => item.id === holdingId);
+            if (h) {
+                h.payStart = '';
+                h.payEnd = '';
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Төлеу мерзімі шектеусіз режимге ауыстырылды.");
+                renderTabContent();
+            } else {
+                hideSpinner();
+            }
+        }
+
         async function deleteHolding(idx) {
-            if (!confirm("Холдингті өшіргіңіз келе ме?")) return;
+            if (!confirm("Холдингті өшіресіз бе?")) return;
             showSpinner("Өшірілуде...");
+            await loadDataFromCloud(true);
             schoolHoldings.splice(idx, 1);
             await saveDataToCloud();
             hideSpinner();
@@ -3913,79 +4296,34 @@
         }
 
         function openHoldingModal(holdingId) {
-            let h = schoolHoldings.find(x => x.id === holdingId);
+            let h = schoolHoldings.find(item => item.id === holdingId);
             if (!h) return;
 
             let modalHtml = `
-                <div class="ios-modal-backdrop" id="holding-detail-modal">
-                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full space-y-3 border max-h-[85vh] overflow-y-auto">
-                        <h3 class="text-sm font-extrabold text-blue-900 border-b pb-2">${h.name} (${h.type})</h3>
-                        <div class="text-xs text-slate-700 space-y-1">
+                <div class="ios-modal-backdrop" id="holding-modal">
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">📄 ${h.name} — Жазылым шарты</h3>
+                            <button onclick="document.getElementById('holding-modal').remove()" class="text-slate-400 hover:text-red-600 font-bold text-sm">✕</button>
+                        </div>
+                        <div class="space-y-2 text-xs max-h-60 overflow-y-auto bg-slate-50 p-3 rounded border">
                             <div><b>Мектеп:</b> ${h.school}</div>
                             <div><b>Басшысы:</b> ${h.head}</div>
-                            <div><b>Ай сайынғы төлем:</b> <span class="text-emerald-700 font-bold">${h.amount} ₸</span></div>
+                            <div><b>Оферта:</b> ${h.oferta || 'Стандартты білім беру офертасы'}</div>
+                            <div><b>Саясат шарттары:</b> ${h.policy || 'Құпиялылық және төлем саясаты'}</div>
+                            <div><b>Ай сайынғы төлем:</b> <span class="text-amber-700 font-extrabold">${h.amount} ₸</span></div>
                         </div>
-                        <div class="p-2.5 bg-slate-50 border rounded text-[11px] text-slate-600"><b>Оферта шарттары:</b><br>${h.oferta || 'Көрсетілмеген'}</div>
-                        <div class="p-2.5 bg-slate-50 border rounded text-[11px] text-slate-600"><b>Условия политики:</b><br>${h.policy || 'Көрсетілмеген'}</div>
-                        <div class="p-2.5 bg-slate-50 border rounded text-[11px] text-slate-600"><b>Сипаттама:</b><br>${h.desc || 'Көрсетілмеген'}</div>
-                        <div class="flex items-center gap-2 pt-2">
-                            <input type="checkbox" id="agree-holding-terms">
-                            <label for="agree-holding-terms" class="text-xs font-bold text-slate-800">Оферта және саясат шарттарымен келісемін</label>
-                        </div>
-                        <button onclick="confirmSubscribeHolding('${h.id}')" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs shadow">Жазылымды рәсімдеу</button>
-                        <button onclick="document.getElementById('holding-detail-modal').remove()" class="w-full py-2 bg-slate-200 text-slate-700 rounded font-bold text-xs">Жабу</button>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        }
-
-        async function confirmSubscribeHolding(holdingId) {
-            if (!document.getElementById('agree-holding-terms').checked) {
-                showIosToast(false, "Сәтсіз!", "Жазылым жасау үшін шарттармен келісу қажет!");
-                return;
-            }
-            document.getElementById('holding-detail-modal').remove();
-
-            showSpinner("Жазылым жасалуда...");
-            if (!parentHoldingsSubscribed[currentUser.username]) {
-                parentHoldingsSubscribed[currentUser.username] = [];
-            }
-            if (!parentHoldingsSubscribed[currentUser.username].includes(holdingId)) {
-                parentHoldingsSubscribed[currentUser.username].push(holdingId);
-            }
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Холдингке жазылым жасалды! Енді Pay батырмасы арқылы төлем жасай аласыз.");
-            renderTabContent();
-        }
-
-        function openPayHoldingModal(holdingId) {
-            let h = schoolHoldings.find(x => x.id === holdingId);
-            if (!h) return;
-
-            let existingModal = document.getElementById('pay-holding-modal');
-            if (existingModal) existingModal.remove();
-
-            let modalHtml = `
-                <div class="ios-modal-backdrop" id="pay-holding-modal">
-                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-3 border text-center">
-                        <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2">${h.name} — Төлем және ЭҚ</h3>
-                        <p class="text-xs text-slate-600">Сома: <b class="text-blue-700">${h.amount} ₸</b></p>
-                        
-                        <div class="text-left space-y-1">
-                            <div class="flex justify-between items-center">
-                                <label class="text-[11px] font-bold text-slate-700">✍️ Электрондық қол (Саусақпен/Тышқанмен қол қойыңыз):</label>
-                                <button type="button" onclick="clearSignatureCanvas('holding-sig-canvas')" class="text-[10px] text-red-600 font-bold underline">Тазалау</button>
+                        <label class="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
+                            <input type="checkbox" id="accept-holding-terms"> Мен оферта мен саясат шарттарымен таныстым және келісемін
+                        </label>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-[10px] font-bold text-slate-600">Саусақпен немесе тінтуірмен қол қойыңыз:</label>
+                                <button type="button" onclick="clearSignatureCanvas('holding-sig-canvas')" class="text-[10px] text-red-600 font-bold underline">Тазарту</button>
                             </div>
-                            <canvas id="holding-sig-canvas" width="320" height="110" class="sig-canvas w-full"></canvas>
+                            <canvas id="holding-sig-canvas" width="320" height="100" class="sig-canvas w-full"></canvas>
                         </div>
-
-                        <p class="text-[10px] text-slate-500">Төлемді аяқтау үшін электрондық қол қойып, Face ID / Touch ID арқылы растаңыз.</p>
-                        <button onclick="executePayHolding('${h.id}')" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow flex items-center justify-center gap-2">
-                            <span>🔒</span> Төлеу және қол қоюды растау (${h.amount} ₸)
-                        </button>
-                        <button onclick="document.getElementById('pay-holding-modal').remove()" class="w-full py-2 bg-slate-200 text-slate-700 rounded font-bold text-xs">Болдырмау</button>
+                        <button onclick="subscribeToHolding('${h.id}')" class="w-full py-2.5 bg-blue-600 text-white rounded-xl font-bold text-xs shadow">Қол қою және жазылымды растау</button>
                     </div>
                 </div>
             `;
@@ -3993,56 +4331,113 @@
             initSignatureCanvas('holding-sig-canvas');
         }
 
-        async function executePayHolding(holdingId) {
-            let h = schoolHoldings.find(x => x.id === holdingId);
+        async function subscribeToHolding(holdingId) {
+            let chk = document.getElementById('accept-holding-terms');
+            let canvas = document.getElementById('holding-sig-canvas');
+            if (!chk || !chk.checked) {
+                showIosToast(false, "Сәтсіз!", "Оферта шарттарымен келісу белгісін қойыңыз!");
+                return;
+            }
+            if (!canvas || canvas.dataset.hasSigned !== "true") {
+                showIosToast(false, "Сәтсіз!", "Келісімшартқа қол қою міндетті!");
+                return;
+            }
+
+            document.getElementById('holding-modal').remove();
+            showSpinner("Жазылым тіркелуде...");
+            await loadDataFromCloud(true);
+
+            if (!parentHoldingsSubscribed[currentUser.username]) {
+                parentHoldingsSubscribed[currentUser.username] = [];
+            }
+            if (!parentHoldingsSubscribed[currentUser.username].includes(holdingId)) {
+                parentHoldingsSubscribed[currentUser.username].push(holdingId);
+            }
+
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Холдингке сәтті жазылдыңыз! Енді ай сайынғы төлемді Pay батырмасы арқылы жасай аласыз.");
+            renderTabContent();
+        }
+
+        function openPayHoldingModal(holdingId) {
+            let h = schoolHoldings.find(item => item.id === holdingId);
             if (!h) return;
 
-            const canvas = document.getElementById('holding-sig-canvas');
-            if (!canvas || canvas.dataset.hasSigned !== "true") {
-                showIosToast(false, "Қол қойылмаған!", "Төлемді растау үшін алдымен электрондық қол қойыңыз!");
-                return;
-            }
-            const signatureDataUrl = canvas.toDataURL('image/png');
+            let modalHtml = `
+                <div class="ios-modal-backdrop" id="pay-holding-modal">
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-slate-900">💳 ${h.name} — Төлем жасау</h3>
+                            <button onclick="document.getElementById('pay-holding-modal').remove()" class="text-slate-400 hover:text-red-600 font-bold text-sm">✕</button>
+                        </div>
+                        <div class="text-xs space-y-1">
+                            <div>Төленетін сома: <b class="text-blue-700 text-sm">${h.amount} ₸</b></div>
+                            <div class="text-slate-500">Ата-ана балансынан шегеріледі (Қазіргі баланс: <b>${Number(bPayWallets[currentUser.username] || 0)} ₸</b>)</div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-[10px] font-bold text-slate-600">Төлемді растау қолтаңбасы:</label>
+                                <button type="button" onclick="clearSignatureCanvas('pay-sig-canvas')" class="text-[10px] text-red-600 font-bold underline">Тазарту</button>
+                            </div>
+                            <canvas id="pay-sig-canvas" width="320" height="100" class="sig-canvas w-full"></canvas>
+                        </div>
+                        <button onclick="confirmPayHolding('${h.id}')" class="w-full py-2.5 kaspi-btn rounded-xl font-bold text-xs shadow">Төлеу (${h.amount} ₸)</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            initSignatureCanvas('pay-sig-canvas');
+        }
 
-            let parentBal = Number(bPayWallets[currentUser.username] || 0);
-            if (parentBal < h.amount) {
-                showIosToast(false, "Сәтсіз!", "B-Pay шотыңызда қаражат жеткіліксіз! Алдымен картаны толтырыңыз.");
+        async function confirmPayHolding(holdingId) {
+            let canvas = document.getElementById('pay-sig-canvas');
+            if (!canvas || canvas.dataset.hasSigned !== "true") {
+                showIosToast(false, "Сәтсіз!", "Төлем жасау үшін қолтаңба қойыңыз!");
                 return;
             }
+
+            let h = schoolHoldings.find(item => item.id === holdingId);
+            if (!h) return;
 
             let currentStr = getCurrentFormattedDateTime();
             if (h.payStart && h.payEnd && (currentStr < h.payStart || currentStr > h.payEnd)) {
-                showIosToast(false, "Мерзімі өткен!", "Бұл холдингтің төлем қабылдау мерзімі аяқталды.");
                 document.getElementById('pay-holding-modal').remove();
+                showIosToast(false, "Мерзім өтіп кетті!", "Бұл холдингке төлеу уақыты аяқталған.");
+                renderTabContent();
+                return;
+            }
+
+            let bal = Number(bPayWallets[currentUser.username] || 0);
+            if (bal < h.amount) {
+                showIosToast(false, "Қаражат жеткіліксіз!", "Алдымен картаны толтыру арқылы балансты көбейтіңіз!");
                 return;
             }
 
             document.getElementById('pay-holding-modal').remove();
-            showSpinner("Төлем мен қолтаңба расталуда...");
+            showSpinner("Төлем өңделуде...");
+            await loadDataFromCloud(true);
 
-            try {
-                const challenge = new Uint8Array(32);
-                window.crypto.getRandomValues(challenge);
-                await navigator.credentials.get({ publicKey: { challenge: challenge, rpId: window.location.hostname, userVerification: "required" } });
-            } catch(e) {}
+            bPayWallets[currentUser.username] = Number(bPayWallets[currentUser.username] || 0) - h.amount;
 
-            bPayWallets[currentUser.username] = parentBal - h.amount;
             if (!parentHoldingPayments[currentUser.username]) {
                 parentHoldingPayments[currentUser.username] = [];
             }
 
             let periodKey = (h.payStart && h.payEnd) ? `${h.payStart}_${h.payEnd}` : 'general';
+
             parentHoldingPayments[currentUser.username].push({
                 holdingId: h.id,
+                holdingName: h.name,
                 amount: h.amount,
-                originalAmount: h.amount,
+                paidAt: Date.now(),
+                paidDateStr: getCurrentDateDDMMYYYY(),
                 periodKey: periodKey,
-                signature: signatureDataUrl,
-                refunded: false,
-                date: getCurrentDateDDMMYYYY()
+                refunded: false
             });
 
             bPayTransactions.unshift({
+                id: 'tx_hold_' + Date.now(),
                 username: currentUser.username,
                 serviceName: `Холдинг төлемі: ${h.name}`,
                 amount: h.amount,
@@ -4052,45 +4447,88 @@
 
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `${h.name} бойынша ${h.amount} ₸ төленді және электрондық қол сақталды!`);
+            showIosToast(true, "Сәтті!", `${h.name} холдингіне ${h.amount} ₸ төленді!`);
             renderTabContent();
         }
 
         function openUnsubscribeConfirmModal(holdingId) {
-            let h = schoolHoldings.find(x => x.id === holdingId);
+            let h = schoolHoldings.find(item => item.id === holdingId);
             if (!h) return;
-
-            let existingModal = document.getElementById('unsub-confirm-modal');
-            if (existingModal) existingModal.remove();
 
             let modalHtml = `
                 <div class="ios-modal-backdrop" id="unsub-confirm-modal">
-                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-4 border text-center">
-                        <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xl font-black mx-auto">⚠️</div>
-                        <h3 class="text-sm font-extrabold text-slate-900">Жазылымды жоюға сенімдісіз бе?</h3>
-                        <p class="text-xs text-slate-600 leading-relaxed">
-                            Сіз <b>«${h.name}»</b> холдингінен жазылымды өшірейін деп жатырсыз. Жазылым жойылған соң бұл бөлім тізімнен алынады.
-                        </p>
-                        <div class="flex gap-2 pt-2">
-                            <button onclick="document.getElementById('unsub-confirm-modal').remove()" class="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl font-bold text-xs">Жоқ, қалдыру</button>
-                            <button onclick="confirmUnsubscribeHolding('${h.id}')" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow">Иә, өшіру</button>
+                    <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-sm font-extrabold text-red-700">⚠️ Жазылымнан бас тарту</h3>
+                            <button onclick="document.getElementById('unsub-confirm-modal').remove()" class="text-slate-400 hover:text-red-600 font-bold text-sm">✕</button>
                         </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Сіз шынымен <b>${h.name}</b> холдингінен бас тартқыңыз келе ме? 
+                            <br><span class="text-amber-700 font-semibold">(Егер төлем жасалған сәттен 10 күн өтпеген болса, қаражат балансыңызға қайтарылады).</span>
+                        </p>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-[10px] font-bold text-slate-600">Бас тартуды растау қолтаңбасы:</label>
+                                <button type="button" onclick="clearSignatureCanvas('unsub-sig-canvas')" class="text-[10px] text-red-600 font-bold underline">Тазарту</button>
+                            </div>
+                            <canvas id="unsub-sig-canvas" width="320" height="100" class="sig-canvas w-full"></canvas>
+                        </div>
+                        <button onclick="confirmUnsubscribeHolding('${h.id}')" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow">Бас тартуды растау</button>
                     </div>
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
+            initSignatureCanvas('unsub-sig-canvas');
         }
 
         async function confirmUnsubscribeHolding(holdingId) {
-            let modal = document.getElementById('unsub-confirm-modal');
-            if (modal) modal.remove();
+            let canvas = document.getElementById('unsub-sig-canvas');
+            if (!canvas || canvas.dataset.hasSigned !== "true") {
+                showIosToast(false, "Сәтсіз!", "Жазылымнан бас тарту үшін қолтаңба қойыңыз!");
+                return;
+            }
 
-            showSpinner("Жазылым өшірілуде...");
+            document.getElementById('unsub-confirm-modal').remove();
+            showSpinner("Бас тарту өңделуде...");
+            await loadDataFromCloud(true);
+
             let subList = parentHoldingsSubscribed[currentUser.username] || [];
             parentHoldingsSubscribed[currentUser.username] = subList.filter(id => id !== holdingId);
+
+            let payments = parentHoldingPayments[currentUser.username] || [];
+            let tenDaysMs = 10 * 24 * 60 * 60 * 1000;
+            let nowMs = Date.now();
+            let refundedTotal = 0;
+
+            payments.forEach(p => {
+                if (p.holdingId === holdingId && !p.refunded) {
+                    if ((nowMs - p.paidAt) <= tenDaysMs) {
+                        p.refunded = true;
+                        refundedTotal += p.amount;
+                    }
+                }
+            });
+
+            if (refundedTotal > 0) {
+                bPayWallets[currentUser.username] = Number(bPayWallets[currentUser.username] || 0) + refundedTotal;
+                bPayTransactions.unshift({
+                    id: 'tx_ref_' + Date.now(),
+                    username: currentUser.username,
+                    serviceName: `Қайтарым (10 күн ішінде бас тарту)`,
+                    amount: refundedTotal,
+                    date: getCurrentDateDDMMYYYY(),
+                    status: 'Қайтарылды'
+                });
+            }
+
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Холдинг жазылымы өшірілді.");
+
+            if (refundedTotal > 0) {
+                showIosToast(true, "Сәтті!", `Жазылым тоқтатылды! 10 күн өтпегендіктен ${refundedTotal} ₸ балансыңызға қайтарылды.`);
+            } else {
+                showIosToast(true, "Сәтті!", "Жазылым тоқтатылды! (10 күн мерзімі өтіп кеткендіктен қаражат қайтарылмады).");
+            }
             renderTabContent();
         }
 
@@ -4098,323 +4536,118 @@
             let title = document.getElementById('news-title').value.trim();
             let text = document.getElementById('news-text').value.trim();
             let datetime = document.getElementById('news-datetime').value;
-            if (!title || !text) { showIosToast(false, "Сәтсіз!", "Тақырып пен мәтінді толтырыңыз!"); return; }
+
+            if (!title || !text) {
+                showIosToast(false, "Сәтсіз!", "Жаңалық тақырыбын және мәтінін толтырыңыз!");
+                return;
+            }
+
             showSpinner("Жаңалық жариялануда...");
+            await loadDataFromCloud(true);
+
             newsList.unshift({ title, text, datetime });
             await saveDataToCloud();
             hideSpinner();
+
             showIosToast(true, "Сәтті!", "Жаңалық сәтті жарияланды!");
             renderTabContent();
         }
 
-        async function deleteNewsItem(idx) {
-            if (!confirm("Бұл жаңалықты өшіруге сенімдісіз бе?")) return;
-            showSpinner("Өшірілуде...");
-            newsList.splice(idx, 1);
+        async function deleteNewsItem(index) {
+            if (!confirm("Бұл жаңалықты өшіресіз бе?")) return;
+            showSpinner("Жаңалық өшірілуде...");
+            await loadDataFromCloud(true);
+            newsList.splice(index, 1);
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Жаңалық сәтті өшірілді!");
+            showIosToast(true, "Сәтті!", "Жаңалық өшірілді!");
             renderTabContent();
         }
 
-        function keepSession(sessionId) {
-            showIosToast(true, "Сәтті!", "Бұл сеанс расталып қалдырылды.");
-        }
+        async function adminSaveTeacherToSchedule(index) {
+            let teacherUsername = document.getElementById(`admin_sched_teacher_${index}`).value;
+            let teacherObj = users.find(u => u.username === teacherUsername);
 
-        async function terminateSession(sessionId) {
-            if (!confirm("Бұл сеансты өшіргіңіз келе ме?")) return;
-            showSpinner("Сеанс жойылуда...");
-            let list = activeSessionsStore[currentUser.username] || [];
-            activeSessionsStore[currentUser.username] = list.filter(s => s.id !== sessionId);
-            await saveDataToCloud();
-            hideSpinner();
+            showSpinner("Сабақ кестесіне мұғалім бекітілуде...");
+            await loadDataFromCloud(true);
 
-            let currentSessId = localStorage.getItem('bilim_current_session_id');
-            if (sessionId === currentSessId) {
-                showIosToast(false, "Сеанс аяқталды", "Сіз ағымдағы сеансты өшірдіңіз.");
-                logout();
-            } else {
-                showIosToast(true, "Сәтті!", "Құрылғы сеансы сәтті өшірілді.");
+            if (schedules[index]) {
+                schedules[index].teacherUsername = teacherUsername || '';
+                schedules[index].teacherName = teacherObj ? teacherObj.name : '';
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Мұғалім сабақ кестесіне бекітілді!");
                 renderTabContent();
+            } else {
+                hideSpinner();
             }
         }
 
-        async function saveBilimLimit() {
-            let startRaw = document.getElementById('limit-start-datetime').value;
-            let endRaw = document.getElementById('limit-end-datetime').value;
-            let reason = document.getElementById('limit-reason-input').value.trim();
+        async function teacherSaveTopicAndHW(index) {
+            let topicVal = document.getElementById(`teach_topic_${index}`).value.trim();
+            let hwVal = document.getElementById(`teach_hw_${index}`).value.trim();
 
-            if (!startRaw || !endRaw) {
-                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын таңдаңыз!");
-                return;
+            showSpinner("Тақырып пен үй тапсырмасы сақталуда...");
+            await loadDataFromCloud(true);
+
+            if (schedules[index]) {
+                schedules[index].topic = topicVal;
+                schedules[index].homework = hwVal;
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Сабақ тақырыбы мен үй тапсырмасы оқушыларға жарияланды!");
+                renderTabContent();
+            } else {
+                hideSpinner();
             }
-            if (!reason) {
-                showIosToast(false, "Сәтсіз!", "Шектеу себебін міндетті түрде жазыңыз!");
-                return;
-            }
-
-            showSpinner("BilimLimit сақталуда...");
-            bilimLimitSettings.startDate = startRaw.replace(/-/g, '/').replace('T', '-');
-            bilimLimitSettings.endDate = endRaw.replace(/-/g, '/').replace('T', '-');
-            bilimLimitSettings.reason = reason;
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "BilimLimit шектеуі сәтті орнатылды!");
-            renderTabContent();
         }
 
-        async function clearBilimLimit() {
-            showSpinner("Шектеу алынуда...");
-            bilimLimitSettings = { startDate: '', endDate: '', reason: '' };
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "BilimLimit шектеуі алынып тасталды!");
-            renderTabContent();
-        }
-
-        async function saveSubscriptionSettings() {
-            let startRaw = document.getElementById('sub-start-datetime').value;
-            let endRaw = document.getElementById('sub-end-datetime').value;
-
-            if (!startRaw || !endRaw) {
-                showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын таңдаңыз!");
-                return;
-            }
-
-            showSpinner("Сақталуда...");
-            subscriptionSettings.startDate = startRaw.replace(/-/g, '/').replace('T', '-');
-            subscriptionSettings.endDate = endRaw.replace(/-/g, '/').replace('T', '-');
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Табель мерзімі сәтті сақталды!");
-            renderAdminSubTable();
-        }
-
-        function renderAdminSubTable() {
-            let className = document.getElementById('admin-sub-class-select')?.value;
-            let container = document.getElementById('admin-sub-table-container');
-            if(!container || !className) return;
-
-            let targetClass = classesList.find(c => c.name === className);
-            let students = targetClass ? users.filter(u => u.role === 'student' && (targetClass.students || []).includes(u.username)) : [];
-            let currentStr = getCurrentFormattedDateTime();
-            let startWin = subscriptionSettings.startDate;
-            let endWin = subscriptionSettings.endDate;
-
-            let rows = students.map(s => {
-                let parentUser = users.find(u => u.role === 'parent' && u.parentOf === s.username);
-                let subInfo = bilimSubscriptions[s.username] || { signed: false, signedAt: '', history: [] };
-                
-                let isSignedCurrentWindow = subInfo.signed && startWin && endWin && subInfo.signedAt >= startWin && subInfo.signedAt <= endWin;
-                let statusBadge = '';
-
-                if (isSignedCurrentWindow) {
-                    statusBadge = `<span class="px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800">✅ Расталды (${subInfo.signedAt})</span>`;
-                } else if (endWin && currentStr > endWin) {
-                    statusBadge = `<span class="px-2 py-0.5 rounded font-bold bg-red-100 text-red-700">⏰ Уақыт аяқталды (Қол қойылмады)</span>`;
-                } else {
-                    statusBadge = `<span class="px-2 py-0.5 rounded font-bold bg-amber-100 text-amber-800">⏳ Күтілуде</span>`;
-                }
-
-                return `
-                    <tr class="text-xs">
-                        <td class="font-bold">${s.name} (@${s.username})</td>
-                        <td>${parentUser ? `${parentUser.name} (@${parentUser.username})` : '<span class="text-slate-400">Ата-ана тіркелмеген</span>'}</td>
-                        <td>${statusBadge}</td>
-                        <td><span class="text-slate-600 font-semibold">${(subInfo.history || []).length} рет</span></td>
-                    </tr>
-                `;
-            }).join('');
-
-            container.innerHTML = `
-                <table class="w-full gov-table">
-                    <thead><tr><th>Оқушы</th><th>Ата-ана</th><th>Ағымдағы табель мәртебесі</th><th>Жалпы тарихы</th></tr></thead>
-                    <tbody>${rows || '<tr><td colspan="4" class="text-center text-slate-400 py-3">Сыныпта оқушылар жоқ</td></tr>'}</tbody>
-                </table>
-            `;
-        }
-
-        async function signParentSubscription() {
-            let childUsername = currentUser.parentOf;
-            if(!childUsername) return;
-            showSpinner("Төлем және Face ID тексерілуде...");
-
-            try {
-                const challenge = new Uint8Array(32);
-                window.crypto.getRandomValues(challenge);
-                await navigator.credentials.get({ publicKey: { challenge: challenge, rpId: window.location.hostname, userVerification: "required" } });
-            } catch(e) {}
-
-            let formattedNow = getCurrentFormattedDateTime();
-            let existingSub = bilimSubscriptions[childUsername] || { history: [] };
-            let historyList = existingSub.history || [];
-
-            historyList.unshift({
-                periodStart: subscriptionSettings.startDate,
-                periodEnd: subscriptionSettings.endDate,
-                signedAt: formattedNow,
-                signedBy: currentUser.username
-            });
-
-            bilimSubscriptions[childUsername] = {
-                signed: true,
-                signedAt: formattedNow,
-                signedBy: currentUser.username,
-                history: historyList
-            };
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Табельге қол қойылды және базаға жазылды!");
-            renderTabContent();
-        }
-
-        function startAddingQuestions() {
-            let cls = document.getElementById('test-class-select').value;
-            let title = document.getElementById('test-title-input').value.trim();
-            if(!cls || !title) { showIosToast(false, "Сәтсіз!", "Сынып пен тақырыпты таңдаңыз!"); return; }
-            tempQuestions = [];
-            document.getElementById('current-q-num').innerText = "1";
-            document.getElementById('test-questions-builder').classList.remove('hidden');
-        }
-
-        function addQuestionCard() {
-            let qText = document.getElementById('q-text').value.trim();
-            let o0 = document.getElementById('opt_0').value.trim();
-            let o1 = document.getElementById('opt_1').value.trim();
-            let o2 = document.getElementById('opt_2').value.trim();
-            let o3 = document.getElementById('opt_3').value.trim();
-            let correctIdx = parseInt(document.querySelector('input[name="correct_opt"]:checked').value);
-
-            if(!qText || !o0 || !o1) { showIosToast(false, "Сәтсіз!", "Сұрақ пен кемінде 2 нұсқаны жазыңыз!"); return; }
-
-            tempQuestions.push({ question: qText, options: [o0, o1, o2, o3], correct: correctIdx });
-            document.getElementById('q-text').value = '';
-            document.getElementById('opt_0').value = '';
-            document.getElementById('opt_1').value = '';
-            document.getElementById('opt_2').value = '';
-            document.getElementById('opt_3').value = '';
-            document.getElementById('current-q-num').innerText = tempQuestions.length + 1;
-            showIosToast(true, "Сәтті!", `Сұрақ №${tempQuestions.length} сақталды!`);
-        }
-
-        async function publishBilimTest() {
-            let qText = document.getElementById('q-text').value.trim();
-            if(qText) addQuestionCard();
-
-            if(tempQuestions.length === 0) { showIosToast(false, "Сәтсіз!", "Кемінде 1 сұрақ қосыңыз!"); return; }
-
-            let cls = document.getElementById('test-class-select').value;
-            let title = document.getElementById('test-title-input').value.trim();
-            showSpinner("Тест жариялануда...");
-
-            bilimTests.push({
-                id: 'test_' + Date.now(),
-                title: title,
-                className: cls,
-                author: currentUser.username,
-                questions: tempQuestions
-            });
-
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "BilimTest сәтті жарияланды!");
-            renderTabContent();
-        }
-
-        async function deleteBilimTest(testId) {
-            if(!confirm("Тестті өшіруге сенімдісіз бе?")) return;
-            showSpinner("Өшірілуде...");
-            bilimTests = bilimTests.filter(t => t.id !== testId);
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Тест өшірілді.");
-            renderTabContent();
-        }
-
-        function startStudentTest(testId) {
-            let testObj = bilimTests.find(t => t.id === testId);
-            if(!testObj) return;
-
-            let view = document.getElementById('student-test-view');
-            let qHTML = testObj.questions.map((q, idx) => `
-                <div class="p-4 bg-white border rounded-xl space-y-2 mb-3">
-                    <div class="font-extrabold text-xs text-slate-800">${idx + 1}. ${q.question}</div>
-                    <div class="space-y-1 text-xs">
-                        ${q.options.map((opt, oIdx) => opt ? `
-                            <label class="flex items-center gap-2 p-1.5 rounded hover:bg-slate-50 cursor-pointer border">
-                                <input type="radio" name="ans_q_${idx}" value="${oIdx}"> <span>${opt}</span>
-                            </label>
-                        ` : '').join('')}
-                    </div>
-                </div>
-            `).join('');
-
-            view.innerHTML = `
-                <div class="max-w-xl mx-auto">
-                    <h4 class="text-sm font-extrabold text-blue-900 mb-3">${testObj.title}</h4>
-                    ${qHTML}
-                    <button onclick="submitStudentTest('${testObj.id}')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow">🏁 Аяқтау және нәтиже көру</button>
-                </div>
-            `;
-        }
-
-        async function submitStudentTest(testId) {
-            let testObj = bilimTests.find(t => t.id === testId);
-            if(!testObj) return;
-
-            let correctCount = 0;
-            testObj.questions.forEach((q, idx) => {
-                let selected = document.querySelector(`input[name="ans_q_${idx}"]:checked`);
-                if(selected && parseInt(selected.value) === q.correct) {
-                    correctCount++;
-                }
-            });
-
-            let suggestedGrade = Math.round((correctCount / testObj.questions.length) * 10);
-
-            showSpinner("Нәтиже сақталуда...");
-            if(!testResults[testId]) testResults[testId] = {};
-            testResults[testId][currentUser.username] = {
-                correctCount: correctCount,
-                suggestedGrade: suggestedGrade
-            };
-
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", `Тест аяқталды! Дұрыс жауап: ${correctCount}/${testObj.questions.length}`);
-            renderTabContent();
-        }
-
-        function renderScheduleView(titleText, targetClassName) {
-            let dayButtons = daysList.map(d => `
-                <button onclick="selectScheduleDay('${d}')" class="px-3 py-1.5 rounded text-xs font-bold transition ${activeScheduleDay === d ? 'bg-blue-600 text-white shadow' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
-                    ${d}
+        /* Schedule View for Student & Parent — Approved BZhB & TZhB appear directly under the assigned Subject */
+        function renderScheduleView(titleText, filterClassName) {
+            let filteredSchedules = filterClassName ? schedules.filter(s => s.className === filterClassName) : schedules;
+            let dayTabs = daysList.map(day => `
+                <button onclick="selectScheduleDay('${day}')" class="px-3 py-1.5 rounded text-xs font-bold transition ${activeScheduleDay === day ? 'bg-blue-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                    ${day}
                 </button>
             `).join('');
 
-            let filteredSchedules = schedules.filter(s => {
-                let dayMatches = (s.day || 'Дүйсенбі') === activeScheduleDay;
-                if(targetClassName) return dayMatches && s.className === targetClassName;
-                return dayMatches;
-            });
+            let daySchedules = filteredSchedules.filter(s => (s.day || 'Дүйсенбі') === activeScheduleDay);
+            let rows = daySchedules.length > 0 ? daySchedules.map(s => {
+                // Find Admin-approved BZhB/TZhB for this class and subject
+                let subjectSummatives = summativeAssessments.filter(sa => sa.className === s.className && sa.subject === s.subject);
+                let summativeUnderSubjectHtml = subjectSummatives.length > 0 ? `
+                    <div class="mt-1.5 space-y-1">
+                        ${subjectSummatives.map(sa => `
+                            <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-extrabold ${sa.type === 'ТЖБ' ? 'bg-pink-100 text-pink-800 border border-pink-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
+                                <span>📌 ${sa.type}: ${sa.title}</span>
+                                <span>• 📅 ${sa.date}</span>
+                                <span>• (${sa.maxScore} балл)</span>
+                            </div>
+                        `).join('<br>')}
+                    </div>
+                ` : '';
 
-            let rows = filteredSchedules.length > 0 ? filteredSchedules.map(s => `
-                <tr>
-                    <td><b>${s.className}</b></td>
-                    <td><b>${s.subject}</b></td>
-                    <td><span class="text-indigo-700 font-bold">${s.teacherName || 'Мұғалім көрсетілмеген'}</span></td>
-                    <td>${s.topic || '<span class="text-slate-400">Тақырып әлі енгізілмеді</span>'}</td>
-                    <td class="text-emerald-700 font-medium">${s.homework || '<span class="text-slate-400">Үй жұмысы жоқ</span>'}</td>
-                    <td>${s.time}</td>
-                </tr>
-            `).join('') : `<tr><td colspan="6" class="text-center text-slate-400 py-4">${activeScheduleDay} күніне кесте жоқ</td></tr>`;
+                return `
+                    <tr>
+                        <td><b>${s.className}</b></td>
+                        <td class="text-left">
+                            <div class="font-extrabold text-blue-900">${s.subject}</div>
+                            ${summativeUnderSubjectHtml}
+                        </td>
+                        <td class="font-bold text-indigo-700">${s.teacherName || 'Мұғалім көрсетілмеген'}</td>
+                        <td>${s.topic || '<span class="text-slate-400">Мұғалім әлі толтырмады</span>'}</td>
+                        <td><span class="text-emerald-700 font-semibold">${s.homework || '<span class="text-slate-400">Берілмеді</span>'}</span></td>
+                        <td class="font-bold text-slate-700">${s.time}</td>
+                    </tr>
+                `;
+            }).join('') : `<tr><td colspan="6" class="text-center text-slate-400 py-4">${activeScheduleDay} күніне сабақтар тіркелмеген</td></tr>`;
 
             return `
-                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${titleText} ${targetClassName ? `(${targetClassName})` : ''}</h3>
-                <div class="flex flex-wrap gap-1.5 mb-3">${dayButtons}</div>
+                <h3 class="text-sm font-extrabold text-slate-900 border-b pb-2 mb-3">${titleText} ${filterClassName ? `<span class="text-blue-600">(${filterClassName})</span>` : ''}</h3>
+                <div class="flex flex-wrap gap-1.5 mb-4">${dayTabs}</div>
                 <div class="overflow-x-auto">
                     <table class="w-full gov-table">
-                        <thead><tr><th>Сынып</th><th>Пән</th><th>Мұғалім</th><th>Тақырыбы</th><th>Үй тапсырмасы</th><th>Уақыты</th></tr></thead>
+                        <thead><tr><th>Сынып</th><th>Пән (БЖБ / ТЖБ)</th><th>Мұғалім</th><th>Тақырып</th><th>Үй жұмысы</th><th>Уақыты</th></tr></thead>
                         <tbody>${rows}</tbody>
                     </table>
                 </div>
@@ -4426,66 +4659,241 @@
             renderTabContent();
         }
 
-        async function adminUpdateClassTeacher(idx) {
-            let selectElem = document.getElementById(`admin_teacher_select_${idx}`);
-            let selectedUsername = selectElem.value;
-            let teacherObj = users.find(u => u.username === selectedUsername);
-            if (!teacherObj) return;
-            
-            showSpinner("Сынып жетекшісі ауыстырылуда...");
-            classesList[idx].teacher = teacherObj.name;
-            classesList[idx].teacherUsername = teacherObj.username;
+        async function saveSubscriptionSettings() {
+            let startRaw = document.getElementById('sub-start-datetime').value;
+            let endRaw = document.getElementById('sub-end-datetime').value;
+            if (!startRaw || !endRaw) { showIosToast(false, "Сәтсіз!", "Басталу және аяқталу уақытын міндетті түрде таңдаңыз!"); return; }
+
+            let startFormatted = startRaw.replace(/-/g, '/').replace('T', '-');
+            let endFormatted = endRaw.replace(/-/g, '/').replace('T', '-');
+
+            showSpinner("Табель мерзімі сақталуда...");
+            await loadDataFromCloud(true);
+
+            subscriptionSettings = { startDate: startFormatted, endDate: endFormatted };
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `Сынып жетекшісі "${teacherObj.name}" болып тағайындалды!`);
+            showIosToast(true, "Сәтті!", `Мерзім сәтті бекітілді (${startFormatted} - ${endFormatted})`);
             renderTabContent();
         }
 
-        async function deleteClassRecord(idx) {
-            let target = classesList[idx];
-            if (!target) return;
-            if (!confirm(`"${target.name}" сыныбын толығымен өшіруге сенімдісіз бе?`)) return;
-            
-            showSpinner("Сынып жойылуда...");
-            classesList.splice(idx, 1);
+        function renderAdminSubTable() {
+            const container = document.getElementById('admin-sub-table-container');
+            const selectEl = document.getElementById('admin-sub-class-select');
+            if(!container || !selectEl) return;
+
+            let selectedClassName = selectEl.value;
+            let targetClass = classesList.find(c => c.name === selectedClassName);
+            if(!targetClass) {
+                container.innerHTML = '<p class="text-xs text-slate-400">Сынып табылмады.</p>';
+                return;
+            }
+
+            let students = users.filter(u => u.role === 'student' && (targetClass.students || []).includes(u.username));
+            let rows = students.map(s => {
+                let parentUser = users.find(u => u.role === 'parent' && u.parentOf === s.username);
+                let subInfo = bilimSubscriptions[s.username] || { signed: false, signedAt: '', history: [] };
+                
+                let startWin = subscriptionSettings.startDate;
+                let endWin = subscriptionSettings.endDate;
+                let isSignedCurrent = subInfo.signed && startWin && subInfo.signedAt >= startWin && subInfo.signedAt <= endWin;
+
+                let pastCount = (subInfo.history || []).length;
+
+                return `
+                    <tr class="text-xs">
+                        <td class="font-bold">${s.name} (@${s.username})</td>
+                        <td>${parentUser ? `${parentUser.name} (@${parentUser.username})` : '<span class="text-slate-400">Ата-ана бекітілмеген</span>'}</td>
+                        <td>
+                            ${isSignedCurrent 
+                                ? `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">✅ Қол қойылды</span>` 
+                                : `<span class="px-2 py-0.5 bg-red-100 text-red-700 rounded font-bold">❌ Қол қойылмаған</span>`
+                            }
+                        </td>
+                        <td class="font-bold text-blue-700">${isSignedCurrent ? subInfo.signedAt : '—'}</td>
+                        <td><span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold">Архивте: ${pastCount} табель</span></td>
+                    </tr>
+                `;
+            }).join('') || '<tr><td colspan="5" class="text-center text-slate-400 py-4">Бұл сыныпта оқушылар жоқ</td></tr>';
+
+            container.innerHTML = `
+                <table class="w-full gov-table">
+                    <thead><tr><th>Оқушы</th><th>Ата-ана</th><th>Ағымдағы мерзім статусы</th><th>Қол қойылған уақыты</th><th>Төлем тарихы</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            `;
+        }
+
+        async function signParentSubscription() {
+            let childUsername = currentUser.parentOf;
+            if(!childUsername) { showIosToast(false, "Сәтсіз!", "Бекітілген бала табылмады!"); return; }
+
+            let currentStr = getCurrentFormattedDateTime();
+            let startWin = subscriptionSettings.startDate;
+            let endWin = subscriptionSettings.endDate;
+
+            if(!startWin || !endWin || currentStr < startWin || currentStr > endWin) {
+                showIosToast(false, "Сәтсіз!", "Қазіргі уақытта табельге қол қою мерзімі жабық!");
+                return;
+            }
+
+            let confirmPay = confirm("BilimSubscription (1 500 ₸) төлемін растау және табельге қол қою?");
+            if(!confirmPay) return;
+
+            showSpinner("Төлем тексерілуде және қолтаңба сақталуда...");
+            await loadDataFromCloud(true);
+
+            let prevSub = bilimSubscriptions[childUsername] || { signed: false, history: [] };
+            let updatedHistory = prevSub.history || [];
+
+            updatedHistory.unshift({
+                periodStart: startWin,
+                periodEnd: endWin,
+                signedAt: currentStr,
+                parentName: currentUser.name
+            });
+
+            bilimSubscriptions[childUsername] = {
+                signed: true,
+                signedAt: currentStr,
+                parentName: currentUser.name,
+                history: updatedHistory
+            };
+
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `"${target.name}" сыныбы базадан сәтті жойылды.`);
+            showIosToast(true, "Сәтті!", "Төлем өтті және табельге сәтті қол қойылды!");
             renderTabContent();
         }
 
-        async function adminSaveTeacherToSchedule(sIdx) {
-            let selectElem = document.getElementById(`admin_sched_teacher_${sIdx}`);
-            let selectedUsername = selectElem.value;
-            let teacherObj = users.find(u => u.username === selectedUsername);
+        function startAddingQuestions() {
+            let title = document.getElementById('test-title-input').value.trim();
+            if(!title) { showIosToast(false, "Сәтсіз!", "Тест тақырыбын жазыңыз!"); return; }
+            tempQuestions = [];
+            document.getElementById('current-q-num').innerText = "1";
+            document.getElementById('test-questions-builder').classList.remove('hidden');
+        }
 
-            showSpinner("Мұғалім бекітілуде...");
-            schedules[sIdx].teacherUsername = teacherObj ? teacherObj.username : '';
-            schedules[sIdx].teacherName = teacherObj ? teacherObj.name : '';
+        function addQuestionCard() {
+            let qText = document.getElementById('q-text').value.trim();
+            let opts = [
+                document.getElementById('opt_0').value.trim(),
+                document.getElementById('opt_1').value.trim(),
+                document.getElementById('opt_2').value.trim(),
+                document.getElementById('opt_3').value.trim()
+            ];
+            let correctIdx = parseInt(document.querySelector('input[name="correct_opt"]:checked').value);
+
+            if(!qText || opts.some(o => !o)) {
+                showIosToast(false, "Сәтсіз!", "Сұрақ мәтінін және барлық 4 нұсқаны толтырыңыз!");
+                return;
+            }
+
+            tempQuestions.push({ question: qText, options: opts, correct: correctIdx });
+            document.getElementById('q-text').value = '';
+            for(let i=0; i<4; i++) document.getElementById('opt_'+i).value = '';
+            document.getElementById('current-q-num').innerText = tempQuestions.length + 1;
+            showIosToast(true, "Сәтті!", `Сұрақ №${tempQuestions.length} қосылды!`);
+        }
+
+        async function publishBilimTest() {
+            let qText = document.getElementById('q-text').value.trim();
+            if(qText) addQuestionCard(); 
+            if(tempQuestions.length === 0) { showIosToast(false, "Сәтсіз!", "Кемінде 1 сұрақ қосыңыз!"); return; }
+
+            let className = document.getElementById('test-class-select').value;
+            let title = document.getElementById('test-title-input').value.trim();
+
+            showSpinner("Тест жариялануда...");
+            await loadDataFromCloud(true);
+
+            bilimTests.push({
+                id: 'test_' + Date.now(),
+                author: currentUser.username,
+                className: className,
+                title: title,
+                questions: tempQuestions
+            });
+
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Сабаққа мұғалім сәтті бекітілді!");
+            showIosToast(true, "Сәтті!", "BilimTest сәтті жарияланды!");
             renderTabContent();
         }
 
-        async function teacherSaveTopicAndHW(realIndex) {
-            let topicVal = document.getElementById(`teach_topic_${realIndex}`).value.trim();
-            let hwVal = document.getElementById(`teach_hw_${realIndex}`).value.trim();
-
-            showSpinner("Сабақ деректері сақталуда...");
-            schedules[realIndex].topic = topicVal;
-            schedules[realIndex].homework = hwVal;
+        async function deleteBilimTest(testId) {
+            if(!confirm("Тестті өшіресіз бе?")) return;
+            showSpinner("Тест өшірілуде...");
+            await loadDataFromCloud(true);
+            bilimTests = bilimTests.filter(t => t.id !== testId);
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Сабақ тақырыбы мен үй тапсырмасы сәтті сақталды!");
+            showIosToast(true, "Сәтті!", "Тест өшірілді.");
             renderTabContent();
         }
 
-        function getStandardGrade(p) {
-            if (p >= 85) return '5 (Өте жақсы)';
-            if (p >= 65) return '4 (Жақсы)';
-            if (p >= 40) return '3 (Қанағаттанарлық)';
-            return '2 (Нашар)';
+        function startStudentTest(testId) {
+            let test = bilimTests.find(t => t.id === testId);
+            if(!test) return;
+
+            let view = document.getElementById('student-test-view');
+            let currentIdx = 0;
+            let studentAnswers = [];
+
+            function showQuestionStep(idx) {
+                let q = test.questions[idx];
+                view.innerHTML = `
+                    <div class="p-5 bg-slate-50 border rounded-xl max-w-xl mx-auto space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="text-xs font-bold text-blue-700">${test.title}</span>
+                            <span class="text-xs font-extrabold text-slate-600">Сұрақ ${idx + 1} / ${test.questions.length}</span>
+                        </div>
+                        <h4 class="text-sm font-extrabold text-slate-900">${q.question}</h4>
+                        <div class="space-y-2">
+                            ${q.options.map((opt, oIdx) => `
+                                <label class="flex items-center gap-2 p-2.5 bg-white border rounded-lg cursor-pointer hover:bg-blue-50 text-xs font-semibold">
+                                    <input type="radio" name="st_ans" value="${oIdx}" class="accent-blue-600">
+                                    <span>${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                        <button id="next-q-btn" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs w-full shadow">
+                            ${idx + 1 === test.questions.length ? '✅ Тестті аяқтау' : 'Келесі сұрақ ➔'}
+                        </button>
+                    </div>
+                `;
+
+                document.getElementById('next-q-btn').onclick = async () => {
+                    let selected = document.querySelector('input[name="st_ans"]:checked');
+                    if(!selected) { showIosToast(false, "Сәтсіз!", "Бір нұсқаны таңдаңыз!"); return; }
+                    studentAnswers.push(parseInt(selected.value));
+
+                    if(idx + 1 < test.questions.length) {
+                        showQuestionStep(idx + 1);
+                    } else {
+                        let correctCount = 0;
+                        test.questions.forEach((tq, i) => {
+                            if(studentAnswers[i] === tq.correct) correctCount++;
+                        });
+                        let suggestedGrade = Math.round((correctCount / test.questions.length) * 10);
+
+                        showSpinner("Нәтиже сақталуда...");
+                        await loadDataFromCloud(true);
+                        if(!testResults[test.id]) testResults[test.id] = {};
+                        testResults[test.id][currentUser.username] = {
+                            correctCount: correctCount,
+                            suggestedGrade: suggestedGrade
+                        };
+                        await saveDataToCloud();
+                        hideSpinner();
+
+                        showIosToast(true, "Сәтті!", `Тест аяқталды! Ұсынылған баға: ${suggestedGrade} / 10 балл`);
+                        renderTabContent();
+                    }
+                };
+            }
+
+            showQuestionStep(0);
         }
 
         function toggleParentStudentSelect(roleVal) {
@@ -4494,19 +4902,168 @@
             else parentSelect.classList.add('hidden');
         }
 
+        async function adminUpdateClassTeacher(idx) {
+            let newTeacherUsername = document.getElementById(`admin_teacher_select_${idx}`).value;
+            let teacherObj = users.find(u => u.username === newTeacherUsername);
+            if(!teacherObj) return;
+
+            showSpinner("Сынып жетекшісі ауыстырылуда...");
+            await loadDataFromCloud(true);
+            classesList[idx].teacher = teacherObj.name;
+            classesList[idx].teacherUsername = teacherObj.username;
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Сынып жетекшісі сәтті ауыстырылды!");
+            renderTabContent();
+        }
+
+        async function deleteClassRecord(idx) {
+            let target = classesList[idx];
+            if(!confirm(`"${target.name}" сыныбын толығымен жоясыз ба?`)) return;
+            showSpinner("Сынып жойылуда...");
+            await loadDataFromCloud(true);
+            classesList.splice(idx, 1);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Сынып жойылды.");
+            renderTabContent();
+        }
+
+        function getStandardGrade(percent) {
+            if (percent >= 85) return 5;
+            if (percent >= 65) return 4;
+            if (percent >= 40) return 3;
+            return 2;
+        }
+
+        async function saveAttendance(studentUsername) {
+            let dateVal = document.getElementById('att-date').value;
+            let statusVal = document.getElementById(`att_status_${studentUsername}`).value;
+            if(!dateVal) { showIosToast(false, "Сәтсіз!", "Күнді таңдаңыз!"); return; }
+
+            showSpinner("Қатысу сақталуда...");
+            await loadDataFromCloud(true);
+
+            if(!attendance[studentUsername]) attendance[studentUsername] = {};
+            attendance[studentUsername][dateVal] = statusVal;
+            attendance[studentUsername]['today'] = statusVal;
+
+            await saveDataToCloud();
+            hideSpinner();
+            let statusLabel = statusVal === '+' ? 'Қатысты (+)' : (statusVal === 'С' ? 'Себепті (Сары таңба)' : 'Ауырып жатыр (Қызыл таңба)');
+            showIosToast(true, "Сәтті!", `Қатысу белгісі (${statusLabel}) сақталды және барлық мұғалімдер журналына жіберілді.`);
+            renderTabContent();
+        }
+
+        async function saveScheduleByAdmin() {
+            let className = document.getElementById('sched-class').value;
+            let day = document.getElementById('sched-day').value;
+            let subject = document.getElementById('sched-subject').value;
+            let teacherUsername = document.getElementById('sched-teacher-select').value;
+            let time = document.getElementById('sched-time').value.trim();
+            if(!className || !time) { showIosToast(false, "Сәтсіз!", "Сыныпты және уақытты көрсетіңіз!"); return; }
+
+            let teacherObj = users.find(u => u.username === teacherUsername);
+
+            showSpinner("Сабақ кестесі жариялануда...");
+            await loadDataFromCloud(true);
+            schedules.push({ 
+                className, 
+                day, 
+                subject, 
+                teacherUsername: teacherUsername || '',
+                teacherName: teacherObj ? teacherObj.name : '',
+                topic: '', 
+                homework: '', 
+                time 
+            });
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Сабақ кестесі жарияланды және мұғалімге бекітілді.");
+            renderTabContent();
+        }
+
+        async function deleteSchedule(idx) {
+            showSpinner("Жойылуда...");
+            await loadDataFromCloud(true);
+            schedules.splice(idx, 1);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Сабақ кестесі жойылды.");
+            renderTabContent();
+        }
+
+        async function saveAnnouncement() {
+            showSpinner("Жариялануда...");
+            await loadDataFromCloud(true);
+            currentAnnouncement = document.getElementById('announcement-input').value.trim();
+            await saveDataToCloud();
+            hideSpinner();
+            checkBanners();
+            showIosToast(true, "Сәтті!", "Хабарландыру жарияланды!");
+        }
+
+        async function clearAnnouncement() {
+            showSpinner("Өшірілуде...");
+            await loadDataFromCloud(true);
+            currentAnnouncement = '';
+            document.getElementById('announcement-input').value = '';
+            await saveDataToCloud();
+            hideSpinner();
+            checkBanners();
+            showIosToast(true, "Сәтті!", "Хабарландыру өшірілді.");
+        }
+
+        async function issueWarningPrompt(username) {
+            let reason = prompt("Ескерту беру себебін жазыңыз:");
+            if(reason === null) return;
+            showSpinner("Сақталуда...");
+            await loadDataFromCloud(true);
+            let target = users.find(u => u.username === username);
+            if(target) {
+                target.warningReason = reason.trim();
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Ескерту жіберілді!");
+                renderTabContent();
+            } else {
+                hideSpinner();
+            }
+        }
+
+        async function toggleBlockUser(username) {
+            showSpinner("Өңделуде...");
+            await loadDataFromCloud(true);
+            let target = users.find(u => u.username === username);
+            if(target) {
+                target.status = (target.status === 'blocked') ? 'active' : 'blocked';
+                await saveDataToCloud();
+                hideSpinner();
+                showIosToast(true, "Сәтті!", "Пайдаланушы мәртебесі өзгертілді!");
+                renderTabContent();
+            } else {
+                hideSpinner();
+            }
+        }
+
         async function registerNewUser() {
-            const name = document.getElementById('reg-name').value.trim();
-            const username = document.getElementById('reg-user').value.trim();
-            const password = document.getElementById('reg-pass').value.trim();
-            const role = document.getElementById('reg-role').value;
-            const parentOf = role === 'parent' ? document.getElementById('reg-parent-of').value : '';
+            let name = document.getElementById('reg-name').value.trim();
+            let username = document.getElementById('reg-user').value.trim();
+            let password = document.getElementById('reg-pass').value.trim();
+            let role = document.getElementById('reg-role').value;
+            let parentOf = (role === 'parent') ? document.getElementById('reg-parent-of').value : '';
 
             if(!name || !username || !password) { showIosToast(false, "Сәтсіз!", "Барлық өрісті толтырыңыз!"); return; }
-            if(role === 'parent' && !parentOf) { showIosToast(false, "Сәтсіз!", "Ата-ана үшін баланы таңдаңыз!"); return; }
-            if(users.some(u => u.username === username)) { showIosToast(false, "Сәтсіз!", "Бұл логин тіркелген!"); return; }
-            
+            if(role === 'parent' && !parentOf) { showIosToast(false, "Сәтсіз!", "Ата-анаға бекітілетін баланы таңдаңыз!"); return; }
+
             showSpinner("Тіркелуде...");
-            users.push({ name, username, password, role, parentOf, warningReason: '', status: 'active' });
+            await loadDataFromCloud(true);
+            if(users.some(u => u.username === username)) {
+                hideSpinner();
+                showIosToast(false, "Сәтсіз!", "Бұл логин жүйеде бос емес!");
+                return;
+            }
+            users.push({ username, password, role, name, parentOf, warningReason: '', status: 'active' });
             await saveDataToCloud();
             hideSpinner();
             showIosToast(true, "Сәтті!", "Жаңа пайдаланушы тіркелді!");
@@ -4514,148 +5071,87 @@
         }
 
         async function deleteSystemUser(username) {
-            if(confirm(`@${username} пайдаланушыны жоясыз ба?`)) {
-                showSpinner("Жойылуда...");
-                users = users.filter(u => u.username !== username);
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Пайдаланушы жойылды.");
-                renderTabContent();
-            }
+            if(!confirm("Пайдаланушыны жоюды растайсыз ба?")) return;
+            showSpinner("Жойылуда...");
+            await loadDataFromCloud(true);
+            users = users.filter(u => u.username !== username);
+            await saveDataToCloud();
+            hideSpinner();
+            showIosToast(true, "Сәтті!", "Пайдаланушы жойылды.");
+            renderTabContent();
         }
 
         async function createNewClass() {
-            let className = document.getElementById('new-class-name').value.trim();
-            if(!className) return;
-            showSpinner("Сынып құрылуда...");
-            let randomCode = "DCA-" + Math.floor(1000 + Math.random() * 9000);
-            classesList.push({ 
-                name: className, 
-                creator: currentUser.name,
-                teacher: currentUser.name, 
-                teacherUsername: currentUser.username, 
-                dcaCode: randomCode, 
-                students: [] 
-            });
+            let name = document.getElementById('new-class-name').value.trim();
+            if(!name) { showIosToast(false, "Сәтсіз!", "Сынып атын жазыңыз!"); return; }
+            showSpinner("Сынып ашылуда...");
+            await loadDataFromCloud(true);
+            let dcaCode = "DCA-" + Math.floor(1000 + Math.random() * 9000);
+            classesList.push({ name, creator: currentUser.name, teacher: currentUser.name, teacherUsername: currentUser.username, dcaCode, students: [] });
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", `Сынып ашылды! DCA коды: ${randomCode}`);
+            showIosToast(true, "Сәтті!", "Сынып ашылды!");
             renderTabContent();
         }
 
         async function joinClassByDCA() {
             let code = document.getElementById('dca-code-input').value.trim().toUpperCase();
-            let targetClass = classesList.find(c => c.dcaCode === code);
-            if(!targetClass) { showIosToast(false, "Сәтсіз!", "Қате DCA коды!"); return; }
-            showSpinner("Қосылуда...");
-            if(!targetClass.students) targetClass.students = [];
-            if(!targetClass.students.includes(currentUser.username)) targetClass.students.push(currentUser.username);
-            await saveDataToCloud();
+            showSpinner("DCA код тексерілуде...");
+            await loadDataFromCloud(true);
+            let foundClass = classesList.find(c => c.dcaCode === code);
+            if(!foundClass) { hideSpinner(); showIosToast(false, "Сәтсіз!", "Қате DCA код! Қайта тексеріңіз."); return; }
+            if(!foundClass.students) foundClass.students = [];
+            if(!foundClass.students.includes(currentUser.username)) {
+                foundClass.students.push(currentUser.username);
+                await saveDataToCloud();
+            }
             hideSpinner();
-            showIosToast(true, "Сәтті!", `Сіз "${targetClass.name}" сыныбына қосылдыңыз!`);
+            showIosToast(true, "Сәтті!", `${foundClass.name} сыныбына қосылдыңыз!`);
             switchTab('student_grades');
-        }
-
-        async function saveScheduleByAdmin() {
-            let cName = document.getElementById('sched-class').value;
-            let day = document.getElementById('sched-day').value;
-            let subj = document.getElementById('sched-subject').value;
-            let teacherUsername = document.getElementById('sched-teacher-select')?.value || '';
-            let teacherObj = users.find(u => u.username === teacherUsername);
-            let time = document.getElementById('sched-time').value.trim();
-            if(!cName || !subj || !time) { showIosToast(false, "Сәтсіз!", "Сынып, пән және уақытты көрсетіңіз!"); return; }
-            showSpinner("Кесте сақталуда...");
-            schedules.push({ 
-                className: cName, 
-                day: day, 
-                subject: subj, 
-                teacherUsername: teacherObj ? teacherObj.username : '',
-                teacherName: teacherObj ? teacherObj.name : '',
-                topic: '', 
-                homework: '', 
-                time: time 
-            });
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Сабақ кестесі жарияланды және мұғалім бекітілді!");
-            renderTabContent();
-        }
-
-        async function deleteSchedule(idx) {
-            showSpinner("Өшірілуде...");
-            schedules.splice(idx, 1);
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Сабақ кестесі өшірілді.");
-            renderTabContent();
-        }
-
-        async function saveAttendance(studentUsername) {
-            let status = document.getElementById(`att_status_${studentUsername}`).value;
-            showSpinner("Сақталуда...");
-            if(!attendance[studentUsername]) attendance[studentUsername] = {};
-            attendance[studentUsername]['today'] = status;
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Қатысу белгісі сақталды!");
-            renderTabContent();
         }
 
         async function saveKtp() {
             let title = document.getElementById('ktp-title').value.trim();
             if(!title) return;
-            showSpinner("КТЖ қосылуда...");
-            ktpList.push(title);
+            showSpinner("КТЖ сақталуда...");
+            await loadDataFromCloud(true);
+            ktpList.push(`${title} (${currentUser.name})`);
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "КТЖ жоспарына қосылды!");
-            renderTabContent();
-        }
-
-        async function issueWarningPrompt(username) {
-            let reason = prompt("Ескерту себебін жазыңыз:");
-            if(reason) {
-                showSpinner("Сақталуда...");
-                let u = users.find(x => x.username === username);
-                if(u) u.warningReason = reason;
-                await saveDataToCloud();
-                hideSpinner();
-                showIosToast(true, "Сәтті!", "Ескерту берілді!");
-                renderTabContent();
-            }
-        }
-
-        async function toggleBlockUser(username) {
-            showSpinner("Мәртебе жаңартылуда...");
-            let u = users.find(x => x.username === username);
-            if(u) u.status = u.status === 'blocked' ? 'active' : 'blocked';
-            await saveDataToCloud();
-            hideSpinner();
-            showIosToast(true, "Сәтті!", "Пайдаланушы мәртебесі өзгертілді!");
+            showIosToast(true, "Сәтті!", "КТЖ қосылды.");
             renderTabContent();
         }
 
         async function sendSupportMessage() {
-            let inputId = currentUser.role === 'teacher' ? 'support-msg' : 'stud-support-msg';
-            let txt = document.getElementById(inputId).value.trim();
-            if(!txt) return;
-            showSpinner("Хабарлама жіберілуде...");
+            let msgBox = document.getElementById('support-msg') || document.getElementById('stud-support-msg');
+            let text = msgBox.value.trim();
+            if(!text) return;
 
-            let lowerTxt = txt.toLowerCase();
-            let isOffensive = badWords.some(w => lowerTxt.includes(w));
+            let lowerText = text.toLowerCase();
+            let containsProfanity = badWords.some(word => lowerText.includes(word));
 
-            if(isOffensive) {
-                let u = users.find(x => x.username === currentUser.username);
-                if(u) u.warningReason = "Әдепсіз сөздер қолданғаны үшін автоматты AI Security ескертуі!";
-                checkBanners();
-                showIosToast(false, "AI Security ескертуі!", "Әдепсіз сөз қолдануға тыйым салынады!");
+            showSpinner("AI Security тексеруде...");
+            await loadDataFromCloud(true);
+
+            let isFlagged = false;
+            if(containsProfanity) {
+                isFlagged = true;
+                let targetUser = users.find(u => u.username === currentUser.username);
+                if(targetUser) {
+                    targetUser.warningReason = "AI Security: Қолдау қызметінде балағат сөздер қолданғаны үшін ескерту берілді!";
+                    currentUser.warningReason = targetUser.warningReason;
+                }
+            }
+
+            supportTickets.push({ from: currentUser.username, text, reply: '', flagged: isFlagged });
+            await saveDataToCloud();
+            hideSpinner();
+            checkBanners();
+            if(isFlagged) {
+                showIosToast(false, "AI Security Ескертуі!", "Әдепсіз сөздер анықталды! Аккаунтыңызға автоматты түрде ескерту берілді.");
             } else {
                 showIosToast(true, "Сәтті!", "Өтініш әкімшілікке жіберілді!");
             }
-
-            supportTickets.push({ from: currentUser.username, text: txt, reply: '', flagged: isOffensive });
-            await saveDataToCloud();
-            hideSpinner();
             renderTabContent();
         }
 
@@ -4663,16 +5159,16 @@
             let rep = document.getElementById(`reply_${idx}`).value.trim();
             if(!rep) return;
             showSpinner("Жауап жіберілуде...");
+            await loadDataFromCloud(true);
             supportTickets[idx].reply = rep;
             await saveDataToCloud();
             hideSpinner();
-            showIosToast(true, "Сәтті!", "Жауап сәтті жіберілді!");
+            showIosToast(true, "Сәтті!", "Жауап жіберілді.");
             renderTabContent();
         }
 
         function downloadPDFReport() {
-            showSpinner("Табель жүктелуде...");
-            setTimeout(() => { hideSpinner(); window.print(); }, 600);
+            window.print();
         }
     </script>
 </body>
